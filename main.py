@@ -56,6 +56,36 @@ HEIGHT = BOARD_SIZE["HEIGHT"]
 PIECES = PUZZLE["PIECES"]
 
 
+def main():
+	logging.basicConfig(filename="main.log", encoding="utf-8", level=logging.DEBUG, filemode="w")
+
+	state = get_state()
+	states = [ state ]
+
+	logging.info(f"\nState number: 1, State: {state}")
+	print(f"\nState number: 1, State: {state}")
+
+	print_board()
+
+	solve(states)
+
+	# print("\n\nSOLUTION FOUND!")
+
+	# TODO: Why is this identical to the previously printed board?
+	print_board()
+
+	print(f"\nNumber of states: {len(states)}")
+
+
+def print_board():
+	board = get_board()
+
+	for row in board:
+		print(row)
+
+	print()
+
+
 def get_board():
 	board = [[EMPTY_CHARACTER] * WIDTH for _ in range(HEIGHT)]
 
@@ -75,34 +105,85 @@ def get_board():
 	return board
 
 
-def print_board():
-	board = get_board()
-
-	print()
-	for row in board:
-		print(row)
-
-
-def is_intersection():
-	board = [[EMPTY_CHARACTER] * WIDTH for _ in range(HEIGHT)]
+def solve(states):
+	piece_moved_at_least_once = False
 
 	for piece_label, piece in PIECES.items():
-		pos, size = piece["pos"], piece["size"]
-
+		# save pos of piece
+		pos = piece["pos"]
+		x = pos["x"]
 		y = pos["y"]
-		height = size["height"]
 
-		for y2 in range(y, y + height):
-			x = pos["x"]
-			width = size["width"]
+		logging.info(piece_label)
+		logging.info(piece)
 
-			for x2 in range(x, x + width):
-				if board[y2][x2] != EMPTY_CHARACTER:
-					return True
+		# for move piece up/down/left/right:
+		for dir in Direction:
+			logging.info(dir)
 
-				board[y2][x2] = piece_label
+			if is_valid_move(dir, piece, states):
+				logging.info(piece)
+
+				piece_moved_at_least_once = True
+
+				logging.info("MOVED, RECURSING")
+
+				print_board()
+
+				solve(states)
+
+				pos["x"] = x
+				pos["y"] = y
+
+				print_board()
+
+			if piece_moved_at_least_once and dir == Direction.RIGHT: # TODO: Not sure whether this is correct
+				logging.info("Backtracking due to having moved at least once and having tried to move in all directions")
+
+				print("Backtracking due to having moved at least once and having tried to move in all directions")
+
+				return
+
+	logging.info("Backtracking due to not having moved and having no more pieces that can be moved")
+
+	print("Backtracking due to not having moved and having no more pieces that can be moved")
+
+
+def is_valid_move(dir, piece, states):
+	# Saves the position of the piece in case it needs to be moved back
+	pos = piece["pos"]
+	x = pos["x"]
+	y = pos["y"]
+
+	move(dir, pos)
+
+	state = get_state()
+
+	if move_doesnt_cross_puzzle_edge(piece) and no_intersection() and is_new_state(state, states):
+		states.append(state)
+
+		logging.info(f"State number: {len(states)}, State: {state}")
+		print(f"State number: {len(states)}, State: {state}")
+
+		return True
+
+	# Moves the piece back
+	pos["x"] = x
+	pos["y"] = y
 
 	return False
+
+
+# TODO: Replace with a lookup/jump table?
+def move(dir, pos):
+	if dir == Direction.UP:
+		pos["y"] += -1
+	elif dir == Direction.DOWN:
+		pos["y"] += 1
+	elif dir == Direction.LEFT:
+		pos["x"] += -1
+	elif dir == Direction.RIGHT:
+		pos["x"] += 1
 
 
 def get_state():
@@ -119,14 +200,8 @@ def get_state():
 	return state
 
 
-# TODO:
-# Efficiently store which states have already been visited to avoid infinite loops
-def is_new_state(state, seen_states):
-	return state not in seen_states
-
-
 # TODO: Replace with a lookup/jump table?
-def can_move(dir, piece):
+def move_doesnt_cross_puzzle_edge(piece):
 	pos = piece["pos"]
 	x = pos["x"]
 	y = pos["y"]
@@ -135,90 +210,37 @@ def can_move(dir, piece):
 	width = size["width"]
 	height = size["height"]
 
-	if dir == Direction.UP and y >= 1:
-		return True
-	elif dir == Direction.DOWN and y + height < HEIGHT:
-		return True
-	elif dir == Direction.LEFT and x >= 1:
-		return True
-	elif dir == Direction.RIGHT and x + width < WIDTH:
+	if y >= 0 and y + (height - 1) < HEIGHT and x >= 0 and x + (width - 1) < WIDTH:
 		return True
 	return False
 
 
-# TODO: Replace with a lookup/jump table?
-def move(dir, pos):
-	if dir == Direction.UP:
-		pos["y"] += -1
-	elif dir == Direction.DOWN:
-		pos["y"] += 1
-	elif dir == Direction.LEFT:
-		pos["x"] += -1
-	elif dir == Direction.RIGHT:
-		pos["x"] += 1
+def no_intersection():
+	board = [[EMPTY_CHARACTER] * WIDTH for _ in range(HEIGHT)]
 
-
-def solve(seen_states):
 	for piece_label, piece in PIECES.items():
-		# save pos of piece
-		pos = piece["pos"]
-		x = pos["x"]
+		pos, size = piece["pos"], piece["size"]
+
 		y = pos["y"]
+		height = size["height"]
 
-		# logging.info("")
-		logging.info(piece_label)
-		logging.info(piece)
+		for y2 in range(y, y + height):
+			x = pos["x"]
+			width = size["width"]
 
-		# for move piece up/down/left/right:
-		for dir in Direction:
-			if can_move(dir, piece): # A piece in the top-left corner of the puzzle can't move up nor left
-				move(dir, pos)
-			else:
-				continue # TODO: Is continuing here correct?
+			for x2 in range(x, x + width):
+				if board[y2][x2] != EMPTY_CHARACTER:
+					return False
 
-			logging.info(dir)
-			logging.info(piece)
+				board[y2][x2] = piece_label
 
-			state = get_state()
-
-			is_a_new_state = is_new_state(state, seen_states)
-
-			if state not in seen_states:
-				seen_states.append(state)
-
-			logging.info(f"is_intersection: {is_intersection()}")
-			logging.info(f"not is_a_new_state: {not is_a_new_state}")
-			if is_intersection() or not is_a_new_state:
-				pos["x"] = x
-				pos["y"] = y
-				logging.info("Taking a different direction")
-			else:
-				logging.info("MOVED\n")
-				logging.info("RECURSING\n")
-				print_board()
-				solve(seen_states)
-
-		# TODO: Move this return to its right spot, wherever that may be
-		# return
-
-	logging.info("BACKTRACKING\n")
-
-	print("Backtracking")
+	return True
 
 
-def main():
-	logging.basicConfig(filename='main.log', encoding='utf-8', level=logging.DEBUG, filemode="w")
-
-	seen_states = [ get_state() ]
-
-	print_board()
-
-	solve(seen_states)
-
-	print("\n\nSOLUTION FOUND!")
-
-	# TODO: Why is this completely different than the previously printed board?
-	print_board()
+# TODO:
+# Efficiently store which states have already been visited to avoid infinite loops
+def is_new_state(state, states):
+	return state not in states
 
 
 if __name__ == "__main__":

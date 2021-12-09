@@ -73,7 +73,7 @@ PIECES = PUZZLE["PIECES"]
 
 
 def main():
-	logging.basicConfig(filename="main.log", encoding="utf-8", level=logging.DEBUG, filemode="w")
+	logging.basicConfig(filename="main.log", level=logging.DEBUG, filemode="w")
 
 	state = get_state()
 	states = [ state ]

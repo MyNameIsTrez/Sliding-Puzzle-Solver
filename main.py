@@ -62,7 +62,7 @@ def main():
 	state = get_state()
 	states = [ state ]
 
-	logging.info(f"\nState number: 1, State: {state}")
+	logging.info(f"State number: 1, State: {state}")
 	print(f"\nState number: 1, State: {state}")
 
 	print_board()

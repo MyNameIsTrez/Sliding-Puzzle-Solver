@@ -2,9 +2,18 @@ from enum import Enum, auto
 
 import logging
 
+
 # import sys
-# sys.setrecursionlimit(1500)
-# logging.info(sys.getrecursionlimit())
+# sys.setrecursionlimit(10**7) # max depth of recursion
+
+
+# Max recursion depth
+# Setting this too high will cause the program to silently crash (probably called a segfault)
+# 1572 is safe on my Windows 10 PC according to find_recursionlimit.py
+# sys.setrecursionlimit(1900)
+
+# import threading
+# threading.stack_size(2**27)  # new thread will get stack of such size
 
 
 CHOSEN_PUZZLE = "klotski"
@@ -15,6 +24,11 @@ EMPTY_CHARACTER = " "
 PUZZLES = {
 	"klotski": {
 #		Starting state: A00B10C30D02E12F32G13H23I04J34
+
+#		Move G: A00B10C30D02E12F32G14H23I04J34
+#		Move H: A00B10C30D02E12F32G13H24I04J34
+#		Move I: A00B10C30D02E12F32G13H23I14J34
+#		Move J: A00B10C30D02E12F32G13H23I04J24
 
 		"BOARD_SIZE": {
 			"WIDTH": 4,
@@ -71,6 +85,8 @@ def main():
 
 	solve(states)
 
+	logging.info("Done")
+
 	# print("\n\nSOLUTION FOUND!")
 
 	# TODO: Why is this identical to the previously printed board?
@@ -108,7 +124,7 @@ def get_board():
 
 
 def solve(states, depth=0):
-	piece_moved_at_least_once = False
+	# piece_moved_at_least_once = False
 
 	for piece_label, piece in PIECES.items():
 		# save pos of piece
@@ -119,16 +135,33 @@ def solve(states, depth=0):
 		logging.info(piece_label)
 		logging.info(piece)
 
+		if (
+			piece_label == "J" and x == 3 and y == 4 and
+
+			PIECES["A"]["pos"]["x"] == 0 and PIECES["A"]["pos"]["y"] == 0 and
+			PIECES["B"]["pos"]["x"] == 1 and PIECES["B"]["pos"]["y"] == 0 and
+			PIECES["C"]["pos"]["x"] == 3 and PIECES["C"]["pos"]["y"] == 0 and
+			PIECES["D"]["pos"]["x"] == 0 and PIECES["D"]["pos"]["y"] == 2 and
+			PIECES["E"]["pos"]["x"] == 1 and PIECES["E"]["pos"]["y"] == 2 and
+			PIECES["F"]["pos"]["x"] == 3 and PIECES["F"]["pos"]["y"] == 2 and
+			PIECES["G"]["pos"]["x"] == 1 and PIECES["G"]["pos"]["y"] == 3 and
+			PIECES["H"]["pos"]["x"] == 2 and PIECES["H"]["pos"]["y"] == 3 and
+			PIECES["I"]["pos"]["x"] == 0 and PIECES["I"]["pos"]["y"] == 4
+			):
+			print("Evaluating J at the bottom-right corner")
+			print("foo")
+
 		# for move piece up/down/left/right:
 		for dir in Direction:
 			logging.info(dir)
 
 			if is_valid_move(dir, piece, states):
 				logging.info(f"Depth: {depth}")
+				print(f"Depth: {depth}")
+
 				logging.info(piece)
 
-				piece_moved_at_least_once = True
-
+				# print("a1")
 				logging.info("MOVED, RECURSING")
 
 				print_board()
@@ -140,12 +173,12 @@ def solve(states, depth=0):
 
 				print_board()
 
-			if piece_moved_at_least_once and dir == Direction.RIGHT: # TODO: Not sure whether this is correct
-				logging.info("Backtracking due to having moved at least once and having tried to move in all directions")
+				# print("a2")
 
-				print("Backtracking due to having moved at least once and having tried to move in all directions")
+			# print("a3")
+		# print("a4")
 
-				return
+	# print("a5")
 
 	logging.info("Backtracking due to not having moved and having no more pieces that can be moved")
 
@@ -247,4 +280,15 @@ def is_new_state(state, states):
 
 
 if __name__ == "__main__":
-	main()
+	import sys
+	sys.setrecursionlimit(10**7) # max depth of recursion
+
+	import threading
+	# from threading import Thread
+
+	threading.stack_size(2**27)
+	thread = threading.Thread(target = main)
+	print(threading.stack_size())
+	thread.start()
+	thread.join()
+	print("Thread finished")

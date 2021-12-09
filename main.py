@@ -14,6 +14,8 @@ EMPTY_CHARACTER = " "
 
 PUZZLES = {
 	"klotski": {
+#		Starting state: A00B10C30D02E12F32G13H23I04J34
+
 		"BOARD_SIZE": {
 			"WIDTH": 4,
 			"HEIGHT": 5
@@ -105,7 +107,7 @@ def get_board():
 	return board
 
 
-def solve(states):
+def solve(states, depth=0):
 	piece_moved_at_least_once = False
 
 	for piece_label, piece in PIECES.items():
@@ -122,6 +124,7 @@ def solve(states):
 			logging.info(dir)
 
 			if is_valid_move(dir, piece, states):
+				logging.info(f"Depth: {depth}")
 				logging.info(piece)
 
 				piece_moved_at_least_once = True
@@ -130,7 +133,7 @@ def solve(states):
 
 				print_board()
 
-				solve(states)
+				solve(states, depth + 1)
 
 				pos["x"] = x
 				pos["y"] = y

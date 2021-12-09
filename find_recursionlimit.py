@@ -125,4 +125,4 @@ if __name__ == '__main__':
         check_limit(limit, "test_cpickle")
         check_limit(limit, "test_compiler_recursion")
         print("Limit of %d is fine" % limit)
-        limit = limit + 1
+        limit = limit + 100

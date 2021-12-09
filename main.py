@@ -280,15 +280,17 @@ def is_new_state(state, states):
 
 
 if __name__ == "__main__":
-	import sys
-	sys.setrecursionlimit(10**7) # max depth of recursion
+    main()
 
-	import threading
+	# import sys
+	# sys.setrecursionlimit(10**7) # max depth of recursion
+
+	# import threading
 	# from threading import Thread
 
-	threading.stack_size(2**27)
-	thread = threading.Thread(target = main)
-	print(threading.stack_size())
-	thread.start()
-	thread.join()
-	print("Thread finished")
+	# threading.stack_size(2**27)
+	# thread = threading.Thread(target = main)
+	# print(threading.stack_size())
+	# thread.start()
+	# thread.join()
+	# print("Thread finished")

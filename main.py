@@ -79,10 +79,10 @@ def main():
 	# filemode default to "a"
 	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
+	logging.disable() # The code is significantly faster without logging
+
 	state = get_state()
 	states = [ state ]
-
-	logging.warning("foo")
 
 	logging.info(f"State number: 1, State: {state}")
 	print(f"\nState number: 1, State: {state}")
@@ -108,7 +108,8 @@ def main():
 def print_progress_stack(progress_stack):
 	threading.Timer(1, print_progress_stack, [progress_stack]).start()
 
-	print(f"progress stack length: {len(progress_stack)}, {progress_stack[:10]}")
+	print(f"progress stack length: {len(progress_stack)}, {progress_stack[:10]}", end="\r", flush=True)
+	# print(f"{progress_stack[-40:]}")
 
 
 def print_board():

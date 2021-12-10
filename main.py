@@ -2,18 +2,10 @@ from enum import Enum, auto
 
 import logging
 
+import sys
+import resource
 
-# import sys
-# sys.setrecursionlimit(10**7) # max depth of recursion
-
-
-# Max recursion depth
-# Setting this too high will cause the program to silently crash (probably called a segfault)
-# 1572 is safe on my Windows 10 PC according to find_recursionlimit.py
-# sys.setrecursionlimit(1900)
-
-# import threading
-# threading.stack_size(2**27)  # new thread will get stack of such size
+import threading
 
 
 CHOSEN_PUZZLE = "klotski"
@@ -73,17 +65,35 @@ PIECES = PUZZLE["PIECES"]
 
 
 def main():
-	logging.basicConfig(filename="main.log", level=logging.DEBUG, filemode="w")
+	# This sets the maximum number of bytes used by the stack to 4 GB at 2**32
+	resource.setrlimit(resource.RLIMIT_STACK, (2**32, resource.RLIM_INFINITY))
+
+	# Max recursion depth
+	# Setting this too high will cause the program to silently crash (probably a segfault)
+	# Without the resource.setrlimit() call above 10466 is safe on my Ubuntu laptop,
+	# and 1572 is safe on my Windows 10 PC, according to find_recursionlimit.py
+	sys.setrecursionlimit(int(1e9)) # 1e10 is too large for C
+
+	# filename has to be set or everything will be printed to the terminal
+	# level has to be set for logging.info()
+	# filemode default to "a"
+	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
 	state = get_state()
 	states = [ state ]
+
+	logging.warning("foo")
 
 	logging.info(f"State number: 1, State: {state}")
 	print(f"\nState number: 1, State: {state}")
 
 	print_board()
 
-	solve(states)
+	progress_stack = []
+
+	print_progress_stack(progress_stack)
+
+	solve(states, progress_stack)
 
 	logging.info("Done")
 
@@ -93,6 +103,12 @@ def main():
 	print_board()
 
 	print(f"\nNumber of states: {len(states)}")
+
+
+def print_progress_stack(progress_stack):
+	threading.Timer(1, print_progress_stack, [progress_stack]).start()
+
+	print(f"progress stack length: {len(progress_stack)}, {progress_stack[:10]}")
 
 
 def print_board():
@@ -123,11 +139,11 @@ def get_board():
 	return board
 
 
-def solve(states, depth=0):
-	# piece_moved_at_least_once = False
-
+def solve(states, progress_stack, depth=0):
 	for piece_label, piece in PIECES.items():
-		# save pos of piece
+		progress_stack.append(piece_label)
+
+		# Saves the pos of piece for backtracking
 		pos = piece["pos"]
 		x = pos["x"]
 		y = pos["y"]
@@ -135,54 +151,32 @@ def solve(states, depth=0):
 		logging.info(piece_label)
 		logging.info(piece)
 
-		if (
-			piece_label == "J" and x == 3 and y == 4 and
-
-			PIECES["A"]["pos"]["x"] == 0 and PIECES["A"]["pos"]["y"] == 0 and
-			PIECES["B"]["pos"]["x"] == 1 and PIECES["B"]["pos"]["y"] == 0 and
-			PIECES["C"]["pos"]["x"] == 3 and PIECES["C"]["pos"]["y"] == 0 and
-			PIECES["D"]["pos"]["x"] == 0 and PIECES["D"]["pos"]["y"] == 2 and
-			PIECES["E"]["pos"]["x"] == 1 and PIECES["E"]["pos"]["y"] == 2 and
-			PIECES["F"]["pos"]["x"] == 3 and PIECES["F"]["pos"]["y"] == 2 and
-			PIECES["G"]["pos"]["x"] == 1 and PIECES["G"]["pos"]["y"] == 3 and
-			PIECES["H"]["pos"]["x"] == 2 and PIECES["H"]["pos"]["y"] == 3 and
-			PIECES["I"]["pos"]["x"] == 0 and PIECES["I"]["pos"]["y"] == 4
-			):
-			print("Evaluating J at the bottom-right corner")
-			print("foo")
-
-		# for move piece up/down/left/right:
+		# For moving a piece up/down/left/right
 		for dir in Direction:
 			logging.info(dir)
 
 			if is_valid_move(dir, piece, states):
 				logging.info(f"Depth: {depth}")
-				print(f"Depth: {depth}")
+				# print(f"Depth: {depth}")
 
 				logging.info(piece)
 
-				# print("a1")
 				logging.info("MOVED, RECURSING")
 
-				print_board()
+				#print_board()
 
-				solve(states, depth + 1)
+				solve(states, progress_stack, depth + 1)
 
 				pos["x"] = x
 				pos["y"] = y
 
-				print_board()
+				#print_board()
 
-				# print("a2")
-
-			# print("a3")
-		# print("a4")
-
-	# print("a5")
-
+		progress_stack.pop()
+	
 	logging.info("Backtracking due to not having moved and having no more pieces that can be moved")
 
-	print("Backtracking due to not having moved and having no more pieces that can be moved")
+	#print("Backtracking due to not having moved and having no more pieces that can be moved")
 
 
 def is_valid_move(dir, piece, states):
@@ -199,7 +193,7 @@ def is_valid_move(dir, piece, states):
 		states.append(state)
 
 		logging.info(f"State number: {len(states)}, State: {state}")
-		print(f"State number: {len(states)}, State: {state}")
+		# print(f"State number: {len(states)}, State: {state}")
 
 		return True
 
@@ -280,17 +274,4 @@ def is_new_state(state, states):
 
 
 if __name__ == "__main__":
-    main()
-
-	# import sys
-	# sys.setrecursionlimit(10**7) # max depth of recursion
-
-	# import threading
-	# from threading import Thread
-
-	# threading.stack_size(2**27)
-	# thread = threading.Thread(target = main)
-	# print(threading.stack_size())
-	# thread.start()
-	# thread.join()
-	# print("Thread finished")
+	main()

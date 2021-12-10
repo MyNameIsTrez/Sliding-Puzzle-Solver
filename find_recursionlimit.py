@@ -113,8 +113,12 @@ def check_limit(n, test_func_name):
         print("Yikes!")
 
 if __name__ == '__main__':
+    import resource
 
-    limit = 1000
+	# This sets the maximum number of bytes used by the stack to 4 GB at 2**32
+    resource.setrlimit(resource.RLIMIT_STACK, (2**32, resource.RLIM_INFINITY))
+
+    limit = 42
     while 1:
         check_limit(limit, "test_recurse")
         check_limit(limit, "test_add")
@@ -125,4 +129,4 @@ if __name__ == '__main__':
         check_limit(limit, "test_cpickle")
         check_limit(limit, "test_compiler_recursion")
         print("Limit of %d is fine" % limit)
-        limit = limit + 100
+        limit = limit + 100000

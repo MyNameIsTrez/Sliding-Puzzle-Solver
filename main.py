@@ -14,12 +14,10 @@ def main():
 
 	logging.disable() # The code is significantly faster without logging
 
-	state = get_state(PIECES)
-	STATES.add(state)
-	STATE_COUNT += 1
+	add_new_state(PIECES)
 
-	logging.info(f"State number: 1, State: {state}")
-	print(f"\nState number: 1, State: {state}")
+	# logging.info(f"State number: 1, State: {STATES[0]}")
+	# print(f"\nState number: 1, State: {STATES[0]}")
 
 	print_board(PIECES)
 
@@ -30,7 +28,22 @@ def main():
 	# print(f"\nNumber of states: {STATE_COUNT}")
 
 
+def add_new_state(pieces):
+	global STATE_COUNT
+
+	# state = hash(get_state(pieces))
+	state = get_state(pieces)
+
+	if state in STATES:
+		return False
+
+	STATES.add(state)
+	STATE_COUNT += 1
+	return True
+
+
 def get_state(pieces):
+	# return (coordinate for piece in pieces.values() for coordinate in piece["pos"].values())
 	state = ""
 
 	for piece_label, piece in pieces.items():
@@ -135,7 +148,7 @@ def timed_print_queue_path(queue):
 	states_count_diff = STATE_COUNT - timed_print_queue_path.prev_states_count
 	timed_print_queue_path.prev_states_count = STATE_COUNT
 
-	path = queue[-1]["path"]
+	path = queue[-1]["path"] if len(queue) > 0 else ""
 	path_string = "".join(path[:50])
 	path_length = len(path)
 
@@ -195,13 +208,8 @@ def is_valid_move(direction, piece, pieces):
 
 	move(direction, pos)
 
-	state = get_state(pieces)
-
-	if move_doesnt_cross_puzzle_edge(piece) and no_intersection(pieces) and is_new_state(state):
-		STATES.add(state)
-		STATE_COUNT += 1
-
-		logging.info(f"State number: {STATE_COUNT}, State: {state}")
+	if move_doesnt_cross_puzzle_edge(piece) and no_intersection(pieces) and add_new_state(pieces):
+		# logging.info(f"State number: {STATE_COUNT}, State: {STATES[-1]}")
 
 		return True
 
@@ -281,10 +289,6 @@ def no_intersection(pieces):
 				return False
 
 	return True
-
-
-def is_new_state(state):
-	return state not in STATES
 
 
 if __name__ == "__main__":

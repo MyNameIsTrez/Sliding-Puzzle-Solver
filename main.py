@@ -77,7 +77,7 @@ def get_board(pieces):
 def solve():
 	stack = [ { "pieces": copy.deepcopy(PIECES), "path": [] } ]
 
-	timed_print_stack_path(stack)
+	# timed_print_stack_path(stack)
 
 	while True:
 		node = copy.deepcopy(stack.pop())
@@ -87,6 +87,10 @@ def solve():
 		# logging.info("Backtracking due to not having moved and having no more pieces that can be moved")
 
 		if len(stack) == 0:
+			break
+
+		# For performance profiling with Austin
+		if len(stack) > 1000:
 			break
 
 		#print("Backtracking due to not having moved and having no more pieces that can be moved")

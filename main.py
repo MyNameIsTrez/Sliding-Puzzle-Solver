@@ -1,4 +1,4 @@
-import logging, threading, copy
+import logging, threading, ujson
 
 from enum import Enum, auto
 
@@ -75,12 +75,12 @@ def get_board(pieces):
 
 # Traverses using depth-first search on the last element on the stack
 def solve():
-	stack = [ { "pieces": copy.deepcopy(PIECES), "path": [] } ]
+	stack = [ { "pieces": ujson.loads(ujson.dumps(PIECES)), "path": [] } ]
 
 	# timed_print_stack_path(stack)
 
 	while True:
-		node = copy.deepcopy(stack.pop())
+		node = ujson.loads(ujson.dumps(stack.pop()))
 
 		solve_2(node, stack)
 
@@ -133,7 +133,7 @@ def solve_2(node, stack):
 
 				#print_board(pieces)
 
-				new_node = copy.deepcopy(node)
+				new_node = ujson.loads(ujson.dumps(node))
 
 				piece_path = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
 

@@ -1,18 +1,22 @@
-import logging, threading, ujson
+import logging, threading, copy, time
 
 from enum import Enum, auto
+from collections import deque
 
 
 def main():
+	global STATE_COUNT
+
 	# filename has to be set or everything will be printed to the terminal
 	# level has to be set for logging.info()
-	# filemode default to "a"
+	# filemode defaults to "a"
 	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
 	logging.disable() # The code is significantly faster without logging
 
 	state = get_state(PIECES)
 	STATES.append(state)
+	STATE_COUNT += 1
 
 	logging.info(f"State number: 1, State: {state}")
 	print(f"\nState number: 1, State: {state}")
@@ -23,12 +27,7 @@ def main():
 
 	logging.info("Done")
 
-	# print("\n\nSOLUTION FOUND!")
-
-	# TODO: Why is this identical to the previously printed board?
-	# print_board(pieces)
-
-	print(f"\nNumber of states: {len(STATES)}")
+	# print(f"\nNumber of states: {STATE_COUNT}")
 
 
 def get_state(pieces):
@@ -38,9 +37,7 @@ def get_state(pieces):
 		state += piece_label
 
 		pos = piece["pos"]
-		# TODO: Are an X and Y state never going to mix, aka 69 = 6 9? (I don't think so?)
-		state += str(pos["x"])
-		state += str(pos["y"])
+		state += str(pos["x"]) + "-" + str(pos["y"])
 
 	return state
 
@@ -73,42 +70,79 @@ def get_board(pieces):
 	return board
 
 
-# Traverses using depth-first search on the last element on the stack
 def solve():
-	stack = [ { "pieces": ujson.loads(ujson.dumps(PIECES)), "path": [] } ]
+	queue = deque()
+	queue.append( { "pieces": deepcopy_pieces(PIECES), "path": [] } )
 
-	# timed_print_stack_path(stack)
+	timed_print_queue_path(queue)
 
 	while True:
-		# TODO: The debugger shows weird "special variables" being created.
-		# It should be faster to create a custom copier.
-		node = ujson.loads(ujson.dumps(stack.pop()))
+		node = queue.popleft()
 
-		solve_2(node, stack)
+		breadth_first_search_node(node, queue)
 
-		# logging.info("Backtracking due to not having moved and having no more pieces that can be moved")
-
-		if len(stack) == 0:
+		if len(queue) == 0:
 			break
 
-		# For performance profiling with Austin
-		if len(stack) > 1000:
+		# Uncomment for performance profiling
+		if STATE_COUNT > 20000:
 			break
 
-		#print("Backtracking due to not having moved and having no more pieces that can be moved")
+
+def deepcopy_pieces(pieces):
+	deepcopied_pieces = {}
+
+	for piece_label, piece in pieces.items():
+		deepcopied_pieces[piece_label] = {}
+		deepcopied_piece = deepcopied_pieces[piece_label]
+
+		deepcopied_piece["pos"] = {}
+		deepcopied_pos = deepcopied_piece["pos"]
+
+		piece_pos = piece["pos"]
+		deepcopied_pos["x"] = piece_pos["x"]
+		deepcopied_pos["y"] = piece_pos["y"]
+
+		deepcopied_piece["size"] = {}
+		deepcopied_size = deepcopied_piece["size"]
+
+		piece_size = piece["size"]
+		deepcopied_size["width"] = piece_size["width"]
+		deepcopied_size["height"] = piece_size["height"]
+
+	return deepcopied_pieces
 
 
-def timed_print_stack_path(stack):
-	threading.Timer(1, timed_print_stack_path, [stack]).start()
+def deepcopy_node(node):
+	deepcopied_node = {}
 
-	path_string = "".join(stack[-1]["path"][:50])
+	deepcopied_pieces = deepcopy_pieces(node["pieces"])
+	deepcopied_node["pieces"] = deepcopied_pieces
 
-	print(f"progress stack length: {len(stack)}, {path_string}", end="\r", flush=True)
-	# print(f"{stack[-40:]}")
+	copied_path = copy.copy(node["path"])
+	deepcopied_node["path"] = copied_path
+
+	return deepcopied_node
 
 
-def solve_2(node, stack):
-	depth = len(stack)
+def timed_print_queue_path(queue):
+	threading.Timer(0.1, timed_print_queue_path, [queue]).start()
+
+	elapsed_time = int(time.time() - START_TIME)
+
+	states_count_diff = STATE_COUNT - timed_print_queue_path.prev_states_count
+	timed_print_queue_path.prev_states_count = STATE_COUNT
+
+	path = queue[-1]["path"]
+	path_string = "".join(path[:50])
+	path_length = len(path)
+
+	print(f"\rElapsed time: {elapsed_time} seconds, Number of states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}, Path length: {path_length}, Path string: {path_string}", end="", flush=True)
+timed_print_queue_path.prev_states_count = 0
+
+
+def breadth_first_search_node(node, queue):
+	depth = len(queue)
 
 	pieces = node["pieces"]
 
@@ -127,7 +161,6 @@ def solve_2(node, stack):
 
 			if is_valid_move(direction, piece, pieces):
 				logging.info(f"Depth: {depth}")
-				# print(f"Depth: {depth}")
 
 				logging.info(piece)
 
@@ -135,14 +168,14 @@ def solve_2(node, stack):
 
 				#print_board(pieces)
 
-				new_node = ujson.loads(ujson.dumps(node))
+				new_node = deepcopy_node(node)
 
 				piece_path = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
 
 				if len(new_node["path"]) < 100: # This check speeds up the program significantly.
 					new_node["path"].append(piece_path)
 
-				stack.append(new_node)
+				queue.append(new_node)
 
 				pos["x"] = x
 				pos["y"] = y
@@ -151,6 +184,8 @@ def solve_2(node, stack):
 
 
 def is_valid_move(direction, piece, pieces):
+	global STATE_COUNT
+
 	# Saves the position of the piece in case it needs to be moved back
 	pos = piece["pos"]
 	x = pos["x"]
@@ -162,9 +197,9 @@ def is_valid_move(direction, piece, pieces):
 
 	if move_doesnt_cross_puzzle_edge(piece) and no_intersection(pieces) and is_new_state(state):
 		STATES.append(state)
+		STATE_COUNT += 1
 
-		logging.info(f"State number: {len(STATES)}, State: {state}")
-		# print(f"State number: {len(STATES)}, State: {state}")
+		logging.info(f"State number: {STATE_COUNT}, State: {state}")
 
 		return True
 
@@ -312,6 +347,9 @@ if __name__ == "__main__":
 
 	PIECES = PUZZLE["PIECES"]
 
-	STATES = []
+	STATES = deque()
+	STATE_COUNT = 0
+
+	START_TIME = time.time()
 
 	main()

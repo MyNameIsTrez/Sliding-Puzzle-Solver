@@ -80,6 +80,8 @@ def solve():
 	# timed_print_stack_path(stack)
 
 	while True:
+		# TODO: The debugger shows weird "special variables" being created.
+		# It should be faster to create a custom copier.
 		node = ujson.loads(ujson.dumps(stack.pop()))
 
 		solve_2(node, stack)
@@ -202,23 +204,44 @@ def move_doesnt_cross_puzzle_edge(piece):
 
 
 def no_intersection(pieces):
-	board = [[EMPTY_CHARACTER] * WIDTH for _ in range(HEIGHT)]
+	for piece_label_1, piece1 in pieces.items():
+		pos1 = piece1["pos"]
+		size1 = piece1["size"]
 
-	for piece_label, piece in pieces.items():
-		pos, size = piece["pos"], piece["size"]
+		x1 = pos1["x"]
+		y1 = pos1["y"]
 
-		y = pos["y"]
-		height = size["height"]
+		w1 = size1["width"]
+		h1 = size1["height"]
 
-		for y2 in range(y, y + height):
-			x = pos["x"]
-			width = size["width"]
+		p1t = y1
+		p1b = y1 + h1
 
-			for x2 in range(x, x + width):
-				if board[y2][x2] != EMPTY_CHARACTER:
-					return False
+		p1l = x1
+		p1r = x1 + w1
 
-				board[y2][x2] = piece_label
+		for piece_label_2, piece2 in pieces.items():
+			if piece_label_1 == piece_label_2:
+				continue
+
+			pos2 = piece2["pos"]
+			size2 = piece2["size"]
+
+			x2 = pos2["x"]
+			y2 = pos2["y"]
+
+			w2 = size2["width"]
+			h2 = size2["height"]
+
+			p2t = y2
+			p2b = y2 + h2
+
+			p2l = x2
+			p2r = x2 + w2
+
+			# rectOneRight > rectTwoLeft && rectOneLeft < rectTwoRight && rectOneBottom > rectTwoTop && rectOneTop < rectTwoBottom
+			if p1r > p2l and p1l < p2r and p1b > p2t and p1t < p2b:
+				return False
 
 	return True
 

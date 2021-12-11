@@ -15,7 +15,7 @@ def main():
 	logging.disable() # The code is significantly faster without logging
 
 	state = get_state(PIECES)
-	STATES.append(state)
+	STATES.add(state)
 	STATE_COUNT += 1
 
 	logging.info(f"State number: 1, State: {state}")
@@ -198,7 +198,7 @@ def is_valid_move(direction, piece, pieces):
 	state = get_state(pieces)
 
 	if move_doesnt_cross_puzzle_edge(piece) and no_intersection(pieces) and is_new_state(state):
-		STATES.append(state)
+		STATES.add(state)
 		STATE_COUNT += 1
 
 		logging.info(f"State number: {STATE_COUNT}, State: {state}")
@@ -349,9 +349,10 @@ if __name__ == "__main__":
 
 	PIECES = PUZZLE["PIECES"]
 
-	STATES = deque()
+	STATES = set()
 	STATE_COUNT = 0
 
 	START_TIME = time.time()
+
 
 	main()

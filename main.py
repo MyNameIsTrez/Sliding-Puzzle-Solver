@@ -84,7 +84,7 @@ def solve():
 		if len(queue) == 0:
 			break
 
-		# Uncomment for performance profiling
+		# Uncomment when performance profiling
 		if STATE_COUNT > 20000:
 			break
 
@@ -126,7 +126,9 @@ def deepcopy_node(node):
 
 
 def timed_print_queue_path(queue):
-	threading.Timer(0.1, timed_print_queue_path, [queue]).start()
+	# Uncomment when performance profiling
+	if not STATE_COUNT > 20000:
+		threading.Timer(0.1, timed_print_queue_path, [queue]).start()
 
 	elapsed_time = int(time.time() - START_TIME)
 
@@ -172,7 +174,7 @@ def breadth_first_search_node(node, queue):
 
 				piece_path = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
 
-				if len(new_node["path"]) < 100: # This check speeds up the program significantly.
+				if len(new_node["path"]) < 100: # This constraint speeds up the program significantly.
 					new_node["path"].append(piece_path)
 
 				queue.append(new_node)

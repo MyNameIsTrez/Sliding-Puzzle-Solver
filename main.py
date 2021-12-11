@@ -154,7 +154,7 @@ def timed_print_queue_path(queue):
 	timed_print_queue_path.prev_states_count = STATE_COUNT
 
 	path = queue[-1]["path"] if len(queue) > 0 else ""
-	path_string = "".join(path[:50])
+	path_string = "".join(path)
 	path_length = len(path)
 
 	print(f"\rElapsed time: {elapsed_time} seconds, Number of states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}, Path length: {path_length}, Path string: {path_string}", end="", flush=True)
@@ -192,8 +192,7 @@ def breadth_first_search_node(node, queue):
 
 				piece_path = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
 
-				if len(new_node["path"]) < 100: # This constraint speeds up the program significantly.
-					new_node["path"].append(piece_path)
+				new_node["path"].append(piece_path)
 
 				queue.append(new_node)
 

@@ -94,12 +94,17 @@ def solve():
 
 		breadth_first_search_node(node, queue)
 
-		if len(queue) == 0:
+		node_b_pos = node["pieces"]["B"]["pos"]
+		puzzle_finished = node_b_pos["x"] == 1 and node_b_pos["y"] == 3
+
+		if len(queue) == 0 or puzzle_finished:
+			node_path = node["path"]
+			print(f"Shortest path: {node_path}")
 			break
 
 		# Uncomment when performance profiling
-		if STATE_COUNT > 20000:
-			break
+		# if STATE_COUNT > 20000:
+		# 	break
 
 
 def deepcopy_pieces(pieces):
@@ -140,8 +145,8 @@ def deepcopy_node(node):
 
 def timed_print_queue_path(queue):
 	# Uncomment when performance profiling
-	if not STATE_COUNT > 20000:
-		threading.Timer(0.1, timed_print_queue_path, [queue]).start()
+	# if not STATE_COUNT > 20000:
+	threading.Timer(0.1, timed_print_queue_path, [queue]).start()
 
 	elapsed_time = int(time.time() - START_TIME)
 

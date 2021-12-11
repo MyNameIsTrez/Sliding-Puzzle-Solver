@@ -5,11 +5,13 @@
 			"type": "austin",
 			"file": "main.py",
 			"label": "Profile main.py with Austin",
+			"problemMatcher": []
 		},
 		{
 			"type": "shell",
 			"command": "py -m cProfile -s tottime main.py",
 			"label": "Profile main.py with cProfile",
+			"problemMatcher": []
 		}
 	]
 }

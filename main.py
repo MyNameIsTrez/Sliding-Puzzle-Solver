@@ -14,13 +14,26 @@ def main():
 
 	# logging.disable() # The code is significantly faster when logging is disabled
 
-	add_new_state(PIECES)
+	compressed_starting_pieces = get_compressed_starting_pieces()
+	add_new_state(compressed_starting_pieces)
 
 	print_board(PIECES)
 
-	solve()
+	solve(compressed_starting_pieces)
 
 	print("Done!")
+
+
+def get_compressed_starting_pieces():
+	compressed_starting_pieces = {}
+
+	for piece_label, piece in PIECES.items():
+		compressed_starting_pieces[piece_label] = {
+			"x": piece["pos"]["x"],
+			"y": piece["pos"]["y"]
+		}
+
+	return compressed_starting_pieces
 
 
 def add_new_state(pieces):
@@ -29,9 +42,8 @@ def add_new_state(pieces):
 	new_state = False
 
 	for piece in pieces.values():
-		pos = piece["pos"]
-		x = pos["x"]
-		y = pos["y"]
+		x = piece["x"]
+		y = piece["y"]
 
 		if x not in state:
 			new_state = True
@@ -74,63 +86,51 @@ def get_board(pieces):
 	return board
 
 
-def solve():
+def solve(compressed_starting_pieces):
 	global running
 
-	queue = deque([ deepcopy_pieces(PIECES) ])
+	queue = deque([ deepcopy_pieces_positions(compressed_starting_pieces) ])
 
 	timed_print(queue)
 
-	while True:
-		pieces = queue.popleft()
+	while len(queue) > 0:
+		pieces_positions = queue.popleft()
 
-		for piece_label, piece in pieces.items():
-			# Save the position of the piece for moving back
-			pos = piece["pos"]
-			x = pos["x"]
-			y = pos["y"]
-
-			for direction in Direction:
-				if is_valid_move(direction, piece, pieces):
-					new_pieces = deepcopy_pieces(pieces)
-
-					queue.append(new_pieces)
-
-					pos["x"] = x
-					pos["y"] = y
-
-		pieces_b_pos = pieces["B"]["pos"]
-		puzzle_finished = pieces_b_pos["x"] == 1 and pieces_b_pos["y"] == 3
-
-		if len(queue) == 0 or puzzle_finished: # TODO: Replace the while condition with this?
-			print("Shortest path found!")
+		b_piece_position = pieces_positions["B"]
+		puzzle_finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
+		if puzzle_finished:
 			break
 
+		for piece_label, piece in pieces_positions.items():
+			# Saves the position of the piece, in case it needs to be moved back
+			x = piece["x"]
+			y = piece["y"]
+
+			for direction in Direction:
+				if is_valid_move(direction, piece_label, piece, pieces_positions):
+					new_pieces_positions = deepcopy_pieces_positions(pieces_positions)
+
+					queue.append(new_pieces_positions)
+
+					# Moves the piece back
+					piece["x"] = x
+					piece["y"] = y
+
+	print(f"Shortest path found! The remaining queue length is {len(queue)}.")
 	running = False
 
 
-def deepcopy_pieces(pieces):
-	deepcopied_pieces = {}
+def deepcopy_pieces_positions(pieces):
+	deepcopied_pieces_positions = {}
 
 	for piece_label, piece in pieces.items():
-		deepcopied_pieces[piece_label] = {}
-		deepcopied_piece = deepcopied_pieces[piece_label]
+		deepcopied_pieces_positions[piece_label] = {}
+		deepcopied_piece_pos = deepcopied_pieces_positions[piece_label]
 
-		deepcopied_piece["pos"] = {}
-		deepcopied_pos = deepcopied_piece["pos"]
+		deepcopied_piece_pos["x"] = piece["x"]
+		deepcopied_piece_pos["y"] = piece["y"]
 
-		piece_pos = piece["pos"]
-		deepcopied_pos["x"] = piece_pos["x"]
-		deepcopied_pos["y"] = piece_pos["y"]
-
-		deepcopied_piece["size"] = {}
-		deepcopied_size = deepcopied_piece["size"]
-
-		piece_size = piece["size"]
-		deepcopied_size["width"] = piece_size["width"]
-		deepcopied_size["height"] = piece_size["height"]
-
-	return deepcopied_pieces
+	return deepcopied_pieces_positions
 
 
 def timed_print(queue):
@@ -146,46 +146,45 @@ def timed_print(queue):
 timed_print.prev_states_count = 0
 
 
-def is_valid_move(direction, piece, pieces):
+def is_valid_move(direction, piece_label, piece, pieces):
 	global STATE_COUNT
 
-	# Saves the position of the piece in case it needs to be moved back
-	pos = piece["pos"]
-	x = pos["x"]
-	y = pos["y"]
+	# Saves the position of the piece, in case it needs to be moved back
+	x = piece["x"]
+	y = piece["y"]
 
-	move(direction, pos)
+	move(direction, piece)
 
-	if move_doesnt_cross_puzzle_edge(piece) and no_intersection_python(pieces) and add_new_state(pieces):
+	if move_doesnt_cross_puzzle_edge(piece_label, piece) and no_intersection_python(pieces) and add_new_state(pieces):
 		STATE_COUNT += 1
 
 		return True
 
 	# Moves the piece back
-	pos["x"] = x
-	pos["y"] = y
+	piece["x"] = x
+	piece["y"] = y
 
 	return False
 
 
-def move(direction, pos):
+def move(direction, piece):
 	match direction:
 		case Direction.UP:
-			pos["y"] += -1
+			piece["y"] += -1
 		case Direction.DOWN:
-			pos["y"] += 1
+			piece["y"] += 1
 		case Direction.LEFT:
-			pos["x"] += -1
+			piece["x"] += -1
 		case Direction.RIGHT:
-			pos["x"] += 1
+			piece["x"] += 1
 
 
-def move_doesnt_cross_puzzle_edge(piece):
-	pos = piece["pos"]
-	x = pos["x"]
-	y = pos["y"]
+def move_doesnt_cross_puzzle_edge(piece_label, piece):
+	x = piece["x"]
+	y = piece["y"]
 
-	size = piece["size"]
+	PIECE = PIECES[piece_label]
+	size = PIECE["size"]
 	width = size["width"]
 	height = size["height"]
 
@@ -198,13 +197,13 @@ def no_intersection_python(pieces):
 	board = [[EMPTY_CHARACTER] * WIDTH for _ in range(HEIGHT)]
 
 	for piece_label, piece in pieces.items():
-		pos, size = piece["pos"], piece["size"]
+		size = PIECES[piece_label]["size"]
 
-		y = pos["y"]
+		y = piece["y"]
 		height = size["height"]
 
 		for y2 in range(y, y + height):
-			x = pos["x"]
+			x = piece["x"]
 			width = size["width"]
 
 			for x2 in range(x, x + width):

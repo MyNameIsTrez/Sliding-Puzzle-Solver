@@ -10,9 +10,9 @@ def main():
 	# filename has to be set or everything will be printed to the terminal
 	# level has to be set for logging.info()
 	# filemode defaults to "a"
-	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
+	# logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
-	logging.disable() # The code is significantly faster when logging is disabled
+	# logging.disable() # The code is significantly faster when logging is disabled
 
 	add_new_state(PIECES)
 
@@ -20,7 +20,6 @@ def main():
 
 	solve()
 
-	logging.info("Done!")
 	print("Done!")
 
 
@@ -85,27 +84,14 @@ def solve():
 	while True:
 		pieces = queue.popleft()
 
-		depth = len(queue)
-
 		for piece_label, piece in pieces.items():
-			logging.info(piece_label)
-			logging.info(piece)
-
 			# Save the position of the piece for moving back
 			pos = piece["pos"]
 			x = pos["x"]
 			y = pos["y"]
 
 			for direction in Direction:
-				logging.info(direction)
-
 				if is_valid_move(direction, piece, pieces):
-					logging.info(f"Depth: {depth}")
-
-					logging.info(piece)
-
-					logging.info("MOVED, RECURSING")
-
 					new_pieces = deepcopy_pieces(pieces)
 
 					queue.append(new_pieces)
@@ -156,7 +142,7 @@ def timed_print(queue):
 	states_count_diff = STATE_COUNT - timed_print.prev_states_count
 	timed_print.prev_states_count = STATE_COUNT
 
-	print(f"\rElapsed time: {elapsed_time} seconds, Number of states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}", end="", flush=True)
+	print(f"\rElapsed time: {elapsed_time} seconds, Unique states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}", end="", flush=True)
 timed_print.prev_states_count = 0
 
 

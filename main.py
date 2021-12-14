@@ -29,8 +29,6 @@ def main():
 
 
 def add_new_state(pieces):
-	global STATE_COUNT
-
 	state = STATES
 
 	new_state = False
@@ -49,8 +47,6 @@ def add_new_state(pieces):
 			new_state = True
 			state[y] = {}
 		state = state[y]
-
-	STATE_COUNT += 1
 
 	return new_state
 
@@ -224,6 +220,7 @@ def is_valid_move(direction, piece, pieces):
 	move(direction, pos)
 
 	if move_doesnt_cross_puzzle_edge(piece) and no_intersection_python(pieces) and add_new_state(pieces):
+		STATE_COUNT += 1
 		# logging.info(f"State number: {STATE_COUNT}, State: {STATES[-1]}")
 
 		return True

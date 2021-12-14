@@ -12,7 +12,7 @@ def main():
 	# filemode defaults to "a"
 	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
-	logging.disable() # The code is significantly faster without logging
+	logging.disable() # The code is significantly faster when logging is disabled
 
 	add_new_state(PIECES)
 
@@ -31,28 +31,28 @@ def main():
 def add_new_state(pieces):
 	global STATE_COUNT
 
-	# state = hash(get_state(pieces))
-	state = get_state(pieces)
+	state = STATES
 
-	if state in STATES:
-		return False
+	new_state = False
 
-	STATES.add(state)
-	STATE_COUNT += 1
-	return True
-
-
-def get_state(pieces):
-	# return (coordinate for piece in pieces.values() for coordinate in piece["pos"].values())
-	state = ""
-
-	for piece_label, piece in pieces.items():
-		state += piece_label
-
+	for piece in pieces.values():
 		pos = piece["pos"]
-		state += str(pos["x"]) + "-" + str(pos["y"])
+		x = pos["x"]
+		y = pos["y"]
 
-	return state
+		if x not in state:
+			new_state = True
+			state[x] = {}
+		state = state[x]
+
+		if y not in state:
+			new_state = True
+			state[y] = {}
+		state = state[y]
+
+	STATE_COUNT += 1
+
+	return new_state
 
 
 def print_board(pieces):
@@ -84,6 +84,8 @@ def get_board(pieces):
 
 
 def solve():
+	global running
+
 	queue = deque()
 	queue.append( { "pieces": deepcopy_pieces(PIECES), "path": [] } )
 
@@ -97,14 +99,20 @@ def solve():
 		node_b_pos = node["pieces"]["B"]["pos"]
 		puzzle_finished = node_b_pos["x"] == 1 and node_b_pos["y"] == 3
 
-		if len(queue) == 0 or puzzle_finished:
+		# if node_b_pos["y"] == 3:
+		# 	print(f"WOW! x: {str(node_b_pos['x'])}")
+
+		if len(queue) == 0 or puzzle_finished: # TODO: Replace the while condition with this?
 			node_path = node["path"]
-			print(f"Shortest path: {node_path}")
+			path_string = get_path_string(node_path)
+			print(f"Shortest path: {path_string}")
 			break
 
 		# Uncomment when performance profiling
 		# if STATE_COUNT > 20000:
 		# 	break
+
+	running = False
 
 
 def deepcopy_pieces(pieces):
@@ -144,21 +152,24 @@ def deepcopy_node(node):
 
 
 def timed_print_queue_path(queue):
-	# Uncomment when performance profiling
-	# if not STATE_COUNT > 20000:
-	threading.Timer(0.1, timed_print_queue_path, [queue]).start()
+	if running:
+		threading.Timer(1, timed_print_queue_path, [queue]).start()
 
 	elapsed_time = int(time.time() - START_TIME)
 
 	states_count_diff = STATE_COUNT - timed_print_queue_path.prev_states_count
 	timed_print_queue_path.prev_states_count = STATE_COUNT
 
-	path = queue[-1]["path"] if len(queue) > 0 else ""
-	path_string = "".join(path)
+	path = queue[-1]["path"] if len(queue) > 0 else []
+	path_string = get_path_string(path[:30])
 	path_length = len(path)
 
 	print(f"\rElapsed time: {elapsed_time} seconds, Number of states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}, Path length: {path_length}, Path string: {path_string}", end="", flush=True)
 timed_print_queue_path.prev_states_count = 0
+
+
+def get_path_string(path):
+	return "".join(path)
 
 
 def breadth_first_search_node(node, queue):
@@ -379,10 +390,11 @@ if __name__ == "__main__":
 
 	PIECES = PUZZLE["PIECES"]
 
-	STATES = set()
+	STATES = {}
 	STATE_COUNT = 0
 
 	START_TIME = time.time()
 
+	running = True
 
 	main()

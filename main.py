@@ -16,16 +16,12 @@ def main():
 
 	add_new_state(PIECES)
 
-	# logging.info(f"State number: 1, State: {STATES[0]}")
-	# print(f"\nState number: 1, State: {STATES[0]}")
-
 	print_board(PIECES)
 
 	solve()
 
-	logging.info("Done")
-
-	# print(f"\nNumber of states: {STATE_COUNT}")
+	logging.info("Done!")
+	print("Done!")
 
 
 def add_new_state(pieces):
@@ -82,31 +78,47 @@ def get_board(pieces):
 def solve():
 	global running
 
-	queue = deque()
-	queue.append( { "pieces": deepcopy_pieces(PIECES), "path": [] } )
+	queue = deque([ deepcopy_pieces(PIECES) ])
 
-	timed_print_queue_path(queue)
+	timed_print(queue)
 
 	while True:
-		node = queue.popleft()
+		pieces = queue.popleft()
 
-		breadth_first_search_node(node, queue)
+		depth = len(queue)
 
-		node_b_pos = node["pieces"]["B"]["pos"]
-		puzzle_finished = node_b_pos["x"] == 1 and node_b_pos["y"] == 3
+		for piece_label, piece in pieces.items():
+			logging.info(piece_label)
+			logging.info(piece)
 
-		# if node_b_pos["y"] == 3:
-		# 	print(f"WOW! x: {str(node_b_pos['x'])}")
+			# Save the position of the piece for moving back
+			pos = piece["pos"]
+			x = pos["x"]
+			y = pos["y"]
+
+			for direction in Direction:
+				logging.info(direction)
+
+				if is_valid_move(direction, piece, pieces):
+					logging.info(f"Depth: {depth}")
+
+					logging.info(piece)
+
+					logging.info("MOVED, RECURSING")
+
+					new_pieces = deepcopy_pieces(pieces)
+
+					queue.append(new_pieces)
+
+					pos["x"] = x
+					pos["y"] = y
+
+		pieces_b_pos = pieces["B"]["pos"]
+		puzzle_finished = pieces_b_pos["x"] == 1 and pieces_b_pos["y"] == 3
 
 		if len(queue) == 0 or puzzle_finished: # TODO: Replace the while condition with this?
-			node_path = node["path"]
-			path_string = get_path_string(node_path)
-			print(f"Shortest path: {path_string}")
+			print("Shortest path found!")
 			break
-
-		# Uncomment when performance profiling
-		# if STATE_COUNT > 20000:
-		# 	break
 
 	running = False
 
@@ -135,78 +147,17 @@ def deepcopy_pieces(pieces):
 	return deepcopied_pieces
 
 
-def deepcopy_node(node):
-	deepcopied_node = {}
-
-	deepcopied_pieces = deepcopy_pieces(node["pieces"])
-	deepcopied_node["pieces"] = deepcopied_pieces
-
-	copied_path = copy.copy(node["path"])
-	deepcopied_node["path"] = copied_path
-
-	return deepcopied_node
-
-
-def timed_print_queue_path(queue):
+def timed_print(queue):
 	if running:
-		threading.Timer(1, timed_print_queue_path, [queue]).start()
+		threading.Timer(1, timed_print, [queue]).start()
 
 	elapsed_time = int(time.time() - START_TIME)
 
-	states_count_diff = STATE_COUNT - timed_print_queue_path.prev_states_count
-	timed_print_queue_path.prev_states_count = STATE_COUNT
+	states_count_diff = STATE_COUNT - timed_print.prev_states_count
+	timed_print.prev_states_count = STATE_COUNT
 
-	path = queue[-1]["path"] if len(queue) > 0 else []
-	path_string = get_path_string(path[:30])
-	path_length = len(path)
-
-	print(f"\rElapsed time: {elapsed_time} seconds, Number of states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}, Path length: {path_length}, Path string: {path_string}", end="", flush=True)
-timed_print_queue_path.prev_states_count = 0
-
-
-def get_path_string(path):
-	return "".join(path)
-
-
-def breadth_first_search_node(node, queue):
-	depth = len(queue)
-
-	pieces = node["pieces"]
-
-	for piece_label, piece in pieces.items():
-		logging.info(piece_label)
-		logging.info(piece)
-
-		# Save the position of the piece for moving back
-		pos = piece["pos"]
-		x = pos["x"]
-		y = pos["y"]
-
-		# For moving a piece up/down/left/right
-		for direction in Direction:
-			logging.info(direction)
-
-			if is_valid_move(direction, piece, pieces):
-				logging.info(f"Depth: {depth}")
-
-				logging.info(piece)
-
-				logging.info("MOVED, RECURSING")
-
-				#print_board(pieces)
-
-				new_node = deepcopy_node(node)
-
-				piece_path = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
-
-				new_node["path"].append(piece_path)
-
-				queue.append(new_node)
-
-				pos["x"] = x
-				pos["y"] = y
-
-				#print_board(pieces)
+	print(f"\rElapsed time: {elapsed_time} seconds, Number of states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}", end="", flush=True)
+timed_print.prev_states_count = 0
 
 
 def is_valid_move(direction, piece, pieces):
@@ -221,7 +172,6 @@ def is_valid_move(direction, piece, pieces):
 
 	if move_doesnt_cross_puzzle_edge(piece) and no_intersection_python(pieces) and add_new_state(pieces):
 		STATE_COUNT += 1
-		# logging.info(f"State number: {STATE_COUNT}, State: {STATES[-1]}")
 
 		return True
 
@@ -232,7 +182,6 @@ def is_valid_move(direction, piece, pieces):
 	return False
 
 
-# TODO: Replace with a lookup/jump table?
 def move(direction, pos):
 	match direction:
 		case Direction.UP:
@@ -245,7 +194,6 @@ def move(direction, pos):
 			pos["x"] += 1
 
 
-# TODO: Replace with a lookup/jump table?
 def move_doesnt_cross_puzzle_edge(piece):
 	pos = piece["pos"]
 	x = pos["x"]

@@ -14,26 +14,27 @@ def main():
 
 	# logging.disable() # The code is significantly faster when logging is disabled
 
-	compressed_starting_pieces = get_compressed_starting_pieces()
-	add_new_state(compressed_starting_pieces)
+	starting_positions = get_starting_positions()
+
+	add_new_state(starting_positions)
 
 	print_board(PIECES)
 
-	solve(compressed_starting_pieces)
+	solve(starting_positions)
 
 	print("Done!")
 
 
-def get_compressed_starting_pieces():
-	compressed_starting_pieces = {}
+def get_starting_positions():
+	starting_positions = {}
 
 	for piece_label, piece in PIECES.items():
-		compressed_starting_pieces[piece_label] = {
+		starting_positions[piece_label] = {
 			"x": piece["pos"]["x"],
 			"y": piece["pos"]["y"]
 		}
 
-	return compressed_starting_pieces
+	return starting_positions
 
 
 def add_new_state(pieces):
@@ -45,15 +46,12 @@ def add_new_state(pieces):
 		x = piece["x"]
 		y = piece["y"]
 
-		if x not in state:
-			new_state = True
-			state[x] = {}
-		state = state[x]
+		piece_coordinate_index = x + y * WIDTH
 
-		if y not in state:
+		if piece_coordinate_index not in state:
 			new_state = True
-			state[y] = {}
-		state = state[y]
+			state[piece_coordinate_index] = {}
+		state = state[piece_coordinate_index]
 
 	return new_state
 
@@ -86,10 +84,10 @@ def get_board(pieces):
 	return board
 
 
-def solve(compressed_starting_pieces):
+def solve(starting_positions):
 	global running
 
-	queue = deque([ deepcopy_pieces_positions(compressed_starting_pieces) ])
+	queue = deque([ starting_positions.copy() ])
 
 	timed_print(queue)
 
@@ -102,8 +100,8 @@ def solve(compressed_starting_pieces):
 			break
 
 		# Uncomment this when you want to profile the code
-		if STATE_COUNT > 20000:
-			break
+		# if STATE_COUNT > 20000:
+		# 	break
 
 		for piece_label, piece in pieces_positions.items():
 			# Saves the position of the piece, in case it needs to be moved back
@@ -120,8 +118,8 @@ def solve(compressed_starting_pieces):
 					piece["x"] = x
 					piece["y"] = y
 
-	print(f"Shortest path found! The remaining queue length is {len(queue)}.")
 	running = False
+	print(f"\nShortest path found! The remaining queue length is {len(queue)}.")
 
 
 def deepcopy_pieces_positions(pieces):
@@ -161,7 +159,6 @@ def is_valid_move(direction, piece_label, piece, pieces):
 
 	if move_doesnt_cross_puzzle_edge(piece_label, piece) and no_intersection(piece_label, piece, pieces) and add_new_state(pieces):
 		STATE_COUNT += 1
-
 		return True
 
 	# Moves the piece back

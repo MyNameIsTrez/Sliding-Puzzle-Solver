@@ -144,8 +144,20 @@ def timed_print(queue):
 	states_count_diff = STATE_COUNT - timed_print.prev_states_count
 	timed_print.prev_states_count = STATE_COUNT
 
-	print(f"\rElapsed time: {elapsed_time} seconds, Unique states: {STATE_COUNT} (+{states_count_diff}), Queue length: {len(queue)}", end="", flush=True)
+	print(f"\rElapsed time: {elapsed_time} seconds"
+			f", Unique states: {STATE_COUNT} (+{states_count_diff})"
+			f", Queue length: {len(queue)}"
+			# f", Size of queue in bytes: {sizeof(deepcopy(queue))}"
+			# f", Size of STATES in bytes: {sizeof(deepcopy(STATES))}"
+			, end="", flush=True)
 timed_print.prev_states_count = 0
+
+
+# def sizeof(obj):
+#     size = sys.getsizeof(obj)
+#     if isinstance(obj, dict): return size + sum(map(sizeof, obj.keys())) + sum(map(sizeof, obj.values()))
+#     if isinstance(obj, (list, tuple, set, frozenset)): return size + sum(map(sizeof, obj))
+#     return size
 
 
 def is_valid_move(direction, piece_label, piece, pieces):

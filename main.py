@@ -22,7 +22,7 @@ def main():
 
 	solve(starting_positions)
 
-	print("Done!")
+	print("\nDone!")
 
 
 def get_starting_positions():
@@ -87,16 +87,19 @@ def get_board(pieces):
 def solve(starting_positions):
 	global running
 
-	queue = deque([ starting_positions.copy() ])
+	queue = deque([ [starting_positions.copy(), []] ])
 
 	timed_print(queue)
 
 	while len(queue) > 0:
-		pieces_positions = queue.popleft()
+		pieces_positions, path = queue.popleft()
 
 		b_piece_position = pieces_positions["B"]
 		puzzle_finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
 		if puzzle_finished:
+			path_string = "".join(path)
+			print(f"\nShortest path of {len(path)} moves found! The remaining queue length is {len(queue)}. The STATES length is {len(STATES)}.")
+			print(f"Path: {path_string}")
 			break
 
 		# Uncomment this when you want to profile the code
@@ -112,14 +115,15 @@ def solve(starting_positions):
 				if is_valid_move(direction, piece_label, piece, pieces_positions):
 					new_pieces_positions = deepcopy_pieces_positions(pieces_positions)
 
-					queue.append(new_pieces_positions)
+					new_path_part = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
+
+					queue.append([ new_pieces_positions, path + [new_path_part] ])
 
 					# Moves the piece back
 					piece["x"] = x
 					piece["y"] = y
 
 	running = False
-	print(f"\nShortest path found! The remaining queue length is {len(queue)}.")
 
 
 def deepcopy_pieces_positions(pieces):
@@ -171,6 +175,7 @@ def is_valid_move(direction, piece_label, piece, pieces):
 	return False
 
 
+# TODO: Possibly use lookup table for x and y instead if it's faster in C++
 def move(direction, piece):
 	match direction:
 		case Direction.UP:

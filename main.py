@@ -100,7 +100,7 @@ def solve(starting_positions):
 			print(f"Path: {path_string}")
 			logging.info(f"A shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(STATES)} unique states were seen.")
 			logging.info(f"Path: {path_string}")
-			# break
+			# break # Stops the program after one of the multiple shortest paths has been found
 
 		# Uncomment this when you want to profile the code
 		# if STATE_COUNT > 20000:

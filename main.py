@@ -8,11 +8,9 @@ def main():
 	global STATE_COUNT
 
 	# filename has to be set or everything will be printed to the terminal
-	# level has to be set for logging.info()
-	# filemode defaults to "a"
-	# logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
-
-	# logging.disable() # The code is significantly faster when logging is disabled
+	# level has to be set for logging.info() to be written anywhere
+	# filemode defaults to "a", so we change it to "w"
+	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
 	starting_positions = get_starting_positions()
 
@@ -98,9 +96,11 @@ def solve(starting_positions):
 		puzzle_finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
 		if puzzle_finished:
 			path_string = "".join(path)
-			print(f"\nShortest path of {len(path)} moves found! The remaining queue length is {len(queue)}. The STATES length is {len(STATES)}.")
+			print(f"\nA shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(STATES)} unique states were seen.")
 			print(f"Path: {path_string}")
-			break
+			logging.info(f"A shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(STATES)} unique states were seen.")
+			logging.info(f"Path: {path_string}")
+			# break
 
 		# Uncomment this when you want to profile the code
 		# if STATE_COUNT > 20000:

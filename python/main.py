@@ -1,4 +1,4 @@
-import logging, threading, copy, time
+import threading, copy, time
 
 from enum import Enum, auto
 from collections import deque
@@ -44,26 +44,37 @@ def initialize_puzzles():
 				"H": { "pos": { "x": 2, "y": 3 }, "size": { "width": 1, "height": 1 } },
 				"I": { "pos": { "x": 0, "y": 4 }, "size": { "width": 1, "height": 1 } },
 				"J": { "pos": { "x": 3, "y": 4 }, "size": { "width": 1, "height": 1 } }
+			},
+
+			"PIECE_ENDING_POSITIONS": {
+				"B": { "x": 1, "y": 3 }
 			}
 		}
 	}
 
 
 def initialize_global_constants():
-	global PUZZLE, EMPTY_CHARACTER, BOARD_SIZE, WIDTH, HEIGHT, PIECES, START_TIME, DIRECTION_CHARACTERS
-
+	global PUZZLE
 	PUZZLE = PUZZLES[CHOSEN_PUZZLE]
 
+	global EMPTY_CHARACTER
 	EMPTY_CHARACTER = " "
 
+	global BOARD_SIZE, WIDTH, HEIGHT
 	BOARD_SIZE = PUZZLE["BOARD_SIZE"]
 	WIDTH = BOARD_SIZE["WIDTH"]
 	HEIGHT = BOARD_SIZE["HEIGHT"]
 
+	global PIECES
 	PIECES = PUZZLE["PIECES"]
 
+	global PIECE_ENDING_POSITIONS
+	PIECE_ENDING_POSITIONS = PUZZLE["PIECE_ENDING_POSITIONS"]
+
+	global START_TIME
 	START_TIME = time.time()
 
+	global DIRECTION_CHARACTERS
 	DIRECTION_CHARACTERS = {
 		Direction.UP: "^",
 		Direction.DOWN: "v",
@@ -73,23 +84,18 @@ def initialize_global_constants():
 
 
 def initialize_global_non_constants():
-	global states, state_count, prev_state_count, running, finished
-
+	global states, state_count, prev_state_count
 	states = {}
 	state_count = 0
 	prev_state_count = 0
 
+	global running, finished
 	running = True
 	finished = False
 
 
 def main():
 	global state_count
-
-	# filename has to be set or everything will be printed to the terminal
-	# level has to be set for logging.info() to be written anywhere
-	# filemode defaults to "a", so we change it to "w"
-	logging.basicConfig(filename="main.log", level=logging.INFO, filemode="w")
 
 	starting_positions = get_starting_positions()
 
@@ -171,20 +177,16 @@ def solve(starting_positions):
 	while len(queue) > 0:
 		pieces_positions, path = queue.popleft()
 
-		b_piece_position = pieces_positions["B"]
-		finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
+		update_finished(pieces_positions)
+
 		if finished:
-			path_string = "".join(path)
 			finished_message = f"\nA shortest path of {len(path)} moves was found! {state_count} unique states were seen. The remaining queue length is {len(queue)}."
 			print(finished_message)
+			
+			path_string = "".join(path)
 			print(f"Path: {path_string}")
-			logging.info(finished_message)
-			logging.info(f"Path: {path_string}")
-			break # Stops the program after one of the shortest paths has been found
 
-		# Uncomment this when you want to profile the code
-		# if state_count > 20000:
-		# 	break
+			break
 
 		for piece_label, piece in pieces_positions.items():
 			# Saves the position of the piece, in case it needs to be moved back
@@ -195,7 +197,7 @@ def solve(starting_positions):
 				if is_valid_move(direction, piece_label, piece, pieces_positions):
 					new_pieces_positions = deepcopy_pieces_positions(pieces_positions)
 
-					new_path_part = f"{piece_label}{DIRECTION_CHARACTERS[direction]} "
+					new_path_part = piece_label + DIRECTION_CHARACTERS[direction]
 
 					queue.append([ new_pieces_positions, path + [new_path_part] ])
 
@@ -204,6 +206,15 @@ def solve(starting_positions):
 					piece["y"] = y
 
 	running = False
+
+
+def update_finished(pieces_positions):
+	global finished
+	finished = True
+	
+	for label, piece_ending_position in PIECE_ENDING_POSITIONS.items():
+		if pieces_positions[label] != piece_ending_position:
+			finished = False
 
 
 def deepcopy_pieces_positions(pieces):

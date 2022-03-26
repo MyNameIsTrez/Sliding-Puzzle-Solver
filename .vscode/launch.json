@@ -13,12 +13,12 @@
 			"cwd": ".",
 			"preLaunchTask": "Build"
 		},
-		// {
-		// 	"name": "Python",
-		// 	"type": "python",
-		// 	"request": "launch",
-		// 	"program": "${workspaceFolder}/python/main.py",
-		// 	"console": "integratedTerminal"
-		// }
+		{
+			"name": "Python",
+			"type": "python",
+			"request": "launch",
+			"program": "${workspaceFolder}/python/main.py",
+			"console": "integratedTerminal"
+		}
 	]
 }

@@ -11,10 +11,10 @@
 // def move_doesnt_cross_puzzle_edge(piece_label, piece):
 // def no_intersection(piece_label_1, piece1, pieces):
 
-#include <iostream>
+#include <stdio.h>
 
 int main(void)
 {
-	std::cout << "Hello World!" << std::endl;
+	printf("bar\n");
 	return (0);
 }

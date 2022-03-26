@@ -4,8 +4,87 @@ from enum import Enum, auto
 from collections import deque
 
 
+class Direction(Enum):
+	UP = auto()
+	DOWN = auto()
+	LEFT = auto()
+	RIGHT = auto()
+
+
+def initialize_puzzles():
+	global PUZZLES
+
+	PUZZLES = {
+		"klotski": {
+	#		Starting state: A00B10C30D02E12F32G13H23I04J34
+
+	#		Move G: A00B10C30D02E12F32G14H23I04J34
+	#		Move H: A00B10C30D02E12F32G13H24I04J34
+	#		Move I: A00B10C30D02E12F32G13H23I14J34
+	#		Move J: A00B10C30D02E12F32G13H23I04J24
+
+			"BOARD_SIZE": {
+				"WIDTH": 4,
+				"HEIGHT": 5
+			},
+
+	#		ABBC
+	#		ABBC
+	#		DEEF
+	#		DGHF
+	#		I  J
+			"PIECES": {
+				"A": { "pos": { "x": 0, "y": 0 }, "size": { "width": 1, "height": 2 } },
+				"B": { "pos": { "x": 1, "y": 0 }, "size": { "width": 2, "height": 2 } },
+				"C": { "pos": { "x": 3, "y": 0 }, "size": { "width": 1, "height": 2 } },
+				"D": { "pos": { "x": 0, "y": 2 }, "size": { "width": 1, "height": 2 } },
+				"E": { "pos": { "x": 1, "y": 2 }, "size": { "width": 2, "height": 1 } },
+				"F": { "pos": { "x": 3, "y": 2 }, "size": { "width": 1, "height": 2 } },
+				"G": { "pos": { "x": 1, "y": 3 }, "size": { "width": 1, "height": 1 } },
+				"H": { "pos": { "x": 2, "y": 3 }, "size": { "width": 1, "height": 1 } },
+				"I": { "pos": { "x": 0, "y": 4 }, "size": { "width": 1, "height": 1 } },
+				"J": { "pos": { "x": 3, "y": 4 }, "size": { "width": 1, "height": 1 } }
+			}
+		}
+	}
+
+
+def initialize_global_constants():
+	global PUZZLE, EMPTY_CHARACTER, BOARD_SIZE, WIDTH, HEIGHT, PIECES, START_TIME, DIRECTION_CHARACTERS
+
+	PUZZLE = PUZZLES[CHOSEN_PUZZLE]
+
+	EMPTY_CHARACTER = " "
+
+	BOARD_SIZE = PUZZLE["BOARD_SIZE"]
+	WIDTH = BOARD_SIZE["WIDTH"]
+	HEIGHT = BOARD_SIZE["HEIGHT"]
+
+	PIECES = PUZZLE["PIECES"]
+
+	START_TIME = time.time()
+
+	DIRECTION_CHARACTERS = {
+		Direction.UP: "^",
+		Direction.DOWN: "v",
+		Direction.LEFT: "<",
+		Direction.RIGHT: ">",
+	}
+
+
+def initialize_global_non_constants():
+	global states, state_count, prev_state_count, running, finished
+
+	states = {}
+	state_count = 0
+	prev_state_count = 0
+
+	running = True
+	finished = False
+
+
 def main():
-	global STATE_COUNT
+	global state_count
 
 	# filename has to be set or everything will be printed to the terminal
 	# level has to be set for logging.info() to be written anywhere
@@ -36,7 +115,7 @@ def get_starting_positions():
 
 
 def add_new_state(pieces):
-	state = STATES
+	state = states
 
 	new_state = False
 
@@ -83,7 +162,7 @@ def get_board(pieces):
 
 
 def solve(starting_positions):
-	global running
+	global running, finished
 
 	queue = deque([ [starting_positions.copy(), []] ])
 
@@ -93,17 +172,17 @@ def solve(starting_positions):
 		pieces_positions, path = queue.popleft()
 
 		b_piece_position = pieces_positions["B"]
-		puzzle_finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
-		if puzzle_finished:
+		finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
+		if finished:
 			path_string = "".join(path)
-			print(f"\nA shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(STATES)} unique states were seen.")
+			print(f"\nA shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(states)} unique states were seen.")
 			print(f"Path: {path_string}")
-			logging.info(f"A shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(STATES)} unique states were seen.")
+			logging.info(f"A shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(states)} unique states were seen.")
 			logging.info(f"Path: {path_string}")
-			# break # Stops the program after one of the multiple shortest paths has been found
+			break # Stops the program after one of the multiple shortest paths has been found
 
 		# Uncomment this when you want to profile the code
-		# if STATE_COUNT > 20000:
+		# if state_count > 20000:
 		# 	break
 
 		for piece_label, piece in pieces_positions.items():
@@ -140,23 +219,28 @@ def deepcopy_pieces_positions(pieces):
 
 
 def timed_print(queue):
+	global prev_state_count
+
 	if running:
 		threading.Timer(1, timed_print, [queue]).start()
 
-	elapsed_time = int(time.time() - START_TIME)
+	if not finished:
+		elapsed_time = int(time.time() - START_TIME)
 
-	states_count_diff = STATE_COUNT - timed_print.prev_states_count
-	timed_print.prev_states_count = STATE_COUNT
+		states_count_diff = state_count - prev_state_count
+		prev_state_count = state_count
 
-	print(f"\rElapsed time: {elapsed_time} seconds"
-			f", Unique states: {STATE_COUNT} (+{states_count_diff})"
-			f", Queue length: {len(queue)}"
-			, end="", flush=True)
-timed_print.prev_states_count = 0
+		print(
+			f"\rElapsed time: {elapsed_time} seconds"
+			f", Unique states: {state_count} (+{states_count_diff})"
+			f", Queue length: {len(queue)}",
+			end="",
+			flush=True
+		)
 
 
 def is_valid_move(direction, piece_label, piece, pieces):
-	global STATE_COUNT
+	global state_count
 
 	# Saves the position of the piece, in case it needs to be moved back
 	x = piece["x"]
@@ -165,7 +249,7 @@ def is_valid_move(direction, piece_label, piece, pieces):
 	move(direction, piece)
 
 	if move_doesnt_cross_puzzle_edge(piece_label, piece) and no_intersection(piece_label, piece, pieces) and add_new_state(pieces):
-		STATE_COUNT += 1
+		state_count += 1
 		return True
 
 	# Moves the piece back
@@ -245,70 +329,9 @@ def no_intersection(piece_label_1, piece1, pieces):
 if __name__ == "__main__":
 	CHOSEN_PUZZLE = "klotski"
 
-	EMPTY_CHARACTER = " "
+	initialize_puzzles()
 
-
-	PUZZLES = {
-		"klotski": {
-	#		Starting state: A00B10C30D02E12F32G13H23I04J34
-
-	#		Move G: A00B10C30D02E12F32G14H23I04J34
-	#		Move H: A00B10C30D02E12F32G13H24I04J34
-	#		Move I: A00B10C30D02E12F32G13H23I14J34
-	#		Move J: A00B10C30D02E12F32G13H23I04J24
-
-			"BOARD_SIZE": {
-				"WIDTH": 4,
-				"HEIGHT": 5
-			},
-
-	#		ABBC
-	#		ABBC
-	#		DEEF
-	#		DGHF
-	#		I  J
-			"PIECES": {
-				"A": { "pos": { "x": 0, "y": 0 }, "size": { "width": 1, "height": 2 } },
-				"B": { "pos": { "x": 1, "y": 0 }, "size": { "width": 2, "height": 2 } },
-				"C": { "pos": { "x": 3, "y": 0 }, "size": { "width": 1, "height": 2 } },
-				"D": { "pos": { "x": 0, "y": 2 }, "size": { "width": 1, "height": 2 } },
-				"E": { "pos": { "x": 1, "y": 2 }, "size": { "width": 2, "height": 1 } },
-				"F": { "pos": { "x": 3, "y": 2 }, "size": { "width": 1, "height": 2 } },
-				"G": { "pos": { "x": 1, "y": 3 }, "size": { "width": 1, "height": 1 } },
-				"H": { "pos": { "x": 2, "y": 3 }, "size": { "width": 1, "height": 1 } },
-				"I": { "pos": { "x": 0, "y": 4 }, "size": { "width": 1, "height": 1 } },
-				"J": { "pos": { "x": 3, "y": 4 }, "size": { "width": 1, "height": 1 } }
-			}
-		}
-	}
-
-	class Direction(Enum):
-		UP = auto()
-		DOWN = auto()
-		LEFT = auto()
-		RIGHT = auto()
-
-	DIRECTION_CHARACTERS = {
-		Direction.UP: "^",
-		Direction.DOWN: "v",
-		Direction.LEFT: "<",
-		Direction.RIGHT: ">",
-	}
-
-
-	PUZZLE = PUZZLES[CHOSEN_PUZZLE]
-
-	BOARD_SIZE = PUZZLE["BOARD_SIZE"]
-	WIDTH = BOARD_SIZE["WIDTH"]
-	HEIGHT = BOARD_SIZE["HEIGHT"]
-
-	PIECES = PUZZLE["PIECES"]
-
-	STATES = {}
-	STATE_COUNT = 0
-
-	START_TIME = time.time()
-
-	running = True
+	initialize_global_constants()
+	initialize_global_non_constants()
 
 	main()

@@ -11,6 +11,26 @@ class Direction(Enum):
 	RIGHT = auto()
 
 
+def main():
+	global CHOSEN_PUZZLE
+	CHOSEN_PUZZLE = "klotski"
+
+	initialize_puzzles()
+
+	initialize_global_constants()
+	initialize_global_non_constants()
+
+	starting_positions = get_starting_positions()
+
+	add_new_state(starting_positions)
+
+	print_board(PIECES)
+
+	solve(starting_positions)
+
+	print("\nDone!")
+
+
 def initialize_puzzles():
 	global PUZZLES
 	PUZZLES = {
@@ -91,26 +111,6 @@ def initialize_global_non_constants():
 	global running, finished
 	running = True
 	finished = False
-
-
-def main():
-	global CHOSEN_PUZZLE
-	CHOSEN_PUZZLE = "klotski"
-
-	initialize_puzzles()
-
-	initialize_global_constants()
-	initialize_global_non_constants()
-
-	starting_positions = get_starting_positions()
-
-	add_new_state(starting_positions)
-
-	print_board(PIECES)
-
-	solve(starting_positions)
-
-	print("\nDone!")
 
 
 def get_starting_positions():

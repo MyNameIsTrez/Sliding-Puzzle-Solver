@@ -2,16 +2,10 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "austin",
-			"file": "main.py",
-			"label": "Profile main.py with Austin",
-			"problemMatcher": []
-		},
-		{
+			"label": "Build",
 			"type": "shell",
-			"command": "py -m cProfile -s tottime main.py",
-			"label": "Profile main.py with cProfile",
-			"problemMatcher": []
+			"command": "C:/msys64/usr/bin/make.exe",
+			"group": "build"
 		}
 	]
 }

@@ -175,11 +175,12 @@ def solve(starting_positions):
 		finished = b_piece_position["x"] == 1 and b_piece_position["y"] == 3
 		if finished:
 			path_string = "".join(path)
-			print(f"\nA shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(states)} unique states were seen.")
+			finished_message = f"\nA shortest path of {len(path)} moves was found! {state_count} unique states were seen. The remaining queue length is {len(queue)}."
+			print(finished_message)
 			print(f"Path: {path_string}")
-			logging.info(f"A shortest path of {len(path)} moves was found! The remaining queue length is {len(queue)}. {len(states)} unique states were seen.")
+			logging.info(finished_message)
 			logging.info(f"Path: {path_string}")
-			break # Stops the program after one of the multiple shortest paths has been found
+			break # Stops the program after one of the shortest paths has been found
 
 		# Uncomment this when you want to profile the code
 		# if state_count > 20000:

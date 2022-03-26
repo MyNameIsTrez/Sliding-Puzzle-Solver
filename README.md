@@ -1,11 +1,9 @@
 # Sliding-Puzzle-Solver
 
-`python main.py`
+See misc/klotski.pdf in this repository for more information on the Klotski puzzle.
 
-After 10,954,175 states, which is a path length of 117 the program stops.
+## Python
 
-I'm not sure why the program doesn't find the solution with path length 81 which should be the shortest one, [according to Klotski's Wikipedia page](https://en.wikipedia.org/wiki/Klotski).
+`python python/main.py`
 
-# Installing
-
-`alias make=C:/msys64/usr/bin/make.exe`
+The Python implementation finds ~5300 new states/second and takes 37 minutes and 46 seconds (2266 seconds) to find the shortest path of 116 moves.

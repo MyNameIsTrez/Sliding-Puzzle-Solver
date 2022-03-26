@@ -5,11 +5,20 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Python: Current File",
-			"type": "python",
+			"name": "C++",
+			"type": "cppdbg",
 			"request": "launch",
-			"program": "${file}",
-			"console": "integratedTerminal"
-		}
+			"program": "${workspaceFolder}/puzzle.exe",
+			"console": "integratedTerminal",
+			"cwd": ".",
+			"preLaunchTask": "Build"
+		},
+		// {
+		// 	"name": "Python",
+		// 	"type": "python",
+		// 	"request": "launch",
+		// 	"program": "${workspaceFolder}/python/main.py",
+		// 	"console": "integratedTerminal"
+		// }
 	]
 }

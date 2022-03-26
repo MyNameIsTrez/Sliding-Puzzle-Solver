@@ -23,7 +23,7 @@ OBJECTS := $(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.o,$(SOURCES))
 ####
 
 
-all: run
+all: $(NAME)
 
 
 $(NAME): $(OBJECTS)

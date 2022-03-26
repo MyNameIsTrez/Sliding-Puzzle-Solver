@@ -13,7 +13,6 @@ class Direction(Enum):
 
 def initialize_puzzles():
 	global PUZZLES
-
 	PUZZLES = {
 		"klotski": {
 	#		Starting state: A00B10C30D02E12F32G13H23I04J34
@@ -95,7 +94,13 @@ def initialize_global_non_constants():
 
 
 def main():
-	global state_count
+	global CHOSEN_PUZZLE
+	CHOSEN_PUZZLE = "klotski"
+
+	initialize_puzzles()
+
+	initialize_global_constants()
+	initialize_global_non_constants()
 
 	starting_positions = get_starting_positions()
 
@@ -168,7 +173,7 @@ def get_board(pieces):
 
 
 def solve(starting_positions):
-	global running, finished
+	global finished, running
 
 	queue = deque([ [starting_positions.copy(), []] ])
 
@@ -338,11 +343,4 @@ def no_intersection(piece_label_1, piece1, pieces):
 
 
 if __name__ == "__main__":
-	CHOSEN_PUZZLE = "klotski"
-
-	initialize_puzzles()
-
-	initialize_global_constants()
-	initialize_global_non_constants()
-
 	main()

@@ -331,7 +331,6 @@ def no_intersection(piece_label_1, piece1, pieces):
 		p2l = x2
 		p2r = x2 + w2
 
-		# rectOneRight > rectTwoLeft && rectOneLeft < rectTwoRight && rectOneBottom > rectTwoTop && rectOneTop < rectTwoBottom
 		if p1r > p2l and p1l < p2r and p1b > p2t and p1t < p2b:
 			return False
 

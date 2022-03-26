@@ -10,8 +10,8 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/puzzle.exe",
 			"console": "integratedTerminal",
-			"cwd": ".",
-			"preLaunchTask": "Build"
+			"preLaunchTask": "Build",
+			"cwd": "."
 		},
 		{
 			"name": "Python",

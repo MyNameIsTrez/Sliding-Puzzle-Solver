@@ -37,8 +37,6 @@ class SlidingPuzzleSolver:
 
 
 	def initialize_constant_fields(self, puzzle_json):
-		self.EMPTY_CHARACTER = " "
-
 		BOARD_SIZE = puzzle_json["board_size"]
 		self.WIDTH = BOARD_SIZE["width"]
 		self.HEIGHT = BOARD_SIZE["height"]
@@ -49,6 +47,8 @@ class SlidingPuzzleSolver:
 
 		self.START_TIME = time.time()
 
+		self.EMPTY_CHARACTER = " "
+
 		self.DIRECTION_CHARACTERS = {
 			Direction.UP: "^",
 			Direction.DOWN: "v",
@@ -58,7 +58,7 @@ class SlidingPuzzleSolver:
 
 
 	def initialize_variable_fields(self):
-		self.states = {}
+		self.states = set()
 		self.state_count = 0
 		self.prev_state_count = 0
 
@@ -79,22 +79,13 @@ class SlidingPuzzleSolver:
 
 
 	def add_new_state(self, pieces):
-		state = self.states
+		state = repr(pieces)
 
-		new_state = False
+		if state not in self.states:
+			self.states.add(state)
+			return True
 
-		for piece in pieces.values():
-			x = piece["x"]
-			y = piece["y"]
-
-			piece_coordinate_index = x + y * self.WIDTH
-
-			if piece_coordinate_index not in state:
-				new_state = True
-				state[piece_coordinate_index] = {}
-			state = state[piece_coordinate_index]
-
-		return new_state
+		return False
 
 
 	def print_board(self):
@@ -136,7 +127,7 @@ class SlidingPuzzleSolver:
 			self.update_finished(pieces_positions)
 
 			if self.finished:
-				finished_message = f"\nA shortest path of {len(path)} moves was found! {state_count} unique states were seen. The remaining queue length is {len(queue)}."
+				finished_message = f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(queue)}."
 				print(finished_message)
 
 				path_string = "".join(path)
@@ -197,7 +188,7 @@ class SlidingPuzzleSolver:
 
 			print(
 				f"\rElapsed time: {elapsed_time} seconds"
-				f", Unique states: {self.state_count} (+{states_count_diff})"
+				f", Unique states: {self.state_count} (+{states_count_diff}/s)"
 				f", Queue length: {len(queue)}",
 				end="",
 				flush=True

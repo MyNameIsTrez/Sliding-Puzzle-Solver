@@ -2,21 +2,30 @@
 
 ////////
 
-struct Pos
+typedef struct Pos
 {
 	int x;
 	int y;
-};
+} Pos;
 
-struct Size
+typedef struct Size
 {
 	int width;
 	int height;
-};
+} Size;
 
-struct Piece
+typedef struct StartingPiece
 {
-	char label;
 	Pos pos;
 	Size size;
-};
+} StartingPiece;
+
+typedef struct EndingPiece
+{
+	Pos pos;
+} EndingPiece;
+
+typedef struct Piece
+{
+	Pos pos;
+} Piece;

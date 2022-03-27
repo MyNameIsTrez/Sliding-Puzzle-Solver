@@ -7,7 +7,7 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path exe_path, std::st
 	json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
 	initialize_constant_fields(puzzle_json);
 	initialize_variable_fields();
-	std::cout << puzzle_json.dump(4) << std::endl;
+	// std::cout << puzzle_json.dump(4) << std::endl;
 }
 
 void SlidingPuzzleSolver::run(void)
@@ -53,5 +53,12 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 
 void SlidingPuzzleSolver::initialize_variable_fields(void)
 {
-	// this->states = std::vector<>;
+	std::cout << this->states.empty() << std::endl;
+	Piece piece;
+	piece.pos.x = 4;
+	piece.pos.y = 2;
+	this->states.push_back(piece);
+	std::cout << this->states.empty() << std::endl;
+	std::cout << this->states.back().pos.x << std::endl;
+	std::cout << this->states.back().pos.x << std::endl;
 }

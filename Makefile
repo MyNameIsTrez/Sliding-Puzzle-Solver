@@ -1,4 +1,4 @@
-SOURCES := cpp/main.cpp
+SOURCES := cpp/src/main.cpp
 
 
 ####
@@ -7,10 +7,10 @@ SOURCES := cpp/main.cpp
 NAME := puzzle
 CC := C:/msys64/mingw64/bin/g++.exe
 LDFLAGS :=
-CFLAGS := -Wall -Wextra -Werror
+CFLAGS := -Wall -Wextra -Werror #-std=c++11
 
-SRC_DIR := cpp
-OBJ_DIR := obj
+SRC_DIR := cpp/src
+OBJ_DIR := cpp/obj
 
 
 ####

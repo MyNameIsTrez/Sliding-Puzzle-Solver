@@ -1,7 +1,10 @@
 import threading, copy, time
 
+from pathlib import Path
 from collections import deque
 from enum import Enum, auto
+
+import pyjson5
 
 
 class Direction(Enum):
@@ -12,30 +15,10 @@ class Direction(Enum):
 
 
 class SlidingPuzzleSolver:
-	def __init__(self, puzzle_instance):
-		self.initialize_constant_fields(puzzle_instance)
+	def __init__(self, puzzle_name):
+		puzzle_json = self.get_puzzle_json(puzzle_name)
+		self.initialize_constant_fields(puzzle_json)
 		self.initialize_variable_fields()
-
-
-	def initialize_constant_fields(self, puzzle_instance):
-		self.EMPTY_CHARACTER = " "
-
-		BOARD_SIZE = puzzle_instance.BOARD_SIZE
-		self.WIDTH = BOARD_SIZE["WIDTH"]
-		self.HEIGHT = BOARD_SIZE["HEIGHT"]
-
-		self.PIECES = puzzle_instance.PIECES
-
-		self.PIECE_ENDING_POSITIONS = puzzle_instance.PIECE_ENDING_POSITIONS
-
-		self.START_TIME = time.time()
-
-		self.DIRECTION_CHARACTERS = {
-			Direction.UP: "^",
-			Direction.DOWN: "v",
-			Direction.LEFT: "<",
-			Direction.RIGHT: ">",
-		}
 
 
 	def run(self):
@@ -46,6 +29,32 @@ class SlidingPuzzleSolver:
 		self.solve(starting_positions)
 
 		print("\nDone!")
+
+
+	def get_puzzle_json(self, puzzle_name):
+		with open("puzzles" / Path(puzzle_name).with_suffix(".jsonc"), "r") as f:
+			return pyjson5.decode_io(f)
+
+
+	def initialize_constant_fields(self, puzzle_json):
+		self.EMPTY_CHARACTER = " "
+
+		BOARD_SIZE = puzzle_json["BOARD_SIZE"]
+		self.WIDTH = BOARD_SIZE["WIDTH"]
+		self.HEIGHT = BOARD_SIZE["HEIGHT"]
+
+		self.PIECES = puzzle_json["PIECES"]
+
+		self.PIECE_ENDING_POSITIONS = puzzle_json["PIECE_ENDING_POSITIONS"]
+
+		self.START_TIME = time.time()
+
+		self.DIRECTION_CHARACTERS = {
+			Direction.UP: "^",
+			Direction.DOWN: "v",
+			Direction.LEFT: "<",
+			Direction.RIGHT: ">",
+		}
 
 
 	def initialize_variable_fields(self):

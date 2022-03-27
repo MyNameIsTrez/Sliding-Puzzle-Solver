@@ -2,10 +2,44 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build",
+			"label": "build",
 			"type": "shell",
 			"command": "C:/msys64/usr/bin/make.exe",
 			"group": "build"
+		},
+		{
+			"label": "clean",
+			"type": "shell",
+			"command": "C:/msys64/usr/bin/make.exe",
+			"args": [
+				"clean"
+			],
+			"group": "none"
+		},
+		{
+			"label": "fclean",
+			"type": "shell",
+			"command": "C:/msys64/usr/bin/make.exe",
+			"args": [
+				"fclean"
+			],
+			"group": "none"
+		},
+		{
+			"label": "re",
+			"type": "shell",
+			"command": "C:/msys64/usr/bin/make.exe",
+			"args": [
+				"re"
+			]
+		},
+		{
+			"label": "run",
+			"type": "shell",
+			"command": "C:/msys64/usr/bin/make.exe",
+			"args": [
+				"run"
+			]
 		}
 	]
 }

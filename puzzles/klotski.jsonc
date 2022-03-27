@@ -1,14 +1,14 @@
 {
-	"BOARD_SIZE": {
-		"WIDTH": 4,
-		"HEIGHT": 5
+	"board_size": {
+		"width": 4,
+		"height": 5
 	},
 	// ABBC
 	// ABBC
 	// DEEF
 	// DGHF
 	// I  J
-	"PIECES": {
+	"pieces": {
 		"A": {
 			"pos": {
 				"x": 0,
@@ -110,7 +110,7 @@
 			}
 		}
 	},
-	"PIECE_ENDING_POSITIONS": {
+	"piece_ending_positions": {
 		"B": {
 			"x": 1,
 			"y": 3

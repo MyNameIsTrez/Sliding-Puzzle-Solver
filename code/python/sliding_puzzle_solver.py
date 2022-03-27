@@ -39,13 +39,13 @@ class SlidingPuzzleSolver:
 	def initialize_constant_fields(self, puzzle_json):
 		self.EMPTY_CHARACTER = " "
 
-		BOARD_SIZE = puzzle_json["BOARD_SIZE"]
-		self.WIDTH = BOARD_SIZE["WIDTH"]
-		self.HEIGHT = BOARD_SIZE["HEIGHT"]
+		BOARD_SIZE = puzzle_json["board_size"]
+		self.WIDTH = BOARD_SIZE["width"]
+		self.HEIGHT = BOARD_SIZE["height"]
 
-		self.PIECES = puzzle_json["PIECES"]
+		self.PIECES = puzzle_json["pieces"]
 
-		self.PIECE_ENDING_POSITIONS = puzzle_json["PIECE_ENDING_POSITIONS"]
+		self.PIECE_ENDING_POSITIONS = puzzle_json["piece_ending_positions"]
 
 		self.START_TIME = time.time()
 
@@ -69,10 +69,10 @@ class SlidingPuzzleSolver:
 	def get_starting_positions(self):
 		starting_positions = {}
 
-		for piece_label, piece in self.PIECES.items():
-			starting_positions[piece_label] = {
-				"x": piece["pos"]["x"],
-				"y": piece["pos"]["y"]
+		for PIECE_LABEL, PIECE in self.PIECES.items():
+			starting_positions[PIECE_LABEL] = {
+				"x": PIECE["pos"]["x"],
+				"y": PIECE["pos"]["y"]
 			}
 
 		return starting_positions
@@ -109,18 +109,18 @@ class SlidingPuzzleSolver:
 	def get_board(self):
 		board = [[self.EMPTY_CHARACTER] * self.WIDTH for _ in range(self.HEIGHT)]
 
-		for piece_label, piece in self.PIECES.items():
-			pos, size = piece["pos"], piece["size"]
+		for PIECE_LABEL, PIECE in self.PIECES.items():
+			POS, SIZE = PIECE["pos"], PIECE["size"]
 
-			y = pos["y"]
-			height = size["height"]
+			Y = POS["y"]
+			HEIGHT = SIZE["height"]
 
-			for y2 in range(y, y + height):
-				x = pos["x"]
-				width = size["width"]
+			for y2 in range(Y, Y + HEIGHT):
+				X = POS["x"]
+				WIDTH = SIZE["width"]
 
-				for x2 in range(x, x + width):
-					board[y2][x2] = piece_label
+				for x2 in range(X, X + WIDTH):
+					board[y2][x2] = PIECE_LABEL
 
 		return board
 
@@ -167,8 +167,8 @@ class SlidingPuzzleSolver:
 	def update_finished(self, pieces_positions):
 		self.finished = True
 
-		for label, piece_ending_position in self.PIECE_ENDING_POSITIONS.items():
-			if pieces_positions[label] != piece_ending_position:
+		for LABEL, PIECE_ENDING_POSITION in self.PIECE_ENDING_POSITIONS.items():
+			if pieces_positions[LABEL] != PIECE_ENDING_POSITION:
 				self.finished = False
 
 
@@ -244,29 +244,29 @@ class SlidingPuzzleSolver:
 		y = piece["y"]
 
 		PIECE = self.PIECES[piece_label]
-		size = PIECE["size"]
-		width = size["width"]
-		height = size["height"]
 
-		if y >= 0 and y + (height - 1) < self.HEIGHT and x >= 0 and x + (width - 1) < self.WIDTH:
+		PIECE_SIZE = PIECE["size"]
+		PIECE_WIDTH = PIECE_SIZE["width"]
+		PIECE_HEIGHT = PIECE_SIZE["height"]
+
+		if y >= 0 and y + (PIECE_HEIGHT - 1) < self.HEIGHT and x >= 0 and x + (PIECE_WIDTH - 1) < self.WIDTH:
 			return True
 		return False
 
 
 	def no_intersection(self, piece_label_1, piece1, pieces):
-		size1 = self.PIECES[piece_label_1]["size"]
-
 		x1 = piece1["x"]
 		y1 = piece1["y"]
 
-		w1 = size1["width"]
-		h1 = size1["height"]
+		SIZE1 = self.PIECES[piece_label_1]["size"]
+		W1 = SIZE1["width"]
+		H1 = SIZE1["height"]
 
 		p1t = y1
-		p1b = y1 + h1
+		p1b = y1 + H1
 
 		p1l = x1
-		p1r = x1 + w1
+		p1r = x1 + W1
 
 		for piece_label_2, piece2 in pieces.items():
 			if piece_label_1 == piece_label_2:
@@ -277,14 +277,14 @@ class SlidingPuzzleSolver:
 			x2 = piece2["x"]
 			y2 = piece2["y"]
 
-			w2 = size2["width"]
-			h2 = size2["height"]
+			W2 = size2["width"]
+			H2 = size2["height"]
 
 			p2t = y2
-			p2b = y2 + h2
+			p2b = y2 + H2
 
 			p2l = x2
-			p2r = x2 + w2
+			p2r = x2 + W2
 
 			if p1r > p2l and p1l < p2r and p1b > p2t and p1t < p2b:
 				return False

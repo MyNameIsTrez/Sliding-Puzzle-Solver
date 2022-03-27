@@ -11,13 +11,15 @@
 			"program": "${workspaceFolder}/puzzle.exe",
 			"console": "integratedTerminal",
 			"preLaunchTask": "build",
-			"cwd": "."
+			"cwd": ".",
+			"internalConsoleOptions": "neverOpen",
+			// "externalConsole": false
 		},
 		{
 			"name": "Python",
 			"type": "python",
 			"request": "launch",
-			"program": "${workspaceFolder}/python/main.py",
+			"program": "${workspaceFolder}/code/python/main.py",
 			"console": "integratedTerminal"
 		}
 	]

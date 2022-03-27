@@ -1,4 +1,6 @@
-SOURCES := code/cpp/src/main.cpp
+SOURCES :=									\
+	code/cpp/src/main.cpp					\
+	code/cpp/src/sliding_puzzle_solver.cpp
 
 
 ####

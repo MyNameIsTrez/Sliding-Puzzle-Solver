@@ -1,4 +1,4 @@
-SOURCES := cpp/src/main.cpp
+SOURCES := code/cpp/src/main.cpp
 
 
 ####
@@ -11,8 +11,8 @@ CFLAGS := -Wall -Wextra -Werror
 CFLAGS += -std=c++11 # nlohmann::json asks this to be added, although it doesn't seem necessary
 FCLEANED_FILES := puzzle.exe
 
-SRC_DIR := cpp/src
-OBJ_DIR := cpp/obj
+SRC_DIR := code/cpp/src
+OBJ_DIR := code/cpp/obj
 
 
 ####

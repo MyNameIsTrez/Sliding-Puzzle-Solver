@@ -71,8 +71,10 @@ class SlidingPuzzleSolver:
 
 		for PIECE_LABEL, PIECE in self.PIECES.items():
 			starting_positions[PIECE_LABEL] = {
-				"x": PIECE["pos"]["x"],
-				"y": PIECE["pos"]["y"]
+				"pos": {
+					"x": PIECE["pos"]["x"],
+					"y": PIECE["pos"]["y"]
+				}
 			}
 
 		return starting_positions
@@ -137,11 +139,12 @@ class SlidingPuzzleSolver:
 
 			for piece_label, piece in pieces_positions.items():
 				# Saves the position of the piece, in case it needs to be moved back
-				x = piece["x"]
-				y = piece["y"]
+				piece_pos = piece["pos"]
+				x = piece_pos["x"]
+				y = piece_pos["y"]
 
 				for direction in Direction:
-					if self.is_valid_move(direction, piece_label, piece, pieces_positions):
+					if self.is_valid_move(direction, piece_label, piece_pos, pieces_positions):
 						new_pieces_positions = self.deepcopy_pieces_positions(pieces_positions)
 
 						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
@@ -158,8 +161,8 @@ class SlidingPuzzleSolver:
 	def update_finished(self, pieces_positions):
 		self.finished = True
 
-		for LABEL, PIECE_ENDING_POSITION in self.PIECE_ENDING_POSITIONS.items():
-			if pieces_positions[LABEL] != PIECE_ENDING_POSITION:
+		for PIECE_LABEL, PIECE_ENDING_POSITION in self.PIECE_ENDING_POSITIONS.items():
+			if pieces_positions[PIECE_LABEL] != PIECE_ENDING_POSITION:
 				self.finished = False
 
 
@@ -167,11 +170,13 @@ class SlidingPuzzleSolver:
 		deepcopied_pieces_positions = {}
 
 		for piece_label, piece in pieces.items():
-			deepcopied_pieces_positions[piece_label] = {}
-			deepcopied_piece_pos = deepcopied_pieces_positions[piece_label]
-
-			deepcopied_piece_pos["x"] = piece["x"]
-			deepcopied_piece_pos["y"] = piece["y"]
+			piece_pos = piece["pos"]
+			deepcopied_pieces_positions[piece_label] = {
+				"pos": {
+					"x": piece_pos["x"],
+					"y": piece_pos["y"]
+				}
+			}
 
 		return deepcopied_pieces_positions
 
@@ -195,44 +200,44 @@ class SlidingPuzzleSolver:
 			)
 
 
-	def is_valid_move(self, direction, piece_label, piece, pieces):
+	def is_valid_move(self, direction, piece_label, piece_pos, pieces):
 		# Saves the position of the piece, in case it needs to be moved back
-		x = piece["x"]
-		y = piece["y"]
+		x = piece_pos["x"]
+		y = piece_pos["y"]
 
-		self.move(direction, piece)
+		self.move(direction, piece_pos)
 
 		if (
-			self.move_doesnt_cross_puzzle_edge(piece_label, piece) and
-			self.no_intersection(piece_label, piece, pieces) and
+			self.move_doesnt_cross_puzzle_edge(piece_label, piece_pos) and
+			self.no_intersection(piece_label, piece_pos, pieces) and
 			self.add_new_state(pieces)
 		):
 			self.state_count += 1
 			return True
 
 		# Moves the piece back
-		piece["x"] = x
-		piece["y"] = y
+		piece_pos["x"] = x
+		piece_pos["y"] = y
 
 		return False
 
 
 	# TODO: Possibly use lookup table for x and y instead if it's faster in C++
-	def move(self, direction, piece):
+	def move(self, direction, piece_pos):
 		match direction:
 			case Direction.UP:
-				piece["y"] += -1
+				piece_pos["y"] += -1
 			case Direction.DOWN:
-				piece["y"] += 1
+				piece_pos["y"] += 1
 			case Direction.LEFT:
-				piece["x"] += -1
+				piece_pos["x"] += -1
 			case Direction.RIGHT:
-				piece["x"] += 1
+				piece_pos["x"] += 1
 
 
-	def move_doesnt_cross_puzzle_edge(self, piece_label, piece):
-		x = piece["x"]
-		y = piece["y"]
+	def move_doesnt_cross_puzzle_edge(self, piece_label, piece_pos):
+		x = piece_pos["x"]
+		y = piece_pos["y"]
 
 		PIECE = self.PIECES[piece_label]
 
@@ -245,9 +250,9 @@ class SlidingPuzzleSolver:
 		return False
 
 
-	def no_intersection(self, piece_label_1, piece1, pieces):
-		x1 = piece1["x"]
-		y1 = piece1["y"]
+	def no_intersection(self, piece_label_1, piece1_pos, pieces):
+		x1 = piece1_pos["x"]
+		y1 = piece1_pos["y"]
 
 		SIZE1 = self.PIECES[piece_label_1]["size"]
 		W1 = SIZE1["width"]
@@ -265,8 +270,9 @@ class SlidingPuzzleSolver:
 
 			size2 = self.PIECES[piece_label_2]["size"]
 
-			x2 = piece2["x"]
-			y2 = piece2["y"]
+			piece2_pos = piece2["pos"]
+			x2 = piece2_pos["x"]
+			y2 = piece2_pos["y"]
 
 			W2 = size2["width"]
 			H2 = size2["height"]

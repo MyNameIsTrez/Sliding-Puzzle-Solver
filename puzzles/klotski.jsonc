@@ -112,8 +112,10 @@
 	},
 	"piece_ending_positions": {
 		"B": {
-			"x": 1,
-			"y": 3
+			"pos": {
+				"x": 1,
+				"y": 3
+			}
 		}
 	}
 }

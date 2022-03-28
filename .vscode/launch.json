@@ -5,6 +5,23 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Python",
+			"type": "python",
+			"request": "launch",
+			"program": "${workspaceFolder}/code/python/main.py",
+			"console": "integratedTerminal"
+		},
+		// {
+		// 	"name": "Profile Python",
+		// 	"type": "austin",
+		// 	"file": "main.py",
+		// 	"args": [
+		// 		"--verbose"
+		// 	],
+		// 	"label": "Profile main.py",
+		// 	"request": "launch"
+		// },
+		{
 			"name": "C++",
 			"type": "cppdbg",
 			"request": "launch",
@@ -14,13 +31,6 @@
 			"cwd": ".",
 			"internalConsoleOptions": "neverOpen",
 			// "externalConsole": false
-		},
-		{
-			"name": "Python",
-			"type": "python",
-			"request": "launch",
-			"program": "${workspaceFolder}/code/python/main.py",
-			"console": "integratedTerminal"
 		}
 	]
 }

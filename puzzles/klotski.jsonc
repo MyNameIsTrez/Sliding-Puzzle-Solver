@@ -9,6 +9,7 @@
 	// DGHF
 	// I  J
 	"starting_pieces": {
+		// TODO: Don't have labels and make this a list?
 		"A": {
 			"pos": {
 				"x": 0,

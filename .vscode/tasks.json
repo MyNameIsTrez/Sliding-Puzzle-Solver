@@ -1,6 +1,11 @@
 {
 	"version": "2.0.0",
 	"tasks": [
+		// {
+		// 	"type": "austin",
+		// 	"file": "code/python/main.py",
+		// 	"label": "Profile main.py",
+		// },
 		{
 			"label": "build",
 			"type": "shell",

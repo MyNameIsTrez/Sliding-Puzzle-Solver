@@ -7,11 +7,11 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path exe_path, std::st
 	json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
 	initialize_constant_fields(puzzle_json);
 	initialize_variable_fields();
+	// std::cout << puzzle_json.dump(4) << std::endl;
 }
 
 void SlidingPuzzleSolver::run(void)
 {
-	// std::cout << puzzle_json.dump(4) << std::endl;
 	std::cout << get_elapsed_seconds().count() << std::endl;
 }
 
@@ -41,8 +41,8 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->width = board_size["width"];
 	this->height = board_size["height"];
 
-	this->starting_pieces = puzzle_json["starting_pieces"];
-	this->piece_endings = puzzle_json["piece_endings"];
+	this->starting_pieces = json_pieces_to_vector<StartingPiece>(puzzle_json["starting_pieces"]);
+	this->ending_pieces = json_pieces_to_vector<EndingPiece>(puzzle_json["ending_pieces"]);
 
 	this->start_time = std::chrono::steady_clock::now();
 
@@ -63,7 +63,25 @@ void SlidingPuzzleSolver::initialize_variable_fields(void)
 	this->finished = false;
 }
 
-std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
+template <class T>
+std::vector<T> SlidingPuzzleSolver::json_pieces_to_vector(json j)
+{
+	std::vector<T> v;
+
+	for (json::iterator it = j.begin(); it != j.end(); ++it)
+	{
+		json pos = (*it)["pos"];
+		T p;
+		p.pos.x = pos["x"];
+		p.pos.y = pos["y"];
+		v.push_back(p);
+	}
+
+	return v;
+}
+
+std::chrono::duration<double>
+SlidingPuzzleSolver::get_elapsed_seconds(void)
 {
 	// TODO: Cast the result to seconds in type double, cause idk how this works.
 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();

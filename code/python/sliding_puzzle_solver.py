@@ -41,8 +41,7 @@ class SlidingPuzzleSolver:
 		self.WIDTH = BOARD_SIZE["width"]
 		self.HEIGHT = BOARD_SIZE["height"]
 
-		self.PIECES = puzzle_json["pieces"]
-
+		self.STARTING_PIECES = puzzle_json["starting_pieces"]
 		self.PIECE_ENDINGS = puzzle_json["piece_endings"]
 
 		self.START_TIME = time.time()
@@ -69,11 +68,11 @@ class SlidingPuzzleSolver:
 	def get_starting_positions(self):
 		starting_positions = {}
 
-		for PIECE_LABEL, PIECE in self.PIECES.items():
-			starting_positions[PIECE_LABEL] = {
+		for STARTING_PIECE_LABEL, STARTING_PIECE in self.STARTING_PIECES.items():
+			starting_positions[STARTING_PIECE_LABEL] = {
 				"pos": {
-					"x": PIECE["pos"]["x"],
-					"y": PIECE["pos"]["y"]
+					"x": STARTING_PIECE["pos"]["x"],
+					"y": STARTING_PIECE["pos"]["y"]
 				}
 			}
 
@@ -102,8 +101,8 @@ class SlidingPuzzleSolver:
 	def get_board(self):
 		board = [[self.EMPTY_CHARACTER] * self.WIDTH for _ in range(self.HEIGHT)]
 
-		for PIECE_LABEL, PIECE in self.PIECES.items():
-			POS, SIZE = PIECE["pos"], PIECE["size"]
+		for STARTING_PIECE_LABEL, STARTING_PIECE in self.STARTING_PIECES.items():
+			POS, SIZE = STARTING_PIECE["pos"], STARTING_PIECE["size"]
 
 			Y = POS["y"]
 			HEIGHT = SIZE["height"]
@@ -113,7 +112,7 @@ class SlidingPuzzleSolver:
 				WIDTH = SIZE["width"]
 
 				for x2 in range(X, X + WIDTH):
-					board[y2][x2] = PIECE_LABEL
+					board[y2][x2] = STARTING_PIECE_LABEL
 
 		return board
 
@@ -239,13 +238,13 @@ class SlidingPuzzleSolver:
 		x = piece_pos["x"]
 		y = piece_pos["y"]
 
-		PIECE = self.PIECES[piece_label]
+		STARTING_PIECE = self.STARTING_PIECES[piece_label]
 
-		PIECE_SIZE = PIECE["size"]
-		PIECE_WIDTH = PIECE_SIZE["width"]
-		PIECE_HEIGHT = PIECE_SIZE["height"]
+		STARTING_PIECE_SIZE = STARTING_PIECE["size"]
+		STARTING_PIECE_WIDTH = STARTING_PIECE_SIZE["width"]
+		STARTING_PIECE_HEIGHT = STARTING_PIECE_SIZE["height"]
 
-		if y >= 0 and y + (PIECE_HEIGHT - 1) < self.HEIGHT and x >= 0 and x + (PIECE_WIDTH - 1) < self.WIDTH:
+		if y >= 0 and y + (STARTING_PIECE_HEIGHT - 1) < self.HEIGHT and x >= 0 and x + (STARTING_PIECE_WIDTH - 1) < self.WIDTH:
 			return True
 		return False
 
@@ -254,7 +253,7 @@ class SlidingPuzzleSolver:
 		x1 = piece1_pos["x"]
 		y1 = piece1_pos["y"]
 
-		SIZE1 = self.PIECES[piece_label_1]["size"]
+		SIZE1 = self.STARTING_PIECES[piece_label_1]["size"]
 		W1 = SIZE1["width"]
 		H1 = SIZE1["height"]
 
@@ -268,14 +267,13 @@ class SlidingPuzzleSolver:
 			if piece_label_1 == piece_label_2:
 				continue
 
-			size2 = self.PIECES[piece_label_2]["size"]
-
 			piece2_pos = piece2["pos"]
 			x2 = piece2_pos["x"]
 			y2 = piece2_pos["y"]
 
-			W2 = size2["width"]
-			H2 = size2["height"]
+			SIZE2 = self.STARTING_PIECES[piece_label_2]["size"]
+			W2 = SIZE2["width"]
+			H2 = SIZE2["height"]
 
 			p2t = y2
 			p2b = y2 + H2

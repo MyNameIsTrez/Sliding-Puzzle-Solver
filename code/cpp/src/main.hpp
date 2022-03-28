@@ -37,7 +37,7 @@ class SlidingPuzzleSolver
 	int width;
 	int height;
 
-	json pieces;
+	json starting_pieces;
 	json piece_endings;
 
 	std::chrono::steady_clock::time_point start_time;
@@ -61,9 +61,9 @@ class SlidingPuzzleSolver
 	void initialize_variable_fields(void);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
-	void SlidingPuzzleSolver::print_board(void);
-	std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(void);
-	std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void);
+	void print_board(void);
+	std::vector<std::vector<char>> get_board(void);
+	std::vector<std::vector<char>> get_2d_vector(void);
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);

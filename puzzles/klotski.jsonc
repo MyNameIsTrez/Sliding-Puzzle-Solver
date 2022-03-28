@@ -8,7 +8,7 @@
 	// DEEF
 	// DGHF
 	// I  J
-	"pieces": {
+	"starting_pieces": {
 		"A": {
 			"pos": {
 				"x": 0,

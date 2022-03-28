@@ -41,7 +41,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->width = board_size["width"];
 	this->height = board_size["height"];
 
-	this->pieces = puzzle_json["pieces"];
+	this->starting_pieces = puzzle_json["starting_pieces"];
 	this->piece_endings = puzzle_json["piece_endings"];
 
 	this->start_time = std::chrono::steady_clock::now();
@@ -85,6 +85,7 @@ void SlidingPuzzleSolver::print_board(void)
 std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(void)
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
+	return board;
 }
 
 std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)

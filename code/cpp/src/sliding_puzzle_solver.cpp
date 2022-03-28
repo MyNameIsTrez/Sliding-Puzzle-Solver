@@ -15,6 +15,8 @@ void SlidingPuzzleSolver::run(void)
 	std::cout << get_elapsed_seconds().count() << std::endl;
 }
 
+////////
+
 json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name)
 {
 	std::filesystem::path puzzle_path = get_puzzle_path_from_exe_path(exe_path, puzzle_name);
@@ -54,14 +56,11 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 
 void SlidingPuzzleSolver::initialize_variable_fields(void)
 {
-	std::cout << this->states.empty() << std::endl;
-	Piece piece;
-	piece.pos.x = 4;
-	piece.pos.y = 2;
-	this->states.push_back(piece);
-	std::cout << this->states.empty() << std::endl;
-	std::cout << this->states.back().pos.x << std::endl;
-	std::cout << this->states.back().pos.x << std::endl;
+	this->state_count = 0;
+	this->prev_state_count = 0;
+
+	this->running = true;
+	this->finished = false;
 }
 
 std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)

@@ -2,7 +2,7 @@
 
 ////////
 
-#include "piece.hpp" // piece
+#include "pieces.hpp" // piece
 
 ////////
 
@@ -48,6 +48,11 @@ class SlidingPuzzleSolver
 
 	// Variables
 	std::vector<Piece> states;
+
+	int state_count;
+	int prev_state_count;
+	bool running;
+	bool finished;
 
 	// Methods
 	json get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name);

@@ -30,16 +30,6 @@ struct StartingPieceInfo
 	Size size;
 };
 
-struct StartingPiece
-{
-	Pos pos;
-};
-
-struct EndingPiece
-{
-	Pos pos;
-};
-
 struct Piece
 {
 	Pos pos;

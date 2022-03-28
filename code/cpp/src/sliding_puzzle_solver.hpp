@@ -39,8 +39,8 @@ class SlidingPuzzleSolver
 	int height;
 
 	std::map<std::string, StartingPieceInfo> starting_pieces_info;
-	std::map<std::string, StartingPiece> starting_pieces;
-	std::map<std::string, EndingPiece> ending_pieces;
+	std::map<std::string, Piece> starting_pieces;
+	std::map<std::string, Piece> ending_pieces;
 
 	std::chrono::steady_clock::time_point start_time;
 
@@ -63,7 +63,7 @@ class SlidingPuzzleSolver
 	void initialize_constant_fields(json puzzle_json);
 
 	std::map<std::string, StartingPieceInfo> json_starting_piece_info_to_map(json j);
-	std::map<std::string, EndingPiece> json_ending_piece_info_to_map(json j);
+	std::map<std::string, Piece> json_ending_piece_to_map(json j);
 
 	void set_starting_pieces(void);
 	void initialize_variable_fields(void);
@@ -75,6 +75,8 @@ class SlidingPuzzleSolver
 	template <class T>
 	std::vector<std::vector<char>> get_board(std::map<std::string, T> pieces);
 	std::vector<std::vector<char>> get_2d_vector(void);
+
+	bool add_new_state(std::map<std::string, Piece> pieces);
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);

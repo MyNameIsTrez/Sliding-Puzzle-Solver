@@ -14,7 +14,10 @@ void SlidingPuzzleSolver::run(void)
 {
 	print_board(this->starting_pieces);
 
-	std::cout << get_elapsed_seconds().count() << std::endl;
+	std::cout << add_new_state(this->starting_pieces);
+	std::cout << add_new_state(this->starting_pieces);
+
+	// std::cout << get_elapsed_seconds().count() << std::endl;
 }
 
 ////////
@@ -46,7 +49,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 
 	this->starting_pieces_info = json_starting_piece_info_to_map(puzzle_json["starting_pieces_info"]);
 	set_starting_pieces();
-	this->ending_pieces = json_ending_piece_info_to_map(puzzle_json["ending_pieces"]);
+	this->ending_pieces = json_ending_piece_to_map(puzzle_json["ending_pieces"]);
 
 	this->start_time = std::chrono::steady_clock::now();
 
@@ -82,14 +85,14 @@ std::map<std::string, StartingPieceInfo> SlidingPuzzleSolver::json_starting_piec
 	return m;
 }
 
-std::map<std::string, EndingPiece> SlidingPuzzleSolver::json_ending_piece_info_to_map(json j)
+std::map<std::string, Piece> SlidingPuzzleSolver::json_ending_piece_to_map(json j)
 {
-	std::map<std::string, EndingPiece> m;
+	std::map<std::string, Piece> m;
 
 	// TODO: Can const_iterator be used here?
 	for (json::iterator it = j.begin(); it != j.end(); ++it)
 	{
-		EndingPiece p;
+		Piece p;
 
 		json pos = (*it)["pos"];
 		p.pos.x = pos["x"];
@@ -177,4 +180,13 @@ std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::stri
 std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 {
 	return std::vector<std::vector<char>>(this->height, std::vector<char>(this->width, ' '));
+}
+
+bool SlidingPuzzleSolver::add_new_state(std::map<std::string, Piece> pieces)
+{
+	std::pair<std::set<std::map<std::string, Piece>>::iterator, bool> ret;
+
+	ret = this->states.insert(pieces);
+
+	return ret.second;
 }

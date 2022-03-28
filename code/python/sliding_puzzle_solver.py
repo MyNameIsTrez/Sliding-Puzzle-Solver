@@ -22,9 +22,8 @@ class SlidingPuzzleSolver:
 
 
 	def run(self):
-		self.print_board()
-
 		self.add_new_state(self.STARTING_PIECES_POSITIONS)
+
 		self.solve()
 
 		print("\nDone!")
@@ -54,6 +53,8 @@ class SlidingPuzzleSolver:
 			Direction.LEFT: "<",
 			Direction.RIGHT: ">",
 		}
+
+		self.PRINT_BOARD = False
 
 
 	def initialize_variable_fields(self):
@@ -89,8 +90,8 @@ class SlidingPuzzleSolver:
 		return False
 
 
-	def print_board(self):
-		board = self.get_board()
+	def print_board(self, pieces_positions):
+		board = self.get_board(pieces_positions)
 
 		for row in board:
 			print(row)
@@ -98,21 +99,22 @@ class SlidingPuzzleSolver:
 		print()
 
 
-	def get_board(self):
+	def get_board(self, pieces_positions):
 		board = [[self.EMPTY_CHARACTER] * self.WIDTH for _ in range(self.HEIGHT)]
 
-		for STARTING_PIECE_LABEL, STARTING_PIECE in self.STARTING_PIECES.items():
-			POS, SIZE = STARTING_PIECE["pos"], STARTING_PIECE["size"]
+		for piece_label, piece in pieces_positions.items():
+			pos = piece["pos"]
+			size = self.STARTING_PIECES[piece_label]["size"]
 
-			Y = POS["y"]
-			HEIGHT = SIZE["height"]
+			y = pos["y"]
+			height = size["height"]
 
-			for y2 in range(Y, Y + HEIGHT):
-				X = POS["x"]
-				WIDTH = SIZE["width"]
+			for y2 in range(y, y + height):
+				x = pos["x"]
+				width = size["width"]
 
-				for x2 in range(X, X + WIDTH):
-					board[y2][x2] = STARTING_PIECE_LABEL
+				for x2 in range(x, x + width):
+					board[y2][x2] = piece_label
 
 		return board
 
@@ -124,6 +126,9 @@ class SlidingPuzzleSolver:
 
 		while len(queue) > 0:
 			pieces_positions, path = queue.popleft()
+
+			if self.PRINT_BOARD:
+				self.print_board(pieces_positions)
 
 			self.update_finished(pieces_positions)
 

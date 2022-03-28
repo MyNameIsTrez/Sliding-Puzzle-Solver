@@ -40,7 +40,7 @@ class SlidingPuzzleSolver
 	json pieces;
 	json piece_ending_positions;
 
-	std::chrono::time_point<std::chrono::steady_clock> start_time;
+	std::chrono::steady_clock::time_point start_time;
 
 	char empty_character;
 
@@ -56,4 +56,5 @@ public:
 	std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name);
 	void initialize_constant_fields(json puzzle_json);
 	void initialize_variable_fields(void);
+	std::chrono::duration<double> get_elapsed_seconds(void);
 };

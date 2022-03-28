@@ -10,6 +10,7 @@ NAME := puzzle
 CC := C:/msys64/mingw64/bin/g++.exe
 LDFLAGS :=
 CFLAGS := -Wall -Wextra -Werror
+# CFLAGS += -O3
 FCLEANED_FILES := puzzle.exe
 
 SRC_DIR := code/cpp/src

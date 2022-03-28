@@ -7,11 +7,12 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path exe_path, std::st
 	json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
 	initialize_constant_fields(puzzle_json);
 	initialize_variable_fields();
-	// std::cout << puzzle_json.dump(4) << std::endl;
 }
 
 void SlidingPuzzleSolver::run(void)
 {
+	// std::cout << puzzle_json.dump(4) << std::endl;
+	std::cout << get_elapsed_seconds().count() << std::endl;
 }
 
 json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name)
@@ -61,4 +62,11 @@ void SlidingPuzzleSolver::initialize_variable_fields(void)
 	std::cout << this->states.empty() << std::endl;
 	std::cout << this->states.back().pos.x << std::endl;
 	std::cout << this->states.back().pos.x << std::endl;
+}
+
+std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
+{
+	// TODO: Cast the result to seconds in type double, cause idk how this works.
+	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+	return end_time - this->start_time;
 }

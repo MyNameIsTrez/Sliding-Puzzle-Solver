@@ -42,7 +42,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->height = board_size["height"];
 
 	this->pieces = puzzle_json["pieces"];
-	this->piece_ending_positions = puzzle_json["piece_ending_positions"];
+	this->piece_endings = puzzle_json["piece_endings"];
 
 	this->start_time = std::chrono::steady_clock::now();
 
@@ -68,4 +68,26 @@ std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
 	// TODO: Cast the result to seconds in type double, cause idk how this works.
 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 	return end_time - this->start_time;
+}
+
+////////
+
+void SlidingPuzzleSolver::print_board(void)
+{
+	// char board[this->height][this->width] = get_board();
+
+	// for
+	// 	row in board : std::cout << row << std::endl;
+
+	// std::cout << std::endl;
+}
+
+std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(void)
+{
+	std::vector<std::vector<char>> board = get_2d_vector();
+}
+
+std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
+{
+	return std::vector<std::vector<char>>(this->height, std::vector<char>(this->width, 0));
 }

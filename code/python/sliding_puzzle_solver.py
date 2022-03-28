@@ -43,7 +43,7 @@ class SlidingPuzzleSolver:
 
 		self.PIECES = puzzle_json["pieces"]
 
-		self.PIECE_ENDING_POSITIONS = puzzle_json["piece_ending_positions"]
+		self.PIECE_ENDINGS = puzzle_json["piece_endings"]
 
 		self.START_TIME = time.time()
 
@@ -161,8 +161,8 @@ class SlidingPuzzleSolver:
 	def update_finished(self, pieces_positions):
 		self.finished = True
 
-		for PIECE_LABEL, PIECE_ENDING_POSITION in self.PIECE_ENDING_POSITIONS.items():
-			if pieces_positions[PIECE_LABEL] != PIECE_ENDING_POSITION:
+		for PIECE_LABEL, PIECE_ENDING in self.PIECE_ENDINGS.items():
+			if pieces_positions[PIECE_LABEL] != PIECE_ENDING:
 				self.finished = False
 
 

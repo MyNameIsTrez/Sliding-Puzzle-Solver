@@ -122,12 +122,12 @@ class SlidingPuzzleSolver:
 
 
 	def solve(self):
-		queue = deque([ [self.STARTING_PIECES, []] ])
+		pieces_queue = deque([ [self.STARTING_PIECES, []] ])
 
-		self.timed_print(queue)
+		self.timed_print(pieces_queue)
 
-		while len(queue) > 0:
-			pieces, path = queue.popleft()
+		while len(pieces_queue) > 0:
+			pieces, path = pieces_queue.popleft()
 
 			if self.PRINT_BOARD_EVERY_PATH:
 				self.print_board(pieces)
@@ -135,7 +135,7 @@ class SlidingPuzzleSolver:
 			self.update_finished(pieces)
 
 			if self.finished:
-				finished_message = f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(queue)}."
+				finished_message = f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}."
 				print(finished_message)
 
 				path_string = "".join(path)
@@ -155,7 +155,7 @@ class SlidingPuzzleSolver:
 
 						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
 
-						queue.append([ new_pieces_positions, path + [new_path_part] ])
+						pieces_queue.append([ new_pieces_positions, path + [new_path_part] ])
 
 						# Moves the piece back
 						piece["x"] = x
@@ -187,9 +187,9 @@ class SlidingPuzzleSolver:
 		return deepcopied_pieces_positions
 
 
-	def timed_print(self, queue):
+	def timed_print(self, pieces_queue):
 		if self.running:
-			threading.Timer(1, self.timed_print, [queue]).start()
+			threading.Timer(1, self.timed_print, [pieces_queue]).start()
 
 		if not self.finished:
 			elapsed_time = int(time.time() - self.START_TIME)
@@ -200,7 +200,7 @@ class SlidingPuzzleSolver:
 			print(
 				f"\rElapsed time: {elapsed_time} seconds"
 				f", Unique states: {self.state_count} (+{states_count_diff}/s)"
-				f", Queue length: {len(queue)}",
+				f", Queue length: {len(pieces_queue)}",
 				end="",
 				flush=True
 			)

@@ -90,8 +90,8 @@ class SlidingPuzzleSolver:
 		return False
 
 
-	def print_board(self, pieces_positions):
-		board = self.get_board(pieces_positions)
+	def print_board(self, pieces):
+		board = self.get_board(pieces)
 
 		for row in board:
 			print(row)
@@ -99,10 +99,10 @@ class SlidingPuzzleSolver:
 		print()
 
 
-	def get_board(self, pieces_positions):
+	def get_board(self, pieces):
 		board = [[self.EMPTY_CHARACTER] * self.WIDTH for _ in range(self.HEIGHT)]
 
-		for piece_label, piece in pieces_positions.items():
+		for piece_label, piece in pieces.items():
 			pos = piece["pos"]
 			size = self.STARTING_PIECES[piece_label]["size"]
 
@@ -125,12 +125,12 @@ class SlidingPuzzleSolver:
 		self.timed_print(queue)
 
 		while len(queue) > 0:
-			pieces_positions, path = queue.popleft()
+			pieces, path = queue.popleft()
 
 			if self.PRINT_BOARD:
-				self.print_board(pieces_positions)
+				self.print_board(pieces)
 
-			self.update_finished(pieces_positions)
+			self.update_finished(pieces)
 
 			if self.finished:
 				finished_message = f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(queue)}."
@@ -141,15 +141,15 @@ class SlidingPuzzleSolver:
 
 				break
 
-			for piece_label, piece in pieces_positions.items():
+			for piece_label, piece in pieces.items():
 				# Saves the position of the piece, in case it needs to be moved back
 				piece_pos = piece["pos"]
 				x = piece_pos["x"]
 				y = piece_pos["y"]
 
 				for direction in Direction:
-					if self.is_valid_move(direction, piece_label, piece_pos, pieces_positions):
-						new_pieces_positions = self.deepcopy_pieces_positions(pieces_positions)
+					if self.is_valid_move(direction, piece_label, piece_pos, pieces):
+						new_pieces_positions = self.deepcopy_pieces_positions(pieces)
 
 						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
 
@@ -162,11 +162,11 @@ class SlidingPuzzleSolver:
 		self.running = False
 
 
-	def update_finished(self, pieces_positions):
+	def update_finished(self, pieces):
 		self.finished = True
 
 		for PIECE_LABEL, ENDING_PIECE in self.ENDING_PIECES.items():
-			if pieces_positions[PIECE_LABEL] != ENDING_PIECE:
+			if pieces[PIECE_LABEL] != ENDING_PIECE:
 				self.finished = False
 
 

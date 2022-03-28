@@ -49,12 +49,14 @@ class SlidingPuzzleSolver
 	// Variables
 	std::vector<Piece> states;
 
-public:
-	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);
-	void run(void);
+	// Methods
 	json get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name);
 	std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name);
 	void initialize_constant_fields(json puzzle_json);
 	void initialize_variable_fields(void);
 	std::chrono::duration<double> get_elapsed_seconds(void);
+
+public:
+	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);
+	void run(void);
 };

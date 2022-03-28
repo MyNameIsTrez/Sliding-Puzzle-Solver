@@ -22,6 +22,8 @@ class SlidingPuzzleSolver:
 
 
 	def run(self):
+		self.print_board(self.STARTING_PIECES)
+
 		self.add_new_state(self.STARTING_PIECES)
 
 		self.solve()
@@ -54,7 +56,7 @@ class SlidingPuzzleSolver:
 			Direction.RIGHT: ">",
 		}
 
-		self.PRINT_BOARD = False
+		self.PRINT_BOARD_EVERY_PATH = False
 
 
 	def initialize_variable_fields(self):
@@ -127,7 +129,7 @@ class SlidingPuzzleSolver:
 		while len(queue) > 0:
 			pieces, path = queue.popleft()
 
-			if self.PRINT_BOARD:
+			if self.PRINT_BOARD_EVERY_PATH:
 				self.print_board(pieces)
 
 			self.update_finished(pieces)

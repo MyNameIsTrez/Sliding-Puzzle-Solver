@@ -12,6 +12,8 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path exe_path, std::st
 
 void SlidingPuzzleSolver::run(void)
 {
+	print_board(this->starting_pieces);
+
 	std::cout << get_elapsed_seconds().count() << std::endl;
 }
 
@@ -42,9 +44,9 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->width = board_size["width"];
 	this->height = board_size["height"];
 
-	this->starting_pieces_info = json_pieces_to_map<StartingPieceInfo>(puzzle_json["starting_pieces_info"]);
+	this->starting_pieces_info = json_starting_piece_info_to_map(puzzle_json["starting_pieces_info"]);
 	set_starting_pieces();
-	this->ending_pieces = json_pieces_to_map<EndingPiece>(puzzle_json["ending_pieces"]);
+	this->ending_pieces = json_ending_piece_info_to_map(puzzle_json["ending_pieces"]);
 
 	this->start_time = std::chrono::steady_clock::now();
 
@@ -56,22 +58,44 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->direction_characters[Direction::RIGHT] = '>';
 }
 
-template <class T>
-std::map<std::string, T> SlidingPuzzleSolver::json_pieces_to_map(json j)
+std::map<std::string, StartingPieceInfo> SlidingPuzzleSolver::json_starting_piece_info_to_map(json j)
 {
-	std::map<std::string, T> m;
+	std::map<std::string, StartingPieceInfo> m;
 
+	// TODO: Can const_iterator be used here?
 	for (json::iterator it = j.begin(); it != j.end(); ++it)
 	{
+		StartingPieceInfo p;
+
 		json pos = (*it)["pos"];
-
-		// std::cout << pos << std::endl;
-		// std::cout << it.key() << std::endl;
-
-		T p;
 		p.pos.x = pos["x"];
 		p.pos.y = pos["y"];
 
+		json size = (*it)["size"];
+		p.size.width = size["width"];
+		p.size.height = size["height"];
+
+		// TODO: Can .first be used instead of .key()?
+		m[it.key()] = p;
+	}
+
+	return m;
+}
+
+std::map<std::string, EndingPiece> SlidingPuzzleSolver::json_ending_piece_info_to_map(json j)
+{
+	std::map<std::string, EndingPiece> m;
+
+	// TODO: Can const_iterator be used here?
+	for (json::iterator it = j.begin(); it != j.end(); ++it)
+	{
+		EndingPiece p;
+
+		json pos = (*it)["pos"];
+		p.pos.x = pos["x"];
+		p.pos.y = pos["y"];
+
+		// TODO: Can .first be used instead of .key()?
 		m[it.key()] = p;
 	}
 
@@ -80,7 +104,11 @@ std::map<std::string, T> SlidingPuzzleSolver::json_pieces_to_map(json j)
 
 void SlidingPuzzleSolver::set_starting_pieces(void)
 {
-	// this->starting_pieces
+	// TODO: Can const_iterator be used here?
+	for (std::map<std::string, StartingPieceInfo>::iterator it = this->starting_pieces_info.begin(); it != this->starting_pieces_info.end(); ++it)
+	{
+		this->starting_pieces[it->first].pos = it->second.pos;
+	}
 }
 
 void SlidingPuzzleSolver::initialize_variable_fields(void)
@@ -101,28 +129,52 @@ std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
 
 ////////
 
-void SlidingPuzzleSolver::print_board(void)
+template <class T>
+void SlidingPuzzleSolver::print_board(std::map<std::string, T> pieces)
 {
-	// char board[this->height][this->width] = get_board();
+	std::vector<std::vector<char>> board = get_board(pieces);
 
-	// for
-	// 	row in board : std::cout << row << std::endl;
-
-	// std::cout << std::endl;
+	for (std::vector<std::vector<char>>::const_iterator it_row = board.begin(); it_row != board.end(); ++it_row)
+	{
+		for (std::vector<char>::const_iterator it_chr = it_row->begin(); it_chr != it_row->end(); ++it_chr)
+		{
+			std::cout << *it_chr;
+		}
+		std::cout << std::endl;
+	}
 }
 
-std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::string, Piece> pieces)
+template <class T>
+std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::string, T> pieces)
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
 
-	(void)pieces;
+	for (typename std::map<std::string, T>::const_iterator it = pieces.begin(); it != pieces.end(); ++it)
+	{
+		std::string piece_label = it->first;
+		struct Pos pos = it->second.pos;
+		struct Size size = this->starting_pieces_info[piece_label].size;
 
-	// for piece_label, piece in pieces.items():
+		int y = pos.y;
+		int height = size.height;
+
+		for (int y2 = y; y2 < y + height; ++y2)
+		{
+			int x = pos.x;
+			int width = size.width;
+
+			for (int x2 = x; x2 < x + width; ++x2)
+			{
+				// TODO: Handle the label string to char for printing conversion better.
+				board[y2][x2] = piece_label[0];
+			}
+		}
+	}
 
 	return board;
 }
 
 std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 {
-	return std::vector<std::vector<char>>(this->height, std::vector<char>(this->width, 0));
+	return std::vector<std::vector<char>>(this->height, std::vector<char>(this->width, ' '));
 }

@@ -62,16 +62,18 @@ class SlidingPuzzleSolver
 
 	void initialize_constant_fields(json puzzle_json);
 
-	template <class T>
-	std::map<std::string, T> json_pieces_to_map(json j);
+	std::map<std::string, StartingPieceInfo> json_starting_piece_info_to_map(json j);
+	std::map<std::string, EndingPiece> json_ending_piece_info_to_map(json j);
 
 	void set_starting_pieces(void);
 	void initialize_variable_fields(void);
 
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
-	void print_board(void);
-	std::vector<std::vector<char>> get_board(std::map<std::string, Piece> pieces);
+	template <class T>
+	void print_board(std::map<std::string, T> pieces);
+	template <class T>
+	std::vector<std::vector<char>> get_board(std::map<std::string, T> pieces);
 	std::vector<std::vector<char>> get_2d_vector(void);
 
 public:

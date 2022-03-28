@@ -31,7 +31,8 @@ json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path exe_path, std::s
 std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name)
 {
 	std::filesystem::path exe_dir_path = exe_path.remove_filename();
-	std::filesystem::path puzzle_path = exe_dir_path / "puzzles" / (puzzle_name + ".jsonc"); // TODO: filesystem way of adding extension
+	// TODO: Add the file extension using the filesystem library.
+	std::filesystem::path puzzle_path = exe_dir_path / "puzzles" / (puzzle_name + ".jsonc");
 	return puzzle_path;
 }
 
@@ -41,9 +42,9 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->width = board_size["width"];
 	this->height = board_size["height"];
 
-	this->starting_pieces = json_pieces_to_vector<StartingPiece>(puzzle_json["starting_pieces"]);
-	set_starting_pieces_positions();
-	this->ending_pieces = json_pieces_to_vector<EndingPiece>(puzzle_json["ending_pieces"]);
+	this->starting_pieces_info = json_pieces_to_map<StartingPieceInfo>(puzzle_json["starting_pieces_info"]);
+	set_starting_pieces();
+	this->ending_pieces = json_pieces_to_map<EndingPiece>(puzzle_json["ending_pieces"]);
 
 	this->start_time = std::chrono::steady_clock::now();
 
@@ -56,25 +57,30 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 }
 
 template <class T>
-std::vector<T> SlidingPuzzleSolver::json_pieces_to_vector(json j)
+std::map<std::string, T> SlidingPuzzleSolver::json_pieces_to_map(json j)
 {
-	std::vector<T> v;
+	std::map<std::string, T> m;
 
 	for (json::iterator it = j.begin(); it != j.end(); ++it)
 	{
 		json pos = (*it)["pos"];
+
+		// std::cout << pos << std::endl;
+		// std::cout << it.key() << std::endl;
+
 		T p;
 		p.pos.x = pos["x"];
 		p.pos.y = pos["y"];
-		v.push_back(p);
+
+		m[it.key()] = p;
 	}
 
-	return v;
+	return m;
 }
 
-void set_starting_pieces_positions(void)
+void SlidingPuzzleSolver::set_starting_pieces(void)
 {
-	// this->starting_pieces_positions
+	// this->starting_pieces
 }
 
 void SlidingPuzzleSolver::initialize_variable_fields(void)
@@ -105,9 +111,14 @@ void SlidingPuzzleSolver::print_board(void)
 	// std::cout << std::endl;
 }
 
-std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(void)
+std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::string, Piece> pieces)
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
+
+	(void)pieces;
+
+	// for piece_label, piece in pieces.items():
+
 	return board;
 }
 

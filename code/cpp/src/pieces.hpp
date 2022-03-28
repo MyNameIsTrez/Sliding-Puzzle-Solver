@@ -6,7 +6,7 @@
 
 ////////
 
-typedef struct Pos
+struct Pos
 {
 	int x;
 	int y;
@@ -16,27 +16,33 @@ typedef struct Pos
 		long right_id = static_cast<long>(right.y) * static_cast<long>(std::numeric_limits<int>::max()) + static_cast<long>(right.x);
 		return left_id < right_id;
 	}
-} Pos;
+};
 
-typedef struct Size
+struct Size
 {
 	int width;
 	int height;
-} Size;
+};
 
-typedef struct StartingPiece
+struct StartingPieceInfo
 {
 	Pos pos;
 	Size size;
-} StartingPiece;
+};
 
-typedef struct EndingPiece
+struct StartingPiece
 {
 	Pos pos;
-} EndingPiece;
+};
 
-typedef struct Piece
+struct EndingPiece
 {
 	Pos pos;
+};
+
+struct Piece
+{
+	Pos pos;
+	// TODO: Does this operator have overhead for every Piece?
 	bool operator<(const Piece &right) const { return pos < right.pos; }
-} Piece;
+};

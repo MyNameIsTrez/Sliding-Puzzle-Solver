@@ -38,8 +38,9 @@ class SlidingPuzzleSolver
 	int width;
 	int height;
 
-	std::vector<StartingPiece> starting_pieces;
-	std::vector<EndingPiece> ending_pieces;
+	std::map<std::string, StartingPieceInfo> starting_pieces_info;
+	std::map<std::string, StartingPiece> starting_pieces;
+	std::map<std::string, EndingPiece> ending_pieces;
 
 	std::chrono::steady_clock::time_point start_time;
 
@@ -48,7 +49,7 @@ class SlidingPuzzleSolver
 	std::map<Direction, char> direction_characters;
 
 	// Variables
-	std::set<std::vector<Piece>> states;
+	std::set<std::map<std::string, Piece>> states;
 
 	int state_count;
 	int prev_state_count;
@@ -60,15 +61,17 @@ class SlidingPuzzleSolver
 	std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name);
 
 	void initialize_constant_fields(json puzzle_json);
+
 	template <class T>
-	std::vector<T> json_pieces_to_vector(json j);
-	void set_starting_pieces_positions(void);
+	std::map<std::string, T> json_pieces_to_map(json j);
+
+	void set_starting_pieces(void);
 	void initialize_variable_fields(void);
 
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	void print_board(void);
-	std::vector<std::vector<char>> get_board(void);
+	std::vector<std::vector<char>> get_board(std::map<std::string, Piece> pieces);
 	std::vector<std::vector<char>> get_2d_vector(void);
 
 public:

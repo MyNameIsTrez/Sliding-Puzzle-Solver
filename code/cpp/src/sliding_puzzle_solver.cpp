@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "sliding_puzzle_solver.hpp"
 
 ////////
 
@@ -42,6 +42,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->height = board_size["height"];
 
 	this->starting_pieces = json_pieces_to_vector<StartingPiece>(puzzle_json["starting_pieces"]);
+	set_starting_pieces_positions();
 	this->ending_pieces = json_pieces_to_vector<EndingPiece>(puzzle_json["ending_pieces"]);
 
 	this->start_time = std::chrono::steady_clock::now();
@@ -52,15 +53,6 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->direction_characters[Direction::DOWN] = 'v';
 	this->direction_characters[Direction::LEFT] = '<';
 	this->direction_characters[Direction::RIGHT] = '>';
-}
-
-void SlidingPuzzleSolver::initialize_variable_fields(void)
-{
-	this->state_count = 0;
-	this->prev_state_count = 0;
-
-	this->running = true;
-	this->finished = false;
 }
 
 template <class T>
@@ -80,8 +72,21 @@ std::vector<T> SlidingPuzzleSolver::json_pieces_to_vector(json j)
 	return v;
 }
 
-std::chrono::duration<double>
-SlidingPuzzleSolver::get_elapsed_seconds(void)
+void set_starting_pieces_positions(void)
+{
+	// this->starting_pieces_positions
+}
+
+void SlidingPuzzleSolver::initialize_variable_fields(void)
+{
+	this->state_count = 0;
+	this->prev_state_count = 0;
+
+	this->running = true;
+	this->finished = false;
+}
+
+std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
 {
 	// TODO: Cast the result to seconds in type double, cause idk how this works.
 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();

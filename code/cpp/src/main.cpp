@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "sliding_puzzle_solver.hpp"
 
 ////////
 

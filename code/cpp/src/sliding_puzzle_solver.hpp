@@ -58,14 +58,12 @@ class SlidingPuzzleSolver
 	// Methods
 	json get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name);
 	std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name);
-	void initialize_constant_fields(json puzzle_json);
-	void initialize_variable_fields(void);
 
-	// TODO: Use template argument return value to do StartingPiece and EndingPiece in a single function.
+	void initialize_constant_fields(json puzzle_json);
 	template <class T>
 	std::vector<T> json_pieces_to_vector(json j);
-	// std::vector<StartingPiece> starting_pieces_to_vector(json j);
-	// std::vector<EndingPiece> ending_pieces_to_vector(json j);
+	void set_starting_pieces_positions(void);
+	void initialize_variable_fields(void);
 
 	std::chrono::duration<double> get_elapsed_seconds(void);
 

@@ -111,7 +111,7 @@
 			}
 		}
 	},
-	"piece_endings": {
+	"ending_pieces": {
 		"B": {
 			"pos": {
 				"x": 1,

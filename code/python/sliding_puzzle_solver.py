@@ -24,9 +24,8 @@ class SlidingPuzzleSolver:
 	def run(self):
 		self.print_board()
 
-		starting_positions = self.get_starting_positions()
-		self.add_new_state(starting_positions)
-		self.solve(starting_positions)
+		self.add_new_state(self.STARTING_PIECES_POSITIONS)
+		self.solve()
 
 		print("\nDone!")
 
@@ -42,7 +41,8 @@ class SlidingPuzzleSolver:
 		self.HEIGHT = BOARD_SIZE["height"]
 
 		self.STARTING_PIECES = puzzle_json["starting_pieces"]
-		self.PIECE_ENDINGS = puzzle_json["piece_endings"]
+		self.set_starting_pieces_positions()
+		self.ENDING_PIECES = puzzle_json["ending_pieces"]
 
 		self.START_TIME = time.time()
 
@@ -65,18 +65,18 @@ class SlidingPuzzleSolver:
 		self.finished = False
 
 
-	def get_starting_positions(self):
-		starting_positions = {}
+	def set_starting_pieces_positions(self):
+		self.STARTING_PIECES_POSITIONS = {}
 
 		for STARTING_PIECE_LABEL, STARTING_PIECE in self.STARTING_PIECES.items():
-			starting_positions[STARTING_PIECE_LABEL] = {
+			STARTING_PIECE_POS = STARTING_PIECE["pos"]
+
+			self.STARTING_PIECES_POSITIONS[STARTING_PIECE_LABEL] = {
 				"pos": {
-					"x": STARTING_PIECE["pos"]["x"],
-					"y": STARTING_PIECE["pos"]["y"]
+					"x": STARTING_PIECE_POS["x"],
+					"y": STARTING_PIECE_POS["y"]
 				}
 			}
-
-		return starting_positions
 
 
 	def add_new_state(self, pieces):
@@ -117,8 +117,8 @@ class SlidingPuzzleSolver:
 		return board
 
 
-	def solve(self, starting_positions):
-		queue = deque([ [starting_positions.copy(), []] ])
+	def solve(self):
+		queue = deque([ [self.STARTING_PIECES_POSITIONS, []] ])
 
 		self.timed_print(queue)
 
@@ -160,8 +160,8 @@ class SlidingPuzzleSolver:
 	def update_finished(self, pieces_positions):
 		self.finished = True
 
-		for PIECE_LABEL, PIECE_ENDING in self.PIECE_ENDINGS.items():
-			if pieces_positions[PIECE_LABEL] != PIECE_ENDING:
+		for PIECE_LABEL, ENDING_PIECE in self.ENDING_PIECES.items():
+			if pieces_positions[PIECE_LABEL] != ENDING_PIECE:
 				self.finished = False
 
 

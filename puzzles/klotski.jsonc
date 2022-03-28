@@ -8,7 +8,7 @@
 	// DEEF
 	// DGHF
 	// I  J
-	"starting_pieces": {
+	"starting_pieces_info": {
 		// TODO: Don't have labels and make this a list?
 		"A": {
 			"pos": {

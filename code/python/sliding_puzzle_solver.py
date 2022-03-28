@@ -22,7 +22,7 @@ class SlidingPuzzleSolver:
 
 
 	def run(self):
-		self.add_new_state(self.STARTING_PIECES_POSITIONS)
+		self.add_new_state(self.STARTING_PIECES)
 
 		self.solve()
 
@@ -39,8 +39,8 @@ class SlidingPuzzleSolver:
 		self.WIDTH = BOARD_SIZE["width"]
 		self.HEIGHT = BOARD_SIZE["height"]
 
-		self.STARTING_PIECES = puzzle_json["starting_pieces"]
-		self.set_starting_pieces_positions()
+		self.STARTING_PIECES_INFO = puzzle_json["starting_pieces_info"]
+		self.set_starting_pieces()
 		self.ENDING_PIECES = puzzle_json["ending_pieces"]
 
 		self.START_TIME = time.time()
@@ -66,13 +66,13 @@ class SlidingPuzzleSolver:
 		self.finished = False
 
 
-	def set_starting_pieces_positions(self):
-		self.STARTING_PIECES_POSITIONS = {}
+	def set_starting_pieces(self):
+		self.STARTING_PIECES = {}
 
-		for STARTING_PIECE_LABEL, STARTING_PIECE in self.STARTING_PIECES.items():
+		for STARTING_PIECE_LABEL, STARTING_PIECE in self.STARTING_PIECES_INFO.items():
 			STARTING_PIECE_POS = STARTING_PIECE["pos"]
 
-			self.STARTING_PIECES_POSITIONS[STARTING_PIECE_LABEL] = {
+			self.STARTING_PIECES[STARTING_PIECE_LABEL] = {
 				"pos": {
 					"x": STARTING_PIECE_POS["x"],
 					"y": STARTING_PIECE_POS["y"]
@@ -104,7 +104,7 @@ class SlidingPuzzleSolver:
 
 		for piece_label, piece in pieces.items():
 			pos = piece["pos"]
-			size = self.STARTING_PIECES[piece_label]["size"]
+			size = self.STARTING_PIECES_INFO[piece_label]["size"]
 
 			y = pos["y"]
 			height = size["height"]
@@ -120,7 +120,7 @@ class SlidingPuzzleSolver:
 
 
 	def solve(self):
-		queue = deque([ [self.STARTING_PIECES_POSITIONS, []] ])
+		queue = deque([ [self.STARTING_PIECES, []] ])
 
 		self.timed_print(queue)
 
@@ -243,9 +243,7 @@ class SlidingPuzzleSolver:
 		x = piece_pos["x"]
 		y = piece_pos["y"]
 
-		STARTING_PIECE = self.STARTING_PIECES[piece_label]
-
-		STARTING_PIECE_SIZE = STARTING_PIECE["size"]
+		STARTING_PIECE_SIZE = self.STARTING_PIECES_INFO[piece_label]["size"]
 		STARTING_PIECE_WIDTH = STARTING_PIECE_SIZE["width"]
 		STARTING_PIECE_HEIGHT = STARTING_PIECE_SIZE["height"]
 
@@ -258,7 +256,7 @@ class SlidingPuzzleSolver:
 		x1 = piece1_pos["x"]
 		y1 = piece1_pos["y"]
 
-		SIZE1 = self.STARTING_PIECES[piece_label_1]["size"]
+		SIZE1 = self.STARTING_PIECES_INFO[piece_label_1]["size"]
 		W1 = SIZE1["width"]
 		H1 = SIZE1["height"]
 
@@ -276,7 +274,7 @@ class SlidingPuzzleSolver:
 			x2 = piece2_pos["x"]
 			y2 = piece2_pos["y"]
 
-			SIZE2 = self.STARTING_PIECES[piece_label_2]["size"]
+			SIZE2 = self.STARTING_PIECES_INFO[piece_label_2]["size"]
 			W2 = SIZE2["width"]
 			H2 = SIZE2["height"]
 

@@ -19,6 +19,7 @@ using json = nlohmann::json;
 #include <chrono>	// steady_clock::now(), ::duration()
 #include <vector>	// vector
 #include <set>		// set
+#include <queue>	// queue
 
 ////////
 
@@ -77,6 +78,9 @@ class SlidingPuzzleSolver
 	std::vector<std::vector<char>> get_2d_vector(void);
 
 	bool add_new_state(std::map<std::string, Piece> pieces);
+
+	void solve(void);
+	void solve_and_print_path(void);
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);

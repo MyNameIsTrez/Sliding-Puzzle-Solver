@@ -14,8 +14,11 @@ void SlidingPuzzleSolver::run(void)
 {
 	print_board(this->starting_pieces);
 
-	std::cout << add_new_state(this->starting_pieces);
-	std::cout << add_new_state(this->starting_pieces);
+	add_new_state(this->starting_pieces);
+
+	solve();
+
+	std::cout << "\nDone!" << std::endl;
 
 	// std::cout << get_elapsed_seconds().count() << std::endl;
 }
@@ -189,4 +192,16 @@ bool SlidingPuzzleSolver::add_new_state(std::map<std::string, Piece> pieces)
 	ret = this->states.insert(pieces);
 
 	return ret.second;
+}
+
+void SlidingPuzzleSolver::solve(void)
+{
+	std::queue<std::vector<Piece>> pieces_queue;
+	(void)pieces_queue;
+}
+
+void SlidingPuzzleSolver::solve_and_print_path(void)
+{
+	std::queue<std::pair<Piece, std::vector<std::string>>> pieces_queue;
+	(void)pieces_queue;
 }

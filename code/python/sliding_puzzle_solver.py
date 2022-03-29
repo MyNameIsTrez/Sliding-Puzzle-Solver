@@ -142,11 +142,21 @@ class SlidingPuzzleSolver:
 			for piece_label, piece in pieces.items():
 				piece_pos = piece["pos"]
 
+				# Saves the position of the piece for when it needs to be moved back.
+				x = piece_pos["x"]
+				y = piece_pos["y"]
+
 				for direction in Direction:
-					if self.is_valid_move(direction, piece_label, piece_pos, pieces):
+					self.move(direction, piece_pos)
+
+					if self.is_valid_move(piece_label, piece_pos, pieces):
 						new_pieces_positions = self.deepcopy_pieces_positions(pieces)
 
 						pieces_queue.append(new_pieces_positions)
+
+					# Moves the piece back.
+					piece_pos["x"] = x
+					piece_pos["y"] = y
 
 		self.running = False
 
@@ -175,13 +185,23 @@ class SlidingPuzzleSolver:
 			for piece_label, piece in pieces.items():
 				piece_pos = piece["pos"]
 
+				# Saves the position of the piece for when it needs to be moved back.
+				x = piece_pos["x"]
+				y = piece_pos["y"]
+
 				for direction in Direction:
-					if self.is_valid_move(direction, piece_label, piece_pos, pieces):
+					self.move(direction, piece_pos)
+
+					if self.is_valid_move(piece_label, piece_pos, pieces):
 						new_pieces_positions = self.deepcopy_pieces_positions(pieces)
 
 						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
 
 						pieces_queue.append([ new_pieces_positions, path + [new_path_part] ])
+
+					# Moves the piece back.
+					piece_pos["x"] = x
+					piece_pos["y"] = y
 
 		self.running = False
 
@@ -228,13 +248,7 @@ class SlidingPuzzleSolver:
 			)
 
 
-	def is_valid_move(self, direction, piece_label, piece_pos, pieces):
-		# Saves the position of the piece, in case it needs to be moved back
-		x = piece_pos["x"]
-		y = piece_pos["y"]
-
-		self.move(direction, piece_pos)
-
+	def is_valid_move(self, piece_label, piece_pos, pieces):
 		if (
 			self.move_doesnt_cross_puzzle_edge(piece_label, piece_pos) and
 			self.no_intersection(piece_label, piece_pos, pieces) and
@@ -242,10 +256,6 @@ class SlidingPuzzleSolver:
 		):
 			self.state_count += 1
 			return True
-
-		# Moves the piece back
-		piece_pos["x"] = x
-		piece_pos["y"] = y
 
 		return False
 

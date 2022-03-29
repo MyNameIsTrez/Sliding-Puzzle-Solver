@@ -136,26 +136,17 @@ class SlidingPuzzleSolver:
 			self.update_finished(pieces)
 
 			if self.finished:
-				finished_message = f"\nA shortest path was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}."
-				print(finished_message)
-
+				print(f"\nA shortest path was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}.")
 				break
 
 			for piece_label, piece in pieces.items():
-				# Saves the position of the piece, in case it needs to be moved back
 				piece_pos = piece["pos"]
-				x = piece_pos["x"]
-				y = piece_pos["y"]
 
 				for direction in Direction:
 					if self.is_valid_move(direction, piece_label, piece_pos, pieces):
 						new_pieces_positions = self.deepcopy_pieces_positions(pieces)
 
 						pieces_queue.append(new_pieces_positions)
-
-						# Moves the piece back
-						piece["x"] = x
-						piece["y"] = y
 
 		self.running = False
 
@@ -174,8 +165,7 @@ class SlidingPuzzleSolver:
 			self.update_finished(pieces)
 
 			if self.finished:
-				finished_message = f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}."
-				print(finished_message)
+				print(f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}.")
 
 				path_string = "".join(path)
 				print(f"Path: {path_string}")
@@ -183,10 +173,7 @@ class SlidingPuzzleSolver:
 				break
 
 			for piece_label, piece in pieces.items():
-				# Saves the position of the piece, in case it needs to be moved back
 				piece_pos = piece["pos"]
-				x = piece_pos["x"]
-				y = piece_pos["y"]
 
 				for direction in Direction:
 					if self.is_valid_move(direction, piece_label, piece_pos, pieces):
@@ -195,10 +182,6 @@ class SlidingPuzzleSolver:
 						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
 
 						pieces_queue.append([ new_pieces_positions, path + [new_path_part] ])
-
-						# Moves the piece back
-						piece["x"] = x
-						piece["y"] = y
 
 		self.running = False
 

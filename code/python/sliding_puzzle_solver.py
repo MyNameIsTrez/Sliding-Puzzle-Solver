@@ -26,7 +26,8 @@ class SlidingPuzzleSolver:
 
 		self.add_new_state(self.STARTING_PIECES)
 
-		self.solve()
+		# self.solve()
+		self.solve_and_print_path()
 
 		print("\nDone!")
 
@@ -122,6 +123,44 @@ class SlidingPuzzleSolver:
 
 
 	def solve(self):
+		pieces_queue = deque( [ self.STARTING_PIECES ] )
+
+		self.timed_print(pieces_queue)
+
+		while len(pieces_queue) > 0:
+			pieces = pieces_queue.popleft()
+
+			if self.PRINT_BOARD_EVERY_PATH:
+				self.print_board(pieces)
+
+			self.update_finished(pieces)
+
+			if self.finished:
+				finished_message = f"\nA shortest path was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}."
+				print(finished_message)
+
+				break
+
+			for piece_label, piece in pieces.items():
+				# Saves the position of the piece, in case it needs to be moved back
+				piece_pos = piece["pos"]
+				x = piece_pos["x"]
+				y = piece_pos["y"]
+
+				for direction in Direction:
+					if self.is_valid_move(direction, piece_label, piece_pos, pieces):
+						new_pieces_positions = self.deepcopy_pieces_positions(pieces)
+
+						pieces_queue.append(new_pieces_positions)
+
+						# Moves the piece back
+						piece["x"] = x
+						piece["y"] = y
+
+		self.running = False
+
+
+	def solve_and_print_path(self):
 		pieces_queue = deque([ [self.STARTING_PIECES, []] ])
 
 		self.timed_print(pieces_queue)

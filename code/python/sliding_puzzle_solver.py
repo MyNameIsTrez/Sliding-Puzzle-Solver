@@ -2,16 +2,8 @@ import threading, copy, time
 
 from pathlib import Path
 from collections import deque
-from enum import Enum, auto
 
 import pyjson5
-
-
-class Direction(Enum):
-	UP = auto()
-	DOWN = auto()
-	LEFT = auto()
-	RIGHT = auto()
 
 
 class SlidingPuzzleSolver:
@@ -50,12 +42,7 @@ class SlidingPuzzleSolver:
 
 		self.EMPTY_CHARACTER = " "
 
-		self.DIRECTION_CHARACTERS = {
-			Direction.UP: "^",
-			Direction.DOWN: "v",
-			Direction.LEFT: "<",
-			Direction.RIGHT: ">",
-		}
+		self.DIRECTION_CHARACTERS = [ "^", "v", "<", ">" ]
 
 		self.PRINT_BOARD_EVERY_PATH = False
 
@@ -146,7 +133,7 @@ class SlidingPuzzleSolver:
 				x = piece_pos["x"]
 				y = piece_pos["y"]
 
-				for direction in Direction:
+				for direction in range(4):
 					self.move(direction, piece_pos)
 
 					if self.is_valid_move(piece_label, piece_pos, pieces):
@@ -189,7 +176,7 @@ class SlidingPuzzleSolver:
 				x = piece_pos["x"]
 				y = piece_pos["y"]
 
-				for direction in Direction:
+				for direction in range(4):
 					self.move(direction, piece_pos)
 
 					if self.is_valid_move(piece_label, piece_pos, pieces):
@@ -204,29 +191,6 @@ class SlidingPuzzleSolver:
 					piece_pos["y"] = y
 
 		self.running = False
-
-
-	def update_finished(self, pieces):
-		self.finished = True
-
-		for PIECE_LABEL, ENDING_PIECE in self.ENDING_PIECES.items():
-			if pieces[PIECE_LABEL] != ENDING_PIECE:
-				self.finished = False
-
-
-	def deepcopy_pieces_positions(self, pieces):
-		deepcopied_pieces_positions = {}
-
-		for piece_label, piece in pieces.items():
-			piece_pos = piece["pos"]
-			deepcopied_pieces_positions[piece_label] = {
-				"pos": {
-					"x": piece_pos["x"],
-					"y": piece_pos["y"]
-				}
-			}
-
-		return deepcopied_pieces_positions
 
 
 	def timed_print(self, pieces_queue):
@@ -248,6 +212,27 @@ class SlidingPuzzleSolver:
 			)
 
 
+	def update_finished(self, pieces):
+		self.finished = True
+
+		for PIECE_LABEL, ENDING_PIECE in self.ENDING_PIECES.items():
+			if pieces[PIECE_LABEL] != ENDING_PIECE:
+				self.finished = False
+
+
+	# TODO: Possibly use lookup table for x and y instead if it's faster in C++
+	def move(self, direction, piece_pos):
+		match direction:
+			case 0:
+				piece_pos["y"] += -1
+			case 1:
+				piece_pos["y"] += 1
+			case 2:
+				piece_pos["x"] += -1
+			case 3:
+				piece_pos["x"] += 1
+
+
 	def is_valid_move(self, piece_label, piece_pos, pieces):
 		if (
 			self.move_doesnt_cross_puzzle_edge(piece_label, piece_pos) and
@@ -258,19 +243,6 @@ class SlidingPuzzleSolver:
 			return True
 
 		return False
-
-
-	# TODO: Possibly use lookup table for x and y instead if it's faster in C++
-	def move(self, direction, piece_pos):
-		match direction:
-			case Direction.UP:
-				piece_pos["y"] += -1
-			case Direction.DOWN:
-				piece_pos["y"] += 1
-			case Direction.LEFT:
-				piece_pos["x"] += -1
-			case Direction.RIGHT:
-				piece_pos["x"] += 1
 
 
 	def move_doesnt_cross_puzzle_edge(self, piece_label, piece_pos):
@@ -322,3 +294,18 @@ class SlidingPuzzleSolver:
 				return False
 
 		return True
+
+
+	def deepcopy_pieces_positions(self, pieces):
+		deepcopied_pieces_positions = {}
+
+		for piece_label, piece in pieces.items():
+			piece_pos = piece["pos"]
+			deepcopied_pieces_positions[piece_label] = {
+				"pos": {
+					"x": piece_pos["x"],
+					"y": piece_pos["y"]
+				}
+			}
+
+		return deepcopied_pieces_positions

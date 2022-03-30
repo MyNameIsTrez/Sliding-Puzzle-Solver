@@ -280,13 +280,13 @@ class SlidingPuzzleSolver:
 		piece_1_left = piece_1_x
 		piece_1_right = piece_1_x + PIECE_1_WIDTH
 
-		for piece_label_2, piece2 in pieces.items():
+		for piece_label_2, piece_2 in pieces.items():
 			if piece_label_1 == piece_label_2:
 				continue
 
-			piece2_pos = piece2["pos"]
-			piece_2_x = piece2_pos["x"]
-			piece_2_y = piece2_pos["y"]
+			piece_2_pos = piece_2["pos"]
+			piece_2_x = piece_2_pos["x"]
+			piece_2_y = piece_2_pos["y"]
 
 			SIZE_2 = self.STARTING_PIECES_INFO[piece_label_2]["size"]
 			PIECE_2_WIDTH = SIZE_2["width"]

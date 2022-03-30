@@ -23,16 +23,6 @@ using json = nlohmann::json;
 
 ////////
 
-enum class Direction
-{
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT
-};
-
-////////
-
 class SlidingPuzzleSolver
 {
 	// Constants
@@ -47,7 +37,9 @@ class SlidingPuzzleSolver
 
 	char empty_character;
 
-	std::map<Direction, char> direction_characters;
+	std::vector<char> direction_characters;
+
+	bool print_board_every_path;
 
 	// Variables
 	std::set<std::map<std::string, Piece>> states;
@@ -81,6 +73,13 @@ class SlidingPuzzleSolver
 
 	void solve(void);
 	void solve_and_print_path(void);
+
+	void update_finished(std::map<std::string, Piece> pieces);
+	void move(int direction, Pos piece_pos);
+	bool is_valid_move(std::string piece_label, Pos piece_pos, std::map<std::string, Piece> pieces);
+	bool move_doesnt_cross_puzzle_edge(std::string piece_label, Pos piece_pos);
+	bool no_intersection(std::string piece_label_1, Pos piece_1_pos, std::map<std::string, Piece> pieces);
+	std::map<std::string, Piece> deepcopy_pieces_positions(std::map<std::string, Piece> pieces);
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);

@@ -123,7 +123,11 @@ class SlidingPuzzleSolver:
 			self.update_finished(pieces)
 
 			if self.finished:
-				print(f"\nA shortest path was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}.")
+				print(
+					f"\nA shortest path was found!\n"
+					f"{self.state_count} unique states were seen.\n"
+					"The remaining queue length is {len(pieces_queue)}."
+				)
 				break
 
 			for piece_label, piece in pieces.items():
@@ -162,7 +166,11 @@ class SlidingPuzzleSolver:
 			self.update_finished(pieces)
 
 			if self.finished:
-				print(f"\nA shortest path of {len(path)} moves was found! {self.state_count} unique states were seen. The remaining queue length is {len(pieces_queue)}.")
+				print(
+					f"\nA shortest path of {len(path)} moves was found!\n"
+					f"{self.state_count} unique states were seen.\n"
+					"The remaining queue length is {len(pieces_queue)}."
+				)
 
 				path_string = "".join(path)
 				print(f"Path: {path_string}")
@@ -220,7 +228,6 @@ class SlidingPuzzleSolver:
 				self.finished = False
 
 
-	# TODO: Possibly use lookup table for x and y instead if it's faster in C++
 	def move(self, direction, piece_pos):
 		match direction:
 			case 0:
@@ -255,52 +262,58 @@ class SlidingPuzzleSolver:
 
 		if y >= 0 and y + (STARTING_PIECE_HEIGHT - 1) < self.HEIGHT and x >= 0 and x + (STARTING_PIECE_WIDTH - 1) < self.WIDTH:
 			return True
+
 		return False
 
 
-	def no_intersection(self, piece_label_1, piece1_pos, pieces):
-		x1 = piece1_pos["x"]
-		y1 = piece1_pos["y"]
+	def no_intersection(self, piece_label_1, piece_1_pos, pieces):
+		piece_1_x = piece_1_pos["x"]
+		piece_1_y = piece_1_pos["y"]
 
-		SIZE1 = self.STARTING_PIECES_INFO[piece_label_1]["size"]
-		W1 = SIZE1["width"]
-		H1 = SIZE1["height"]
+		PIECE_1_SIZE = self.STARTING_PIECES_INFO[piece_label_1]["size"]
+		PIECE_1_WIDTH = PIECE_1_SIZE["width"]
+		PIECE_1_HEIGHT = PIECE_1_SIZE["height"]
 
-		p1t = y1
-		p1b = y1 + H1
+		piece_1_top = piece_1_y
+		piece_1_bottom = piece_1_y + PIECE_1_HEIGHT
 
-		p1l = x1
-		p1r = x1 + W1
+		piece_1_left = piece_1_x
+		piece_1_right = piece_1_x + PIECE_1_WIDTH
 
 		for piece_label_2, piece2 in pieces.items():
 			if piece_label_1 == piece_label_2:
 				continue
 
 			piece2_pos = piece2["pos"]
-			x2 = piece2_pos["x"]
-			y2 = piece2_pos["y"]
+			piece_2_x = piece2_pos["x"]
+			piece_2_y = piece2_pos["y"]
 
-			SIZE2 = self.STARTING_PIECES_INFO[piece_label_2]["size"]
-			W2 = SIZE2["width"]
-			H2 = SIZE2["height"]
+			SIZE_2 = self.STARTING_PIECES_INFO[piece_label_2]["size"]
+			PIECE_2_WIDTH = SIZE_2["width"]
+			PIECE_2_HEIGHT = SIZE_2["height"]
 
-			p2t = y2
-			p2b = y2 + H2
+			piece_2_top = piece_2_y
+			piece_2_bottom = piece_2_y + PIECE_2_HEIGHT
 
-			p2l = x2
-			p2r = x2 + W2
+			piece_2_left = piece_2_x
+			piece_2_right = piece_2_x + PIECE_2_WIDTH
 
-			if p1r > p2l and p1l < p2r and p1b > p2t and p1t < p2b:
+			if (piece_1_right > piece_2_left and
+				piece_1_left < piece_2_right and
+				piece_1_bottom > piece_2_top and
+				piece_1_top < piece_2_bottom):
 				return False
 
 		return True
 
 
+	# TODO: Check if this is actually faster than a regular deepcopy call.
 	def deepcopy_pieces_positions(self, pieces):
 		deepcopied_pieces_positions = {}
 
 		for piece_label, piece in pieces.items():
 			piece_pos = piece["pos"]
+
 			deepcopied_pieces_positions[piece_label] = {
 				"pos": {
 					"x": piece_pos["x"],

@@ -11,62 +11,26 @@
 			"program": "${workspaceFolder}/code/python/main.py",
 			"console": "integratedTerminal"
 		},
-		// {
-		// 	"name": "Profile Python",
-		// 	"type": "austin",
-		// 	"file": "main.py",
-		// 	"args": [
-		// 		"--verbose"
-		// 	],
-		// 	"label": "Profile main.py",
-		// 	"request": "launch"
-		// },
-		// {
-		// 	"name": "C++",
-		// 	"type": "cppdbg",
-		// 	"miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
-		// 	// "miDebuggerPath": "C:/msys64/mingw64/bin/g++.exe",
-		// 	"MIMode": "gdb",
-		// 	"request": "launch",
-		// 	"program": "${workspaceFolder}/puzzle.exe",
-		// 	"console": "integratedTerminal",
-		// 	"preLaunchTask": "build",
-		// 	"cwd": ".",
-		// 	"internalConsoleOptions": "neverOpen",
-		// 	// "externalConsole": false
-		// },
 		{
-			"name": "helloworld",
+			"name": "C++",
 			"type": "cppdbg",
-			"miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
-			// "miDebuggerPath": "C:/msys64/mingw64/bin/g++.exe",
-			"MIMode": "gdb",
 			"request": "launch",
-			"program": "${workspaceFolder}/helloworld.exe",
-			"console": "integratedTerminal",
-			"preLaunchTask": "helloworld",
-			"cwd": ".",
-			"internalConsoleOptions": "neverOpen",
-			// "externalConsole": false
+			"program": "${workspaceFolder}/puzzle",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+			  {
+				"description": "Enable pretty-printing for gdb",
+				"text": "-enable-pretty-printing",
+				"ignoreFailures": true
+			  }
+			],
+			"preLaunchTask": "C++ build",
+			"miDebuggerPath": "/usr/bin/gdb"
 		},
-		// {
-		// 	"name": "C++",
-		// 	"type": "cppdbg",
-		// 	"MIMode": "gdb",
-		// 	"request": "launch",
-		// 	"program": "${workspaceFolder}/puzzle.exe",
-		// 	"console": "integratedTerminal",
-		// 	"preLaunchTask": "build",
-		// 	"cwd": ".",
-		// 	"internalConsoleOptions": "neverOpen",
-		// 	// "externalConsole": false
-		// },
-		// {
-		// 	"name": "Launch",
-		// 	"type": "lldb",
-		// 	"request": "launch",
-		// 	"program": "${workspaceFolder}/helloworld.exe",
-		// 	// "program": "${workspaceFolder}/puzzle.exe",
-		// }
 	]
 }

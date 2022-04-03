@@ -42,15 +42,18 @@
 			]
 		},
 		{
-			"label": "helloworld",
-			"type": "shell",
-			"command": "g++",
-			"args": [
-				"-g",
-				"helloworld.cpp",
-				"-o",
-				"helloworld.exe",
-			]
+		  "type": "shell",
+		  "label": "C++ build",
+		  "command": "/usr/bin/g++",
+		  "args": ["-g", "${workspaceFolder}/code/cpp/src/*.cpp", "-std=c++17", "-o", "${workspaceFolder}/puzzle"],
+		  "options": {
+			"cwd": "/usr/bin"
+		  },
+		  "problemMatcher": ["$gcc"],
+		  "group": {
+			"kind": "build",
+			"isDefault": true
+		  }
 		}
 	]
 }

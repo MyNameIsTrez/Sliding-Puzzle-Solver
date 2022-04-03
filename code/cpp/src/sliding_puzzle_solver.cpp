@@ -16,8 +16,6 @@ void SlidingPuzzleSolver::run(void)
 	this->add_new_state(this->starting_pieces);
 
 	this->solve();
-
-	std::cout << std::endl << "Done!" << std::endl;
 }
 
 ////////
@@ -187,8 +185,10 @@ bool SlidingPuzzleSolver::add_new_state(std::map<std::string, Piece> pieces)
 void SlidingPuzzleSolver::solve(void)
 {
 	std::queue<std::map<std::string, Piece>> pieces_queue;
-
 	pieces_queue.push(this->starting_pieces);
+	
+	std::queue<std::vector<std::pair<std::string, char>>> path_queue;
+	path_queue.push(std::vector<std::pair<std::string, char>>());
 
 	// std::thread timed_print_thread(this->timed_print);
 	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue));
@@ -198,6 +198,9 @@ void SlidingPuzzleSolver::solve(void)
 		std::map<std::string, Piece> pieces = pieces_queue.front();
 		pieces_queue.pop();
 
+		std::vector<std::pair<std::string, char>> path = path_queue.front();
+		path_queue.pop();
+
 		if (this->print_board_every_path)
 			this->print_board(pieces);
 
@@ -206,9 +209,12 @@ void SlidingPuzzleSolver::solve(void)
 		if (this->finished)
 		{
 			std::cout << std::endl << std::endl;
-			std::cout << "A shortest path of " << " moves was found!" << std::endl;
+			std::cout << "A shortest path of " << path.size() << " moves was found!" << std::endl;
 			std::cout << this->state_count << " unique states were seen." << std::endl;
 			std::cout << "The remaining queue length is " << pieces_queue.size() << "." << std::endl;
+			
+			std::cout << "Path: " << this->get_path_string(path) << std::endl << std::endl;
+			
 			break;
 		}
 
@@ -233,6 +239,13 @@ void SlidingPuzzleSolver::solve(void)
 					std::map<std::string, Piece> new_pieces_positions = this->deepcopy_pieces_positions(pieces);
 
 					pieces_queue.push(new_pieces_positions);
+
+					std::vector<std::pair<std::string, char>> path_copy = path;
+
+					std::pair<std::string, char> new_path_part(piece_label, this->direction_characters[direction]);
+					path_copy.push_back(new_path_part);
+
+					path_queue.push(path_copy);
 				}
 
 				// Moves the piece back.
@@ -400,4 +413,20 @@ std::map<std::string, Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(std:
 	}
 
 	return deepcopied_pieces_positions;
+}
+
+std::string SlidingPuzzleSolver::get_path_string(std::vector<std::pair<std::string, char>> &path)
+{
+	std::string path_string;
+
+	for (std::vector<std::pair<std::string, char>>::const_iterator pair_it = path.begin(); pair_it != path.end(); ++pair_it)
+	{
+		std::string label = pair_it->first;
+		path_string += label;
+
+		char direction = pair_it->second;
+		path_string += direction;
+	}
+
+	return path_string;
 }

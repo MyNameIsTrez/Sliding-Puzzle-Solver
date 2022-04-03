@@ -20,8 +20,6 @@ class SlidingPuzzleSolver:
 
 		self.solve()
 
-		print("\nDone!")
-
 
 	def get_puzzle_json(self, puzzle_name):
 		with open("puzzles" / Path(puzzle_name).with_suffix(".jsonc"), "r") as f:

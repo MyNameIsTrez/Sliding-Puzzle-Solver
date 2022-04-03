@@ -46,7 +46,7 @@
 		  "label": "C++ build",
 		  "command": "/usr/bin/g++",
 		  "args": [
-			  "-g",
+			  "-g3",
 			  "${workspaceFolder}/code/cpp/src/*.cpp",
 			  "-std=c++17",
 			  "-pthread",

@@ -81,6 +81,8 @@ class SlidingPuzzleSolver
 	bool no_intersection(std::string piece_label_1, Pos piece_1_pos, std::map<std::string, Piece> pieces);
 	std::map<std::string, Piece> deepcopy_pieces_positions(std::map<std::string, Piece> pieces);
 
+	std::string get_path_string(std::vector<std::pair<std::string, char>> &path);
+
 public:
 	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);
 	void run(void);

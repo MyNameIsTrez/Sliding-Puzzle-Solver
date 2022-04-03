@@ -72,7 +72,6 @@ class SlidingPuzzleSolver
 	bool add_new_state(std::map<std::string, Piece> pieces);
 
 	void solve(void);
-	void solve_and_print_path(void);
 
 	void update_finished(std::map<std::string, Piece> pieces);
 	void move(int direction, Pos &piece_pos);

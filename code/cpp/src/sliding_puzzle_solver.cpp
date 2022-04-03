@@ -7,7 +7,6 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path exe_path, std::st
 	json puzzle_json = this->get_puzzle_json(exe_path, puzzle_name);
 	this->initialize_constant_fields(puzzle_json);
 	this->initialize_variable_fields();
-	// std::cout << puzzle_json.dump(4) << std::endl;
 }
 
 void SlidingPuzzleSolver::run(void)
@@ -20,7 +19,7 @@ void SlidingPuzzleSolver::run(void)
 
 	std::cout << "\nDone!" << std::endl;
 
-	// std::cout << get_elapsed_seconds().count() << std::endl;
+	std::cout << get_elapsed_seconds().count() << std::endl;
 }
 
 ////////
@@ -200,7 +199,7 @@ void SlidingPuzzleSolver::solve(void)
 
 	pieces_queue.push(this->starting_pieces);
 
-	// TODO: timed_print()
+	// timed_print(pieces_queue);
 
 	while (!pieces_queue.empty())
 	{
@@ -251,12 +250,6 @@ void SlidingPuzzleSolver::solve(void)
 	}
 
 	this->running = false;
-}
-
-void SlidingPuzzleSolver::solve_and_print_path(void)
-{
-	std::queue<std::pair<Piece, std::vector<std::string>>> pieces_queue;
-	(void)pieces_queue;
 }
 
 void SlidingPuzzleSolver::update_finished(std::map<std::string, Piece> pieces)

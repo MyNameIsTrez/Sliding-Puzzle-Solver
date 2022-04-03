@@ -109,12 +109,12 @@ class SlidingPuzzleSolver:
 
 
 	def solve(self):
-		pieces_queue = deque( [ self.STARTING_PIECES ] )
+		pieces_queue = deque([ [self.STARTING_PIECES, []] ])
 
 		self.repeatedly_print_progress(pieces_queue)
 
 		while len(pieces_queue) > 0:
-			pieces = pieces_queue.popleft()
+			pieces, path = pieces_queue.popleft()
 
 			if self.PRINT_BOARD_EVERY_PATH:
 				self.print_board(pieces)
@@ -123,10 +123,14 @@ class SlidingPuzzleSolver:
 
 			if self.finished:
 				print(
-					f"\nA shortest path was found!\n"
+					f"\nA shortest path of {len(path)} moves was found!\n"
 					f"{self.state_count} unique states were seen.\n"
 					"The remaining queue length is {len(pieces_queue)}."
 				)
+
+				path_string = "".join(path)
+				print(f"Path: {path_string}")
+
 				break
 
 			for piece_label, piece in pieces.items():
@@ -142,7 +146,9 @@ class SlidingPuzzleSolver:
 					if self.is_valid_move(piece_label, piece_pos, pieces):
 						new_pieces_positions = self.deepcopy_pieces_positions(pieces)
 
-						pieces_queue.append(new_pieces_positions)
+						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
+
+						pieces_queue.append([ new_pieces_positions, path + [new_path_part] ])
 
 					# Moves the piece back.
 					piece_pos["x"] = x

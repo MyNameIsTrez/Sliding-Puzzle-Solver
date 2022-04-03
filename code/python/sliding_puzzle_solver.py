@@ -147,6 +147,8 @@ class SlidingPuzzleSolver:
 						new_path_part = piece_label + self.DIRECTION_CHARACTERS[direction]
 
 						pieces_queue.append([ new_pieces_positions, path + [new_path_part] ])
+					
+						self.state_count += 1
 
 					# Moves the piece back.
 					piece_pos["x"] = x
@@ -200,7 +202,6 @@ class SlidingPuzzleSolver:
 			self.no_intersection(piece_label, piece_pos, pieces) and
 			self.add_new_state(pieces)
 		):
-			self.state_count += 1
 			return True
 
 		return False

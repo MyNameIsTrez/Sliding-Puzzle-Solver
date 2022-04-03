@@ -206,6 +206,11 @@ void SlidingPuzzleSolver::solve(void)
 
 		this->update_finished(pieces);
 
+		if (this->state_count > 10000)
+		{
+			break;
+		}
+
 		if (this->finished)
 		{
 			std::cout << std::endl << std::endl;
@@ -246,6 +251,8 @@ void SlidingPuzzleSolver::solve(void)
 					path_copy.push_back(new_path_part);
 
 					path_queue.push(path_copy);
+
+					this->state_count++;
 				}
 
 				// Moves the piece back.
@@ -327,7 +334,6 @@ bool SlidingPuzzleSolver::is_valid_move(std::string piece_label, Pos piece_pos, 
 		this->no_intersection(piece_label, piece_pos, pieces) &&
 		this->add_new_state(pieces))
 	{
-		this->state_count += 1;
 		return true;
 	}
 

@@ -111,7 +111,7 @@ class SlidingPuzzleSolver:
 	def solve(self):
 		pieces_queue = deque( [ self.STARTING_PIECES ] )
 
-		self.timed_print(pieces_queue)
+		self.repeatedly_print_progress(pieces_queue)
 
 		while len(pieces_queue) > 0:
 			pieces = pieces_queue.popleft()
@@ -151,9 +151,9 @@ class SlidingPuzzleSolver:
 		self.running = False
 
 
-	def timed_print(self, pieces_queue):
+	def repeatedly_print_progress(self, pieces_queue):
 		if self.running:
-			threading.Timer(1, self.timed_print, [pieces_queue]).start()
+			threading.Timer(1, self.repeatedly_print_progress, [pieces_queue]).start()
 
 		if not self.finished:
 			elapsed_time = int(time.time() - self.START_TIME)

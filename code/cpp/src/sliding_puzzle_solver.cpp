@@ -204,7 +204,7 @@ void SlidingPuzzleSolver::solve(void)
 
 	while (!pieces_queue.empty())
 	{
-		std::map<std::string, Piece> pieces = pieces_queue.back();
+		std::map<std::string, Piece> pieces = pieces_queue.front();
 		pieces_queue.pop();
 
 		if (this->print_board_every_path)
@@ -223,9 +223,9 @@ void SlidingPuzzleSolver::solve(void)
 		for (std::map<std::string, Piece>::iterator piece_it = pieces.begin(); piece_it != pieces.end(); ++piece_it)
 		{
 			std::string piece_label = piece_it->first;
-			Piece piece = piece_it->second;
+			Piece &piece = piece_it->second;
 
-			Pos piece_pos = piece.pos;
+			Pos &piece_pos = piece.pos;
 
 			// Saves the position of the piece for when it needs to be moved back.
 			int x = piece_pos.x;
@@ -273,7 +273,7 @@ void SlidingPuzzleSolver::update_finished(std::map<std::string, Piece> pieces)
 	}
 }
 
-void SlidingPuzzleSolver::move(int direction, Pos piece_pos)
+void SlidingPuzzleSolver::move(int direction, Pos &piece_pos)
 {
 	switch (direction)
 	{

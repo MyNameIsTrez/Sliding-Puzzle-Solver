@@ -75,7 +75,7 @@ class SlidingPuzzleSolver
 	void solve_and_print_path(void);
 
 	void update_finished(std::map<std::string, Piece> pieces);
-	void move(int direction, Pos piece_pos);
+	void move(int direction, Pos &piece_pos);
 	bool is_valid_move(std::string piece_label, Pos piece_pos, std::map<std::string, Piece> pieces);
 	bool move_doesnt_cross_puzzle_edge(std::string piece_label, Pos piece_pos);
 	bool no_intersection(std::string piece_label_1, Pos piece_1_pos, std::map<std::string, Piece> pieces);

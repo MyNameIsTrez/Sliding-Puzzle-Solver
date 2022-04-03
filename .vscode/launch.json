@@ -21,16 +21,52 @@
 		// 	"label": "Profile main.py",
 		// 	"request": "launch"
 		// },
+		// {
+		// 	"name": "C++",
+		// 	"type": "cppdbg",
+		// 	"miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+		// 	// "miDebuggerPath": "C:/msys64/mingw64/bin/g++.exe",
+		// 	"MIMode": "gdb",
+		// 	"request": "launch",
+		// 	"program": "${workspaceFolder}/puzzle.exe",
+		// 	"console": "integratedTerminal",
+		// 	"preLaunchTask": "build",
+		// 	"cwd": ".",
+		// 	"internalConsoleOptions": "neverOpen",
+		// 	// "externalConsole": false
+		// },
 		{
-			"name": "C++",
+			"name": "helloworld",
 			"type": "cppdbg",
+			"miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+			// "miDebuggerPath": "C:/msys64/mingw64/bin/g++.exe",
+			"MIMode": "gdb",
 			"request": "launch",
-			"program": "${workspaceFolder}/puzzle.exe",
+			"program": "${workspaceFolder}/helloworld.exe",
 			"console": "integratedTerminal",
-			"preLaunchTask": "build",
+			"preLaunchTask": "helloworld",
 			"cwd": ".",
 			"internalConsoleOptions": "neverOpen",
 			// "externalConsole": false
-		}
+		},
+		// {
+		// 	"name": "C++",
+		// 	"type": "cppdbg",
+		// 	"MIMode": "gdb",
+		// 	"request": "launch",
+		// 	"program": "${workspaceFolder}/puzzle.exe",
+		// 	"console": "integratedTerminal",
+		// 	"preLaunchTask": "build",
+		// 	"cwd": ".",
+		// 	"internalConsoleOptions": "neverOpen",
+		// 	// "externalConsole": false
+		// },
+		// {
+		// 	"name": "Launch",
+		// 	"type": "lldb",
+		// 	"request": "launch",
+		// 	"program": "${workspaceFolder}/helloworld.exe",
+		// 	// "program": "${workspaceFolder}/puzzle.exe",
+		// }
 	]
 }

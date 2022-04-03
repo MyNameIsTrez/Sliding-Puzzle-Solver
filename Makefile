@@ -7,9 +7,15 @@ SOURCES :=									\
 
 
 NAME := puzzle
-CC := C:/msys64/mingw64/bin/g++.exe
+
+CC := C:/msys64/mingw64/bin/g++.exe # No vector debug info.
+# CC := C:/msys64/mingw64/bin/gcc.exe # Errors.
+# CC := C:/msys64/mingw64/bin/gdb.exe # No vector debug info. Errors in puzzle.exe?
+# CC := lldb # TODO: Download this?
+
 LDFLAGS :=
 CFLAGS := -Wall -Wextra -Werror
+# CFLAGS += -Og
 CFLAGS += -g3
 # CFLAGS += -O3
 FCLEANED_FILES := puzzle.exe
@@ -51,8 +57,8 @@ fclean: clean
 re: fclean all
 
 
-run: $(NAME)
-	./$(NAME).exe
+# run: $(NAME)
+# 	./$(NAME).exe
 
 
-.PHONY: all $(NAME) clean fclean re run
+.PHONY: all $(NAME) clean fclean re #run

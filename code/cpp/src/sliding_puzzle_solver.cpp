@@ -378,7 +378,7 @@ std::map<std::string, Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(std:
 		Piece piece = it->second;
 		Pos piece_pos = piece.pos;
 
-		Pos deepcopied_piece_position = deepcopied_pieces_positions[piece_label].pos;
+		Pos &deepcopied_piece_position = deepcopied_pieces_positions[piece_label].pos;
 		deepcopied_piece_position.x = piece_pos.x;
 		deepcopied_piece_position.y = piece_pos.y;
 	}

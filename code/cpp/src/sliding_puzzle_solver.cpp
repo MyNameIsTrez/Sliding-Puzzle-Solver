@@ -17,9 +17,7 @@ void SlidingPuzzleSolver::run(void)
 
 	this->solve();
 
-	std::cout << "\nDone!" << std::endl;
-
-	std::cout << get_elapsed_seconds().count() << std::endl;
+	std::cout << std::endl << "Done!" << std::endl;
 }
 
 ////////
@@ -124,13 +122,6 @@ void SlidingPuzzleSolver::initialize_variable_fields(void)
 	this->finished = false;
 }
 
-std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
-{
-	// TODO: Cast the result to seconds in type double, cause idk how this works.
-	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-	return end_time - this->start_time;
-}
-
 ////////
 
 template <class T>
@@ -199,7 +190,8 @@ void SlidingPuzzleSolver::solve(void)
 
 	pieces_queue.push(this->starting_pieces);
 
-	// timed_print(pieces_queue);
+	// std::thread timed_print_thread(this->timed_print);
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue));
 
 	while (!pieces_queue.empty())
 	{
@@ -213,9 +205,10 @@ void SlidingPuzzleSolver::solve(void)
 
 		if (this->finished)
 		{
-			std::cout << "\nA shortest path was found!" << std::endl;
+			std::cout << std::endl << std::endl;
+			std::cout << "A shortest path of " << " moves was found!" << std::endl;
 			std::cout << this->state_count << " unique states were seen." << std::endl;
-			std::cout << "The remaining queue length is" << pieces_queue.size() << "." << std::endl;
+			std::cout << "The remaining queue length is " << pieces_queue.size() << "." << std::endl;
 			break;
 		}
 
@@ -250,6 +243,36 @@ void SlidingPuzzleSolver::solve(void)
 	}
 
 	this->running = false;
+	timed_print_thread.join();
+}
+
+void SlidingPuzzleSolver::timed_print(std::queue<std::map<std::string, Piece>> &pieces_queue)
+{
+	while (this->running)
+	{
+		if (!this->finished)
+		{
+			// TODO: Store elapsed_time in something more appropriate than int.
+			int elapsed_time = this->get_elapsed_seconds().count();
+
+			int states_count_diff = this->state_count - this->prev_state_count;
+			this->prev_state_count = this->state_count;
+
+			std::cout << "\rElapsed time: " << elapsed_time << " seconds";
+			std::cout << ", Unique states: " << this->state_count << " (+" << states_count_diff << "/s)";
+			std::cout << ", Queue length: " << pieces_queue.size();
+			std::cout << std::flush;
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+}
+
+std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
+{
+	// TODO: Cast the result to seconds in type double, cause idk how this works.
+	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+	return end_time - this->start_time;
 }
 
 void SlidingPuzzleSolver::update_finished(std::map<std::string, Piece> pieces)

@@ -20,6 +20,7 @@ using json = nlohmann::json;
 #include <vector>	// vector
 #include <set>		// set
 #include <queue>	// queue
+#include <thread>	// this_thread
 
 ////////
 
@@ -61,8 +62,6 @@ class SlidingPuzzleSolver
 	void set_starting_pieces(void);
 	void initialize_variable_fields(void);
 
-	std::chrono::duration<double> get_elapsed_seconds(void);
-
 	template <class T>
 	void print_board(std::map<std::string, T> pieces);
 	template <class T>
@@ -72,6 +71,8 @@ class SlidingPuzzleSolver
 	bool add_new_state(std::map<std::string, Piece> pieces);
 
 	void solve(void);
+	void timed_print(std::queue<std::map<std::string, Piece>> &pieces_queue);
+	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	void update_finished(std::map<std::string, Piece> pieces);
 	void move(int direction, Pos &piece_pos);

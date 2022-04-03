@@ -45,7 +45,15 @@
 		  "type": "shell",
 		  "label": "C++ build",
 		  "command": "/usr/bin/g++",
-		  "args": ["-g", "${workspaceFolder}/code/cpp/src/*.cpp", "-std=c++17", "-o", "${workspaceFolder}/puzzle"],
+		  "args": [
+			  "-g",
+			  "${workspaceFolder}/code/cpp/src/*.cpp",
+			  "-std=c++17",
+			  "-pthread",
+			  "-O3",
+			  "-o",
+			  "${workspaceFolder}/puzzle"
+			],
 		  "options": {
 			"cwd": "/usr/bin"
 		  },

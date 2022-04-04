@@ -9,7 +9,11 @@ There's a launch.json so you can run whatever implementation you want with ease 
 The Python implementation finds ~15000 new states/second and takes 12 minutes and 54 seconds (774 seconds) to find the shortest path of 116 moves.
 
 ### Profiling
+
 `sudo perf record --call-graph dwarf ./puzzle && sudo chmod 777 perf.data && flamegraph --perfdata ./perf.data`
+
+`sudo perf record --call-graph dwarf ./puzzle && sudo perf script | sudo /root/.cargo/bin/inferno-collapse-perf | sudo /root/.cargo/bin/inferno-flamegraph > flamegraph.svg`
+See https://github.com/jonhoo/inferno
 
 #### Individual profiling commands
 

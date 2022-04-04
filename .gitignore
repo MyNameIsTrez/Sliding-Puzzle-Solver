@@ -5,3 +5,6 @@ __pycache__
 obj
 puzzle
 callgrind.out.*
+flamegraph.svg
+perf.data
+perf.data.old

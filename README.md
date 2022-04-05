@@ -10,10 +10,18 @@ The Python implementation finds ~15000 new states/second and takes 12 minutes an
 
 ### Profiling
 
+This is the preferred command:
 `sudo perf record --call-graph dwarf ./puzzle && sudo chmod 777 perf.data && flamegraph --perfdata ./perf.data`
+Uses https://github.com/flamegraph-rs/flamegraph
 
+The command above calls the inferno library in a way similar to this:
 `sudo perf record --call-graph dwarf ./puzzle && sudo perf script | sudo /root/.cargo/bin/inferno-collapse-perf | sudo /root/.cargo/bin/inferno-flamegraph > flamegraph.svg`
-See https://github.com/jonhoo/inferno
+Uses https://github.com/jonhoo/inferno
+
+Using my fork of the inferno library, run `cargo build --release --bins` in it.
+Then run this in this sliding puzzle solver repository:
+`sudo perf record --call-graph dwarf ./puzzle && sudo perf script | sudo ~/Programming/inferno/target/release/inferno-collapse-perf | sudo ~/Programming/inferno/target/release/inferno-flamegraph > flamegraph.svg`
+Uses https://github.com/jonhoo/inferno
 
 #### Individual profiling commands
 

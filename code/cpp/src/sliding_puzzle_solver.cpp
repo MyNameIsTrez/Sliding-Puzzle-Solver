@@ -33,8 +33,10 @@ const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path &exe_path,
 const std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
 	exe_path.remove_filename();
+
 	// TODO: Add the file extension using the filesystem library.
 	const std::filesystem::path puzzle_path = exe_path / "puzzles" / (puzzle_name + ".jsonc");
+	
 	return puzzle_path;
 }
 
@@ -93,7 +95,7 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces_json)
 }
 
 template <class T>
-void SlidingPuzzleSolver::print_board(std::map<std::string, T> &pieces)
+void SlidingPuzzleSolver::print_board(const std::map<std::string, T> &pieces)
 {
 	const std::vector<std::vector<char>> board = get_board(pieces);
 
@@ -108,7 +110,7 @@ void SlidingPuzzleSolver::print_board(std::map<std::string, T> &pieces)
 }
 
 template <class T>
-const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::string, T> &pieces)
+const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(const std::map<std::string, T> &pieces)
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
 
@@ -119,11 +121,11 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std
 		const Pos &pos = piece.pos;
 		const Size &size = starting_pieces_info[piece_label].size;
 
-		const int &y = pos.y;
-		const int &x = pos.x;
+		const int y = pos.y;
+		const int x = pos.x;
 		
-		const int &width = size.width;
-		const int &height = size.height;
+		const int width = size.width;
+		const int height = size.height;
 
 		for (int y2 = y; y2 < y + height; ++y2)
 		{
@@ -140,14 +142,14 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std
 
 const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 {
-	return std::vector<std::vector<char>>(height, std::vector<char>(width, ' '));
+	return std::vector<std::vector<char>>(height, std::vector<char>(width, empty_character));
 }
 
 bool SlidingPuzzleSolver::add_new_state(const std::map<std::string, Piece> &pieces)
 {
 	const std::pair<std::set<std::map<std::string, Piece>>::iterator, bool> insert_info = states.insert(pieces);
 
-	const bool &success = insert_info.second;
+	const bool success = insert_info.second;
 
 	return success;
 }
@@ -197,14 +199,14 @@ void SlidingPuzzleSolver::solve(void)
 
 		for (std::map<std::string, Piece>::iterator piece_it = pieces.begin(); piece_it != pieces.end(); ++piece_it)
 		{
-			std::string piece_label = piece_it->first;
+			const std::string &piece_label = piece_it->first;
+			
 			Piece &piece = piece_it->second;
-
 			Pos &piece_pos = piece.pos;
 
 			// Saves the position of the piece for when it needs to be moved back.
-			int x = piece_pos.x;
-			int y = piece_pos.y;
+			const int x = piece_pos.x;
+			const int y = piece_pos.y;
 
 			for (int direction = 0; direction < 4; ++direction)
 			{
@@ -213,7 +215,7 @@ void SlidingPuzzleSolver::solve(void)
 
 				if (is_valid_move(piece_label, piece_pos, pieces))
 				{
-					std::map<std::string, Piece> new_pieces_positions = deepcopy_pieces_positions(pieces);
+					const std::map<std::string, Piece> new_pieces_positions = deepcopy_pieces_positions(pieces);
 
 					pieces_queue.push(new_pieces_positions);
 
@@ -265,7 +267,7 @@ std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
 	return end_time - start_time;
 }
 
-void SlidingPuzzleSolver::update_finished(std::map<std::string, Piece> pieces)
+void SlidingPuzzleSolver::update_finished(std::map<std::string, Piece> &pieces)
 {
 	finished = true;
 
@@ -279,7 +281,7 @@ void SlidingPuzzleSolver::update_finished(std::map<std::string, Piece> pieces)
 	}
 }
 
-void SlidingPuzzleSolver::move(int direction, Pos &piece_pos)
+void SlidingPuzzleSolver::move(const int direction, Pos &piece_pos)
 {
 	switch (direction)
 	{
@@ -298,7 +300,7 @@ void SlidingPuzzleSolver::move(int direction, Pos &piece_pos)
 	}
 }
 
-bool SlidingPuzzleSolver::is_valid_move(std::string piece_label, Pos piece_pos, std::map<std::string, Piece> pieces)
+bool SlidingPuzzleSolver::is_valid_move(const std::string &piece_label, const Pos &piece_pos, const std::map<std::string, Piece> &pieces)
 {
 	if (move_doesnt_cross_puzzle_edge(piece_label, piece_pos) &&
 		no_intersection(piece_label, piece_pos, pieces) &&
@@ -310,14 +312,14 @@ bool SlidingPuzzleSolver::is_valid_move(std::string piece_label, Pos piece_pos, 
 	return false;
 }
 
-bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(std::string piece_label, Pos piece_pos)
+bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const std::string &piece_label, const Pos &piece_pos)
 {
-	int x = piece_pos.x;
-	int y = piece_pos.y;
+	const int x = piece_pos.x;
+	const int y = piece_pos.y;
 
-	Size starting_piece_size = starting_pieces_info[piece_label].size;
-	int starting_piece_width = starting_piece_size.width;
-	int starting_piece_height = starting_piece_size.height;
+	const Size &starting_piece_size = starting_pieces_info[piece_label].size;
+	const int starting_piece_width = starting_piece_size.width;
+	const int starting_piece_height = starting_piece_size.height;
 
 	if (y >= 0 && y + (starting_piece_height - 1) < height && x >= 0 && x + (starting_piece_width - 1) < width)
 		return true;
@@ -325,42 +327,42 @@ bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(std::string piece_label,
 	return false;
 }
 
-bool SlidingPuzzleSolver::no_intersection(std::string piece_label_1, Pos piece_1_pos, std::map<std::string, Piece> pieces)
+bool SlidingPuzzleSolver::no_intersection(const std::string &piece_label_1, const Pos &piece_1_pos, const std::map<std::string, Piece> &pieces)
 {
-	int piece_1_x = piece_1_pos.x;
-	int piece_1_y = piece_1_pos.y;
+	const int piece_1_x = piece_1_pos.x;
+	const int piece_1_y = piece_1_pos.y;
 
-	Size piece_1_size = starting_pieces_info[piece_label_1].size;
-	int piece_1_width = piece_1_size.width;
-	int piece_1_height = piece_1_size.height;
+	const Size &piece_1_size = starting_pieces_info[piece_label_1].size;
+	const int piece_1_width = piece_1_size.width;
+	const int piece_1_height = piece_1_size.height;
 
-	int piece_1_top = piece_1_y;
-	int piece_1_bottom = piece_1_y + piece_1_height;
+	const int piece_1_top = piece_1_y;
+	const int piece_1_bottom = piece_1_y + piece_1_height;
 
-	int piece_1_left = piece_1_x;
-	int piece_1_right = piece_1_x + piece_1_width;
+	const int piece_1_left = piece_1_x;
+	const int piece_1_right = piece_1_x + piece_1_width;
 
 	for (std::map<std::string, Piece>::const_iterator it = pieces.cbegin(); it != pieces.cend(); ++it)
 	{
-		std::string piece_label_2 = it->first;
-		Piece piece_2 = it->second;
+		const std::string &piece_label_2 = it->first;
+		const Piece &piece_2 = it->second;
 
 		if (piece_label_1 == piece_label_2)
 			continue;
 
-		Pos piece_2_pos = piece_2.pos;
-		int piece_2_x = piece_2_pos.x;
-		int piece_2_y = piece_2_pos.y;
+		const Pos &piece_2_pos = piece_2.pos;
+		const int piece_2_x = piece_2_pos.x;
+		const int piece_2_y = piece_2_pos.y;
 
-		Size size_2 = starting_pieces_info[piece_label_2].size;
-		int piece_2_width = size_2.width;
-		int piece_2_height = size_2.height;
+		const Size &size_2 = starting_pieces_info[piece_label_2].size;
+		const int piece_2_width = size_2.width;
+		const int piece_2_height = size_2.height;
 
-		int piece_2_top = piece_2_y;
-		int piece_2_bottom = piece_2_y + piece_2_height;
+		const int piece_2_top = piece_2_y;
+		const int piece_2_bottom = piece_2_y + piece_2_height;
 
-		int piece_2_left = piece_2_x;
-		int piece_2_right = piece_2_x + piece_2_width;
+		const int piece_2_left = piece_2_x;
+		const int piece_2_right = piece_2_x + piece_2_width;
 
 		if (piece_1_right > piece_2_left &&
 			piece_1_left < piece_2_right &&
@@ -373,15 +375,15 @@ bool SlidingPuzzleSolver::no_intersection(std::string piece_label_1, Pos piece_1
 }
 
 // TODO: Check if this is actually faster than a regular deepcopy call.
-std::map<std::string, Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(std::map<std::string, Piece> pieces)
+const std::map<std::string, Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(const std::map<std::string, Piece> &pieces)
 {
 	std::map<std::string, Piece> deepcopied_pieces_positions;
 
 	for (std::map<std::string, Piece>::const_iterator it = pieces.cbegin(); it != pieces.cend(); ++it)
 	{
-		std::string piece_label = it->first;
-		Piece piece = it->second;
-		Pos piece_pos = piece.pos;
+		const std::string &piece_label = it->first;
+		const Piece &piece = it->second;
+		const Pos &piece_pos = piece.pos;
 
 		Pos &deepcopied_piece_position = deepcopied_pieces_positions[piece_label].pos;
 		deepcopied_piece_position.x = piece_pos.x;
@@ -391,8 +393,9 @@ std::map<std::string, Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(std:
 	return deepcopied_pieces_positions;
 }
 
-std::string SlidingPuzzleSolver::get_path_string(std::vector<std::pair<std::string, char>> &path)
+const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<std::string, char>> &path)
 {
+	// If this method ever needs to be called a lot then rewrite this to use a string stream/rope instead of += for concatenation.
 	std::string path_string;
 
 	for (std::vector<std::pair<std::string, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)

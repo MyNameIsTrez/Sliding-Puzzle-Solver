@@ -60,9 +60,9 @@ class SlidingPuzzleSolver
 	void set_ending_pieces(const json &ending_pieces_json);
 
 	template <class T>
-	void print_board(std::map<std::string, T> &pieces);
+	void print_board(const std::map<std::string, T> &pieces);
 	template <class T>
-	const std::vector<std::vector<char>> get_board(std::map<std::string, T> &pieces);
+	const std::vector<std::vector<char>> get_board(const std::map<std::string, T> &pieces);
 	const std::vector<std::vector<char>> get_2d_vector(void);
 
 	bool add_new_state(const std::map<std::string, Piece> &pieces);
@@ -71,14 +71,14 @@ class SlidingPuzzleSolver
 	void timed_print(const std::queue<std::map<std::string, Piece>> &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
-	void update_finished(std::map<std::string, Piece> pieces);
-	void move(int direction, Pos &piece_pos);
-	bool is_valid_move(std::string piece_label, Pos piece_pos, std::map<std::string, Piece> pieces);
-	bool move_doesnt_cross_puzzle_edge(std::string piece_label, Pos piece_pos);
-	bool no_intersection(std::string piece_label_1, Pos piece_1_pos, std::map<std::string, Piece> pieces);
-	std::map<std::string, Piece> deepcopy_pieces_positions(std::map<std::string, Piece> pieces);
+	void update_finished(std::map<std::string, Piece> &pieces);
+	void move(const int direction, Pos &piece_pos);
+	bool is_valid_move(const std::string &piece_label, const Pos &piece_pos, const std::map<std::string, Piece> &pieces);
+	bool move_doesnt_cross_puzzle_edge(const std::string &piece_label, const Pos &piece_pos);
+	bool no_intersection(const std::string &piece_label_1, const Pos &piece_1_pos, const std::map<std::string, Piece> &pieces);
+	const std::map<std::string, Piece> deepcopy_pieces_positions(const std::map<std::string, Piece> &pieces);
 
-	std::string get_path_string(std::vector<std::pair<std::string, char>> &path);
+	const std::string get_path_string(const std::vector<std::pair<std::string, char>> &path);
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);

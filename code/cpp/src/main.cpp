@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
 	(void)argc;
 
-	std::filesystem::path exe_path = argv[0];
+	const std::filesystem::path exe_path = argv[0];
 
 	SlidingPuzzleSolver sliding_puzzle_solver(exe_path, "klotski");
 

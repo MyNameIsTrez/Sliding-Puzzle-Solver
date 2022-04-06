@@ -51,15 +51,15 @@ class SlidingPuzzleSolver
 	bool finished;
 
 	// Methods
-	const json get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name);
+	const json get_puzzle_json(const std::filesystem::path &exe_path, const std::string &puzzle_name);
 	std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name);
 
 	void initialize_constant_fields(const json &puzzle_json);
 
-	void set_starting_pieces_info(const json &starting_pieces_info);
-	void set_ending_pieces(const json &ending_pieces);
-
+	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_starting_pieces(void);
+	void set_ending_pieces(const json &ending_pieces_json);
+
 	void initialize_variable_fields(void);
 
 	template <class T>

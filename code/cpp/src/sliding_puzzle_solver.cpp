@@ -4,30 +4,32 @@
 
 SlidingPuzzleSolver::SlidingPuzzleSolver(const std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
-	const json puzzle_json = this->get_puzzle_json(exe_path, puzzle_name);
-	this->initialize_constant_fields(puzzle_json);
-	this->initialize_variable_fields();
+	const json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
+	initialize_constant_fields(puzzle_json);
+	initialize_variable_fields();
 }
 
 void SlidingPuzzleSolver::run(void)
 {
-	this->print_board(this->starting_pieces);
+	print_board(starting_pieces);
 
-	this->add_new_state(this->starting_pieces);
+	add_new_state(starting_pieces);
 
-	this->solve();
+	solve();
 }
 
 ////////
 
-const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name)
+const json SlidingPuzzleSolver::get_puzzle_json(const std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
-	std::filesystem::path puzzle_path = this->get_puzzle_path_from_exe_path(exe_path, puzzle_name);
-	std::ifstream f(puzzle_path);
-	const json puzzle_json = json::parse(f,
-								   /* callback */ nullptr,
-								   /* allow exceptions */ true,
-								   /* ignore_comments */ true);
+	const std::filesystem::path puzzle_path = get_puzzle_path_from_exe_path(exe_path, puzzle_name);
+	std::ifstream stream(puzzle_path);
+	const json puzzle_json = json::parse(
+		stream,
+		nullptr, // callback
+		true, // allow exceptions
+		true // ignore_comments
+	);
 	return puzzle_json;
 }
 
@@ -41,7 +43,7 @@ std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(std::fi
 
 void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 {
-	json board_size = puzzle_json["board_size"];
+	const json board_size = puzzle_json["board_size"];
 	this->width = board_size["width"];
 	this->height = board_size["height"];
 
@@ -58,11 +60,9 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 	this->print_board_every_path = false;
 }
 
-void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info)
+void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
 {
-	std::map<std::string, StartingPieceInfo> &m = this->starting_pieces_info;
-
-	for (json::const_iterator it = starting_pieces_info.cbegin(); it != starting_pieces_info.cend(); ++it)
+	for (json::const_iterator it = starting_pieces_info_json.cbegin(); it != starting_pieces_info_json.cend(); ++it)
 	{
 		StartingPieceInfo p;
 
@@ -74,16 +74,24 @@ void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_i
 		p.size.width = size["width"];
 		p.size.height = size["height"];
 
-		// TODO: Can .first be used instead of .key()?
-		m[it.key()] = p;
+		starting_pieces_info[it.key()] = p;
 	}
 }
 
-void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces)
+void SlidingPuzzleSolver::set_starting_pieces(void)
+{
+	// TODO: Can const_iterator be used here?
+	for (std::map<std::string, StartingPieceInfo>::const_iterator it = starting_pieces_info.cbegin(); it != starting_pieces_info.cend(); ++it)
+	{
+		starting_pieces[it->first].pos = it->second.pos;
+	}
+}
+
+void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces_json)
 {
 	std::map<std::string, Piece> &m = this->ending_pieces;
 
-	for (json::const_iterator it = ending_pieces.cbegin(); it != ending_pieces.cend(); ++it)
+	for (json::const_iterator it = ending_pieces_json.cbegin(); it != ending_pieces_json.cend(); ++it)
 	{
 		Piece p;
 
@@ -91,17 +99,7 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces)
 		p.pos.x = pos["x"];
 		p.pos.y = pos["y"];
 
-		// TODO: Can .first be used instead of .key()?
 		m[it.key()] = p;
-	}
-}
-
-void SlidingPuzzleSolver::set_starting_pieces(void)
-{
-	// TODO: Can const_iterator be used here?
-	for (std::map<std::string, StartingPieceInfo>::iterator it = this->starting_pieces_info.begin(); it != this->starting_pieces_info.end(); ++it)
-	{
-		this->starting_pieces[it->first].pos = it->second.pos;
 	}
 }
 
@@ -121,9 +119,9 @@ void SlidingPuzzleSolver::print_board(std::map<std::string, T> pieces)
 {
 	std::vector<std::vector<char>> board = this->get_board(pieces);
 
-	for (std::vector<std::vector<char>>::const_iterator it_row = board.begin(); it_row != board.end(); ++it_row)
+	for (std::vector<std::vector<char>>::const_iterator it_row = board.cbegin(); it_row != board.cend(); ++it_row)
 	{
-		for (std::vector<char>::const_iterator it_chr = it_row->begin(); it_chr != it_row->end(); ++it_chr)
+		for (std::vector<char>::const_iterator it_chr = it_row->cbegin(); it_chr != it_row->cend(); ++it_chr)
 		{
 			std::cout << *it_chr;
 		}
@@ -136,8 +134,7 @@ std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::stri
 {
 	std::vector<std::vector<char>> board = this->get_2d_vector();
 
-	// TODO: Figure out if "typename" here is really necessary and why if it is.
-	for (typename std::map<std::string, T>::const_iterator it = pieces.begin(); it != pieces.end(); ++it)
+	for (typename std::map<std::string, T>::const_iterator it = pieces.cbegin(); it != pieces.cend(); ++it)
 	{
 		std::string piece_label = it->first;
 		Pos pos = it->second.pos;

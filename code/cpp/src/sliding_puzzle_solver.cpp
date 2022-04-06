@@ -143,13 +143,13 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 	return std::vector<std::vector<char>>(height, std::vector<char>(width, ' '));
 }
 
-bool SlidingPuzzleSolver::add_new_state(std::map<std::string, Piece> &pieces)
+bool SlidingPuzzleSolver::add_new_state(const std::map<std::string, Piece> &pieces)
 {
-	std::pair<std::set<std::map<std::string, Piece>>::iterator, bool> ret;
+	const std::pair<std::set<std::map<std::string, Piece>>::iterator, bool> insert_info = states.insert(pieces);
 
-	ret = states.insert(pieces);
+	const bool &success = insert_info.second;
 
-	return ret.second;
+	return success;
 }
 
 void SlidingPuzzleSolver::solve(void)
@@ -158,9 +158,10 @@ void SlidingPuzzleSolver::solve(void)
 	pieces_queue.push(starting_pieces);
 	
 	std::queue<std::vector<std::pair<std::string, char>>> path_queue;
-	path_queue.push(std::vector<std::pair<std::string, char>>());
+	const std::vector<std::pair<std::string, char>> initial_empty_path = std::vector<std::pair<std::string, char>>();
+	path_queue.push(initial_empty_path);
 
-	// std::thread timed_print_thread(timed_print);
+	// TODO: Can this be shortened?
 	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue));
 
 	while (!pieces_queue.empty())
@@ -178,6 +179,7 @@ void SlidingPuzzleSolver::solve(void)
 
 		if (state_count > 20000)
 		{
+			finished = true;
 			break;
 		}
 
@@ -232,29 +234,27 @@ void SlidingPuzzleSolver::solve(void)
 		}
 	}
 
-	running = false;
 	timed_print_thread.join();
 }
 
-void SlidingPuzzleSolver::timed_print(std::queue<std::map<std::string, Piece>> &pieces_queue)
+void SlidingPuzzleSolver::timed_print(const std::queue<std::map<std::string, Piece>> &pieces_queue)
 {
-	while (running)
+	// TODO: Try to get rid of either the running or finished field.
+	// The reason we have them both right now has to do with the last 
+	while (!finished)
 	{
-		if (!finished)
-		{
-			// TODO: Store elapsed_time in something more appropriate than int.
-			int elapsed_time = get_elapsed_seconds().count();
+		// TODO: Store elapsed_time in something more appropriate than int.
+		const int elapsed_time = get_elapsed_seconds().count();
 
-			int states_count_diff = state_count - prev_state_count;
-			prev_state_count = state_count;
+		const int states_count_diff = state_count - prev_state_count;
+		prev_state_count = state_count;
 
-			std::cout << "\rElapsed time: " << elapsed_time << " seconds";
-			std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
-			std::cout << ", Queue length: " << pieces_queue.size();
-			std::cout << std::flush;
-		}
+		std::cout << "\rElapsed time: " << elapsed_time << " seconds";
+		std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
+		std::cout << ", Queue length: " << pieces_queue.size();
+		std::cout << std::flush;
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 

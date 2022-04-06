@@ -47,7 +47,6 @@ class SlidingPuzzleSolver
 
 	int state_count = 0;
 	int prev_state_count = 0;
-	bool running = true;
 	bool finished = false;
 
 	// Methods
@@ -66,10 +65,10 @@ class SlidingPuzzleSolver
 	const std::vector<std::vector<char>> get_board(std::map<std::string, T> &pieces);
 	const std::vector<std::vector<char>> get_2d_vector(void);
 
-	bool add_new_state(std::map<std::string, Piece> &pieces);
+	bool add_new_state(const std::map<std::string, Piece> &pieces);
 
 	void solve(void);
-	void timed_print(std::queue<std::map<std::string, Piece>> &pieces_queue);
+	void timed_print(const std::queue<std::map<std::string, Piece>> &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	void update_finished(std::map<std::string, Piece> pieces);

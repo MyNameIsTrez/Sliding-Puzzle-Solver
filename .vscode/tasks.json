@@ -46,6 +46,9 @@
 		  "label": "C++ build",
 		  "command": "/usr/bin/g++",
 		  "args": [
+			  "-Wall",
+			  "-Wextra",
+			  "-Werror",
 			  "-g3",
 			  "${workspaceFolder}/code/cpp/src/*.cpp",
 			  "-std=c++17",

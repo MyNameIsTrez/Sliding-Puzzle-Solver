@@ -61,12 +61,12 @@ class SlidingPuzzleSolver
 	void set_ending_pieces(const json &ending_pieces_json);
 
 	template <class T>
-	void print_board(std::map<std::string, T> pieces);
+	void print_board(std::map<std::string, T> &pieces);
 	template <class T>
-	std::vector<std::vector<char>> get_board(std::map<std::string, T> pieces);
-	std::vector<std::vector<char>> get_2d_vector(void);
+	const std::vector<std::vector<char>> get_board(std::map<std::string, T> &pieces);
+	const std::vector<std::vector<char>> get_2d_vector(void);
 
-	bool add_new_state(std::map<std::string, Piece> pieces);
+	bool add_new_state(std::map<std::string, Piece> &pieces);
 
 	void solve(void);
 	void timed_print(std::queue<std::map<std::string, Piece>> &pieces_queue);

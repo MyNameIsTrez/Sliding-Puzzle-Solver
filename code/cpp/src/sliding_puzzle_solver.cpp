@@ -93,9 +93,9 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces_json)
 }
 
 template <class T>
-void SlidingPuzzleSolver::print_board(std::map<std::string, T> pieces)
+void SlidingPuzzleSolver::print_board(std::map<std::string, T> &pieces)
 {
-	std::vector<std::vector<char>> board = get_board(pieces);
+	const std::vector<std::vector<char>> board = get_board(pieces);
 
 	for (std::vector<std::vector<char>>::const_iterator it_row = board.cbegin(); it_row != board.cend(); ++it_row)
 	{
@@ -108,24 +108,25 @@ void SlidingPuzzleSolver::print_board(std::map<std::string, T> pieces)
 }
 
 template <class T>
-std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::string, T> pieces)
+const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::string, T> &pieces)
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
 
 	for (typename std::map<std::string, T>::const_iterator it = pieces.cbegin(); it != pieces.cend(); ++it)
 	{
-		std::string piece_label = it->first;
-		Pos pos = it->second.pos;
-		Size size = starting_pieces_info[piece_label].size;
+		const std::string &piece_label = it->first;
+		const T &piece = it->second;
+		const Pos &pos = piece.pos;
+		const Size &size = starting_pieces_info[piece_label].size;
 
-		int y = pos.y;
-		int height = size.height;
+		const int &y = pos.y;
+		const int &x = pos.x;
+		
+		const int &width = size.width;
+		const int &height = size.height;
 
 		for (int y2 = y; y2 < y + height; ++y2)
 		{
-			int x = pos.x;
-			int width = size.width;
-
 			for (int x2 = x; x2 < x + width; ++x2)
 			{
 				// TODO: Handle the label string to char for printing conversion better.
@@ -137,12 +138,12 @@ std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(std::map<std::stri
 	return board;
 }
 
-std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
+const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 {
 	return std::vector<std::vector<char>>(height, std::vector<char>(width, ' '));
 }
 
-bool SlidingPuzzleSolver::add_new_state(std::map<std::string, Piece> pieces)
+bool SlidingPuzzleSolver::add_new_state(std::map<std::string, Piece> &pieces)
 {
 	std::pair<std::set<std::map<std::string, Piece>>::iterator, bool> ret;
 

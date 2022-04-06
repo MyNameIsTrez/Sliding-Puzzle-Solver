@@ -2,9 +2,9 @@
 
 ////////
 
-SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name)
+SlidingPuzzleSolver::SlidingPuzzleSolver(const std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
-	json puzzle_json = this->get_puzzle_json(exe_path, puzzle_name);
+	const json puzzle_json = this->get_puzzle_json(exe_path, puzzle_name);
 	this->initialize_constant_fields(puzzle_json);
 	this->initialize_variable_fields();
 }
@@ -20,11 +20,11 @@ void SlidingPuzzleSolver::run(void)
 
 ////////
 
-json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name)
+const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name)
 {
 	std::filesystem::path puzzle_path = this->get_puzzle_path_from_exe_path(exe_path, puzzle_name);
 	std::ifstream f(puzzle_path);
-	json puzzle_json = json::parse(f,
+	const json puzzle_json = json::parse(f,
 								   /* callback */ nullptr,
 								   /* allow exceptions */ true,
 								   /* ignore_comments */ true);
@@ -39,15 +39,15 @@ std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(std::fi
 	return puzzle_path;
 }
 
-void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
+void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 {
 	json board_size = puzzle_json["board_size"];
 	this->width = board_size["width"];
 	this->height = board_size["height"];
 
-	this->starting_pieces_info = this->json_starting_piece_info_to_map(puzzle_json["starting_pieces_info"]);
+	this->set_starting_pieces_info(puzzle_json["starting_pieces_info"]);
 	this->set_starting_pieces();
-	this->ending_pieces = this->json_ending_piece_to_map(puzzle_json["ending_pieces"]);
+	this->set_ending_pieces(puzzle_json["ending_pieces"]);
 
 	this->start_time = std::chrono::steady_clock::now();
 
@@ -58,12 +58,11 @@ void SlidingPuzzleSolver::initialize_constant_fields(json puzzle_json)
 	this->print_board_every_path = false;
 }
 
-std::map<std::string, StartingPieceInfo> SlidingPuzzleSolver::json_starting_piece_info_to_map(json j)
+void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info)
 {
-	std::map<std::string, StartingPieceInfo> m;
+	std::map<std::string, StartingPieceInfo> &m = this->starting_pieces_info;
 
-	// TODO: Can const_iterator be used here?
-	for (json::iterator it = j.begin(); it != j.end(); ++it)
+	for (json::const_iterator it = starting_pieces_info.cbegin(); it != starting_pieces_info.cend(); ++it)
 	{
 		StartingPieceInfo p;
 
@@ -78,16 +77,13 @@ std::map<std::string, StartingPieceInfo> SlidingPuzzleSolver::json_starting_piec
 		// TODO: Can .first be used instead of .key()?
 		m[it.key()] = p;
 	}
-
-	return m;
 }
 
-std::map<std::string, Piece> SlidingPuzzleSolver::json_ending_piece_to_map(json j)
+void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces)
 {
-	std::map<std::string, Piece> m;
+	std::map<std::string, Piece> &m = this->ending_pieces;
 
-	// TODO: Can const_iterator be used here?
-	for (json::iterator it = j.begin(); it != j.end(); ++it)
+	for (json::const_iterator it = ending_pieces.cbegin(); it != ending_pieces.cend(); ++it)
 	{
 		Piece p;
 
@@ -98,8 +94,6 @@ std::map<std::string, Piece> SlidingPuzzleSolver::json_ending_piece_to_map(json 
 		// TODO: Can .first be used instead of .key()?
 		m[it.key()] = p;
 	}
-
-	return m;
 }
 
 void SlidingPuzzleSolver::set_starting_pieces(void)

@@ -51,13 +51,13 @@ class SlidingPuzzleSolver
 	bool finished;
 
 	// Methods
-	json get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name);
+	const json get_puzzle_json(std::filesystem::path exe_path, std::string puzzle_name);
 	std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path exe_path, std::string puzzle_name);
 
-	void initialize_constant_fields(json puzzle_json);
+	void initialize_constant_fields(const json &puzzle_json);
 
-	std::map<std::string, StartingPieceInfo> json_starting_piece_info_to_map(json j);
-	std::map<std::string, Piece> json_ending_piece_to_map(json j);
+	void set_starting_pieces_info(const json &starting_pieces_info);
+	void set_ending_pieces(const json &ending_pieces);
 
 	void set_starting_pieces(void);
 	void initialize_variable_fields(void);
@@ -84,6 +84,6 @@ class SlidingPuzzleSolver
 	std::string get_path_string(std::vector<std::pair<std::string, char>> &path);
 
 public:
-	SlidingPuzzleSolver(std::filesystem::path exe_path, std::string puzzle_name);
+	SlidingPuzzleSolver(const std::filesystem::path &exe_path, const std::string &puzzle_name);
 	void run(void);
 };

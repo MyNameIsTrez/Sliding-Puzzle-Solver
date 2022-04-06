@@ -30,7 +30,8 @@
 			  }
 			],
 			"preLaunchTask": "C++ build",
-			"miDebuggerPath": "/usr/bin/gdb"
+			"miDebuggerPath": "/usr/bin/gdb",
+			"internalConsoleOptions": "neverOpen"
 		},
 	]
 }

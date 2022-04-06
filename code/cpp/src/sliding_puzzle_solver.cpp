@@ -206,7 +206,7 @@ void SlidingPuzzleSolver::solve(void)
 
 		this->update_finished(pieces);
 
-		if (this->state_count > 10000)
+		if (this->state_count > 20000)
 		{
 			break;
 		}

@@ -6,7 +6,6 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const 
 {
 	const json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
 	initialize_constant_fields(puzzle_json);
-	initialize_variable_fields();
 }
 
 void SlidingPuzzleSolver::run(void)
@@ -17,8 +16,6 @@ void SlidingPuzzleSolver::run(void)
 
 	solve();
 }
-
-////////
 
 const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
@@ -43,47 +40,41 @@ const std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(s
 
 void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 {
-	const json board_size = puzzle_json["board_size"];
+	const json &board_size = puzzle_json["board_size"];
 	width = board_size["width"];
 	height = board_size["height"];
 
 	set_starting_pieces_info(puzzle_json["starting_pieces_info"]);
 	set_starting_pieces();
 	set_ending_pieces(puzzle_json["ending_pieces"]);
-
-	start_time = std::chrono::steady_clock::now();
-
-	empty_character = ' ';
-
-	direction_characters = {'^', 'v', '<', '>'};
-
-	print_board_every_path = false;
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
 {
 	for (json::const_iterator it = starting_pieces_info_json.cbegin(); it != starting_pieces_info_json.cend(); ++it)
 	{
-		StartingPieceInfo p;
+		StartingPieceInfo piece;
 
-		json pos = (*it)["pos"];
-		p.pos.x = pos["x"];
-		p.pos.y = pos["y"];
+		const json &pos = (*it)["pos"];
+		piece.pos.x = pos["x"];
+		piece.pos.y = pos["y"];
 
-		json size = (*it)["size"];
-		p.size.width = size["width"];
-		p.size.height = size["height"];
+		const json &size = (*it)["size"];
+		piece.size.width = size["width"];
+		piece.size.height = size["height"];
 
-		starting_pieces_info[it.key()] = p;
+		starting_pieces_info[it.key()] = piece;
 	}
 }
 
 void SlidingPuzzleSolver::set_starting_pieces(void)
 {
-	// TODO: Can const_iterator be used here?
 	for (std::map<std::string, StartingPieceInfo>::const_iterator it = starting_pieces_info.cbegin(); it != starting_pieces_info.cend(); ++it)
 	{
-		starting_pieces[it->first].pos = it->second.pos;
+		const std::string &starting_piece_label = it->first;
+		const StartingPieceInfo &starting_piece_info = it->second;
+
+		starting_pieces[starting_piece_label].pos = starting_piece_info.pos;
 	}
 }
 
@@ -91,26 +82,15 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &ending_pieces_json)
 {
 	for (json::const_iterator it = ending_pieces_json.cbegin(); it != ending_pieces_json.cend(); ++it)
 	{
-		Piece p;
+		Piece piece;
 
-		json pos = (*it)["pos"];
-		p.pos.x = pos["x"];
-		p.pos.y = pos["y"];
+		const json &pos = (*it)["pos"];
+		piece.pos.x = pos["x"];
+		piece.pos.y = pos["y"];
 
-		ending_pieces[it.key()] = p;
+		ending_pieces[it.key()] = piece;
 	}
 }
-
-void SlidingPuzzleSolver::initialize_variable_fields(void)
-{
-	state_count = 0;
-	prev_state_count = 0;
-
-	running = true;
-	finished = false;
-}
-
-////////
 
 template <class T>
 void SlidingPuzzleSolver::print_board(std::map<std::string, T> pieces)

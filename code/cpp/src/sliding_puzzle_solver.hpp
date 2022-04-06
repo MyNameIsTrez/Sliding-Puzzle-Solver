@@ -34,21 +34,21 @@ class SlidingPuzzleSolver
 	std::map<std::string, Piece> starting_pieces;
 	std::map<std::string, Piece> ending_pieces;
 
-	std::chrono::steady_clock::time_point start_time;
+	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
-	char empty_character;
+	const char empty_character = ' ';
 
-	std::vector<char> direction_characters;
+	const std::vector<char> direction_characters = {'^', 'v', '<', '>'};
 
-	bool print_board_every_path;
+	const bool print_board_every_path = false;
 
 	// Variables
 	std::set<std::map<std::string, Piece>> states;
 
-	int state_count;
-	int prev_state_count;
-	bool running;
-	bool finished;
+	int state_count = 0;
+	int prev_state_count = 0;
+	bool running = true;
+	bool finished = false;
 
 	// Methods
 	const json get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name);
@@ -59,8 +59,6 @@ class SlidingPuzzleSolver
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_starting_pieces(void);
 	void set_ending_pieces(const json &ending_pieces_json);
-
-	void initialize_variable_fields(void);
 
 	template <class T>
 	void print_board(std::map<std::string, T> pieces);

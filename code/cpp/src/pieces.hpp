@@ -18,9 +18,7 @@ struct Pos
 	}
 	bool operator!=(const Pos &right) const
 	{
-		long left_id = static_cast<long>(y) * static_cast<long>(std::numeric_limits<int>::max()) + static_cast<long>(x);
-		long right_id = static_cast<long>(right.y) * static_cast<long>(std::numeric_limits<int>::max()) + static_cast<long>(right.x);
-		return left_id != right_id;
+		return x != right.x || y != right.y;
 	}
 };
 

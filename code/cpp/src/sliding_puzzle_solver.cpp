@@ -347,10 +347,11 @@ bool SlidingPuzzleSolver::no_intersection(const std::string &piece_label_1, cons
 	for (std::map<std::string, Piece>::const_iterator it = pieces.cbegin(); it != pieces.cend(); ++it)
 	{
 		const std::string &piece_label_2 = it->first;
-		const Piece &piece_2 = it->second;
 
 		if (piece_label_1 == piece_label_2)
 			continue;
+
+		const Piece &piece_2 = it->second;
 
 		const Pos &piece_2_pos = piece_2.pos;
 		const int piece_2_x = piece_2_pos.x;

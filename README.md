@@ -23,6 +23,9 @@ Then run this in this sliding puzzle solver repository:
 `sudo perf record --call-graph dwarf ./puzzle && sudo perf script | sudo ~/Programming/inferno/target/release/inferno-collapse-perf | sudo ~/Programming/inferno/target/release/inferno-flamegraph > flamegraph.svg`
 Uses https://github.com/jonhoo/inferno
 
+Run this to see whether your code changes make the program run faster:
+`hyperfine --warmup 2 --runs 5 './unordered_set' './puzzle'`
+
 #### Individual profiling commands
 
 `sudo perf record --call-graph dwarf ./puzzle`

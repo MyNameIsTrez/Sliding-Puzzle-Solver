@@ -147,7 +147,9 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 
 bool SlidingPuzzleSolver::add_new_state(const std::map<std::string, Piece> &pieces)
 {
-	const std::pair<std::set<std::map<std::string, Piece>>::iterator, bool> insert_info = states.insert(pieces);
+	const std::size_t hash = get_pieces_hash(pieces);
+
+	const std::pair<std::unordered_set<std::size_t>::iterator, bool> insert_info = states.insert(hash);
 
 	const bool success = insert_info.second;
 
@@ -383,9 +385,10 @@ const std::map<std::string, Piece> SlidingPuzzleSolver::deepcopy_pieces_position
 	{
 		const std::string &piece_label = it->first;
 		const Piece &piece = it->second;
-		const Pos &piece_pos = piece.pos;
 
+		const Pos &piece_pos = piece.pos;
 		Pos &deepcopied_piece_position = deepcopied_pieces_positions[piece_label].pos;
+
 		deepcopied_piece_position.x = piece_pos.x;
 		deepcopied_piece_position.y = piece_pos.y;
 	}
@@ -408,4 +411,26 @@ const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pa
 	}
 
 	return path_string;
+}
+
+// Stolen from here: https://stackoverflow.com/a/27216842
+std::size_t SlidingPuzzleSolver::get_pieces_hash(const std::map<std::string, Piece> &pieces) const
+{
+	std::size_t seed = pieces.size();
+
+	for (std::map<std::string, Piece>::const_iterator it = pieces.cbegin(); it != pieces.cend(); ++it)
+	{
+		const Piece &piece = it->second;
+		const Pos &piece_pos = piece.pos;
+		const int x = piece_pos.x;
+		const int y = piece_pos.y;
+		
+		// TODO: Profile whether calculating and storing width instead is faster.
+		// const int i = x + y * width;
+
+		seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= y + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	}
+
+	return seed;
 }

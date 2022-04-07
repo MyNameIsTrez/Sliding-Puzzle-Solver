@@ -3,3 +3,4 @@
 * Try to make things like "pieces" or a struct like "piece_pos" a reference for better performance.
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
+* Can an unordered_map be used for pieces?

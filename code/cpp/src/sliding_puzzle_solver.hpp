@@ -18,7 +18,7 @@ using json = nlohmann::json;
 #include <fstream>	// ifstream
 #include <chrono>	// steady_clock::now(), ::duration()
 #include <vector>	// vector
-#include <set>		// set
+#include <unordered_set>		// unordered_set
 #include <queue>	// queue
 #include <thread>	// this_thread
 
@@ -43,7 +43,7 @@ class SlidingPuzzleSolver
 	const bool print_board_every_path = false;
 
 	// Variables
-	std::set<std::map<std::string, Piece>> states;
+	std::unordered_set<std::size_t> states;
 
 	int state_count = 0;
 	int prev_state_count = 0;
@@ -79,6 +79,7 @@ class SlidingPuzzleSolver
 	const std::map<std::string, Piece> deepcopy_pieces_positions(const std::map<std::string, Piece> &pieces);
 
 	const std::string get_path_string(const std::vector<std::pair<std::string, char>> &path);
+	std::size_t get_pieces_hash(const std::map<std::string, Piece> &pieces) const;
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);

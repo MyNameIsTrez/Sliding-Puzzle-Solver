@@ -304,14 +304,7 @@ void SlidingPuzzleSolver::move(const int direction, Pos &piece_pos)
 
 bool SlidingPuzzleSolver::is_valid_move(const std::string &piece_label, const Pos &piece_pos, const std::map<std::string, Piece> &pieces)
 {
-	if (move_doesnt_cross_puzzle_edge(piece_label, piece_pos) &&
-		no_intersection(piece_label, piece_pos, pieces) &&
-		add_new_state(pieces))
-	{
-		return true;
-	}
-
-	return false;
+	return move_doesnt_cross_puzzle_edge(piece_label, piece_pos) && no_intersection(piece_label, piece_pos, pieces) && add_new_state(pieces);
 }
 
 bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const std::string &piece_label, const Pos &piece_pos)
@@ -323,10 +316,7 @@ bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const std::string &piece
 	const int starting_piece_width = starting_piece_size.width;
 	const int starting_piece_height = starting_piece_size.height;
 
-	if (y >= 0 && y + (starting_piece_height - 1) < height && x >= 0 && x + (starting_piece_width - 1) < width)
-		return true;
-
-	return false;
+	return y >= 0 && y + (starting_piece_height - 1) < height && x >= 0 && x + (starting_piece_width - 1) < width;
 }
 
 bool SlidingPuzzleSolver::no_intersection(const std::string &piece_label_1, const Pos &piece_1_pos, const std::map<std::string, Piece> &pieces)

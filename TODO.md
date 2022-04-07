@@ -4,14 +4,6 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
-* Rename `starting_pieces_info_json` to `starting_pieces_json`.
-
-* Replace `set_ending_pieces()` with `set_ending_pieces_indices()`.
-
-* Use a vector everywhere instead of a map.
-
-* Remove `print_board_every_path` and instead if `pieces_queue.size() > 0` in timed_print() then use `std::cout << ", Path length: " << pieces_queue[0].size();`.
-
 * Add "empty_areas" as a key in the puzzle's JSON holding an array.
   The array contains {"top_left_x": 5, ...}
 * Add the struct empty_area to sliding_puzzle_solver.h

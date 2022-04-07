@@ -177,7 +177,7 @@ void SlidingPuzzleSolver::solve(void)
 	path_queue.push(initial_empty_path);
 
 	// TODO: Can this be shortened?
-	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue));
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue), std::ref(path_queue));
 
 	while (!pieces_queue.empty())
 	{
@@ -186,9 +186,6 @@ void SlidingPuzzleSolver::solve(void)
 
 		std::vector<std::pair<std::size_t, char>> path = path_queue.front();
 		path_queue.pop();
-
-		if (print_board_every_path)
-			print_board(pieces);
 
 		update_finished(pieces);
 
@@ -244,7 +241,7 @@ void SlidingPuzzleSolver::solve(void)
 	timed_print_thread.join();
 }
 
-void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<Piece>> &pieces_queue)
+void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<Piece>> &pieces_queue, const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue)
 {
 	// TODO: Try to get rid of either the running or finished field.
 	// The reason we have them both right now has to do with the last 
@@ -257,6 +254,13 @@ void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<Piece>> &piec
 		prev_state_count = state_count;
 
 		std::cout << "\rElapsed time: " << elapsed_time << " seconds";
+
+		if (path_queue.size() > 0)
+		{
+			const std::size_t path_length = path_queue.front().size();
+			std::cout << ", Path length: " << path_length;
+		}
+		
 		std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
 		std::cout << ", Queue length: " << pieces_queue.size();
 		std::cout << std::flush;

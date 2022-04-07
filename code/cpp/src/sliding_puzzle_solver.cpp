@@ -181,11 +181,11 @@ void SlidingPuzzleSolver::solve(void)
 
 		update_finished(pieces);
 
-		if (state_count > 20000)
-		{
-			finished = true;
-			break;
-		}
+		// if (state_count > 200000)
+		// {
+		// 	finished = true;
+		// 	break;
+		// }
 
 		if (finished)
 		{

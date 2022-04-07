@@ -16,4 +16,4 @@
 * Add the field `vec<empty_area> empty_area;` as a field and initialize it.
 
 * Use a 2D vector of booleans to keep track of occupied tiles for collision.
-* A 2D vector supposedly is slow because it packs bits, so find a container that doesn't.
+* A 2D vector supposedly is slow because it packs bits, so compare with the containers that don't: `std::array` and `bitset`.

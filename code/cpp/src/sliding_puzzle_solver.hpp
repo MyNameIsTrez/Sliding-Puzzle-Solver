@@ -24,6 +24,14 @@ using json = nlohmann::json;
 
 ////////
 
+struct EmptyPosition
+{
+	int x;
+	int y;
+};
+
+////////
+
 class SlidingPuzzleSolver
 {
 	// Constants
@@ -33,6 +41,7 @@ class SlidingPuzzleSolver
 	std::vector<StartingPieceInfo> starting_pieces_info;
 	std::vector<Piece> starting_pieces;
 	std::vector<EndingPiece> ending_pieces;
+	std::vector<EmptyPosition> empty_positions;
 
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
@@ -57,7 +66,10 @@ class SlidingPuzzleSolver
 
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_ending_pieces(const json &starting_pieces_json);
+
 	void set_starting_pieces(void);
+
+	void set_empty_positions(const json &empty_positions_json);
 
 	template <class T>
 	void print_board(const std::vector<T> &pieces);

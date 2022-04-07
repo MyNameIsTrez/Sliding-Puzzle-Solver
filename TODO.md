@@ -4,10 +4,9 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
-* Add "empty_areas" as a key in the puzzle's JSON holding an array.
-  The array contains {"top_left_x": 5, ...}
-* Add the struct empty_area to sliding_puzzle_solver.h
-* Add the field `vec<empty_area> empty_area;` as a field and initialize it.
+* Use range-based for loops whenever possible!
+
+* Check whether using auto whenever possible results in the same performance.
 
 * Use a 2D vector of booleans to keep track of occupied tiles for collision.
 * A 2D vector supposedly is slow because it packs bits, so compare with the containers that don't: `std::array` and `bitset`.

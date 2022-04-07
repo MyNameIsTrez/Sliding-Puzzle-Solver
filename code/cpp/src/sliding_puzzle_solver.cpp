@@ -47,10 +47,12 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 	height = board_size["height"];
 
 	const json &starting_pieces_info = puzzle_json["starting_pieces_info"];
-
 	set_starting_pieces_info(starting_pieces_info);
 	set_ending_pieces(starting_pieces_info);
+
 	set_starting_pieces();
+	
+	set_empty_positions(puzzle_json["empty_positions"]);
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -68,19 +70,6 @@ void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_i
 		piece.size.height = size["height"];
 
 		starting_pieces_info.push_back(piece);
-	}
-}
-
-void SlidingPuzzleSolver::set_starting_pieces(void)
-{
-	for (std::size_t starting_piece_info_index = 0; starting_piece_info_index != starting_pieces_info.size(); ++starting_piece_info_index)
-	{
-		const StartingPieceInfo &starting_piece_info = starting_pieces_info[starting_piece_info_index];
-
-		Piece starting_piece;
-		starting_piece.pos = starting_piece_info.pos;
-
-		starting_pieces.push_back(starting_piece);
 	}
 }
 
@@ -103,6 +92,30 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 
 			ending_pieces.push_back(ending_piece);
 		}
+	}
+}
+
+void SlidingPuzzleSolver::set_starting_pieces(void)
+{
+	for (std::size_t starting_piece_info_index = 0; starting_piece_info_index != starting_pieces_info.size(); ++starting_piece_info_index)
+	{
+		const StartingPieceInfo &starting_piece_info = starting_pieces_info[starting_piece_info_index];
+
+		Piece starting_piece;
+		starting_piece.pos = starting_piece_info.pos;
+
+		starting_pieces.push_back(starting_piece);
+	}
+}
+
+void SlidingPuzzleSolver::set_empty_positions(const json &empty_positions_json)
+{
+	for (const auto &empty_position_json : empty_positions_json)
+	{
+		EmptyPosition empty_position;
+		empty_position.x = empty_position_json["x"];
+		empty_position.y = empty_position_json["y"];
+		empty_positions.push_back(empty_position);
 	}
 }
 

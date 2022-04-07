@@ -8,9 +8,8 @@
 	// DEEF
 	// DGHF
 	// I  J
-	"starting_pieces_info": {
-		// TODO: Don't have labels and make this a list?
-		"A": {
+	"starting_pieces_info": [
+		{
 			"pos": {
 				"x": 0,
 				"y": 0
@@ -20,7 +19,7 @@
 				"height": 2
 			}
 		},
-		"B": {
+		{
 			"pos": {
 				"x": 1,
 				"y": 0
@@ -28,9 +27,13 @@
 			"size": {
 				"width": 2,
 				"height": 2
+			},
+			"end": {
+				"x": 1,
+				"y": 3
 			}
 		},
-		"C": {
+		{
 			"pos": {
 				"x": 3,
 				"y": 0
@@ -40,7 +43,7 @@
 				"height": 2
 			}
 		},
-		"D": {
+		{
 			"pos": {
 				"x": 0,
 				"y": 2
@@ -50,7 +53,7 @@
 				"height": 2
 			}
 		},
-		"E": {
+		{
 			"pos": {
 				"x": 1,
 				"y": 2
@@ -60,7 +63,7 @@
 				"height": 1
 			}
 		},
-		"F": {
+		{
 			"pos": {
 				"x": 3,
 				"y": 2
@@ -70,7 +73,7 @@
 				"height": 2
 			}
 		},
-		"G": {
+		{
 			"pos": {
 				"x": 1,
 				"y": 3
@@ -80,7 +83,7 @@
 				"height": 1
 			}
 		},
-		"H": {
+		{
 			"pos": {
 				"x": 2,
 				"y": 3
@@ -90,7 +93,7 @@
 				"height": 1
 			}
 		},
-		"I": {
+		{
 			"pos": {
 				"x": 0,
 				"y": 4
@@ -100,7 +103,7 @@
 				"height": 1
 			}
 		},
-		"J": {
+		{
 			"pos": {
 				"x": 3,
 				"y": 4
@@ -110,13 +113,5 @@
 				"height": 1
 			}
 		}
-	},
-	"ending_pieces": {
-		"B": {
-			"pos": {
-				"x": 1,
-				"y": 3
-			}
-		}
-	}
+	]
 }

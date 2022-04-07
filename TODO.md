@@ -4,7 +4,9 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
-* Add `bool end;` to `StartingPieceInfo` and update `set_ending_pieces()` so it sets that `end` to `false` by default.
+* Rename `starting_pieces_info_json` to `starting_pieces_json`.
+
+* Replace `set_ending_pieces()` with `set_ending_pieces_indices()`.
 
 * Use a vector everywhere instead of a map.
 
@@ -17,3 +19,5 @@
 
 * Use a 2D vector of booleans to keep track of occupied tiles for collision.
 * A 2D vector supposedly is slow because it packs bits, so compare with the containers that don't: `std::array` and `bitset`.
+
+* The pairs data type is supposedly slow, so store a struct inside of path_queue instead of pairs.

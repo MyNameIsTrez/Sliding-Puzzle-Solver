@@ -6,10 +6,6 @@ struct Pos
 {
 	int x;
 	int y;
-	bool operator!=(const Pos &right) const
-	{
-		return x != right.x || y != right.y;
-	}
 };
 
 struct Size
@@ -24,8 +20,13 @@ struct StartingPieceInfo
 	Size size;
 };
 
+struct EndingPiece
+{
+	std::size_t piece_index;
+	Pos pos;
+};
+
 struct Piece
 {
 	Pos pos;
-	bool operator!=(const Piece &right) const { return pos != right.pos; }
 };

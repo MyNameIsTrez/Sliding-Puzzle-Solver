@@ -2,12 +2,12 @@
 
 ////////
 
-#include "pieces.hpp" // piece
+#include "json.hpp" // json
+using json = nlohmann::json;
 
 ////////
 
-#include "json.hpp" // json
-using json = nlohmann::json;
+#include "pieces.hpp" // piece
 
 ////////
 
@@ -30,9 +30,9 @@ class SlidingPuzzleSolver
 	int width;
 	int height;
 
-	std::map<std::string, StartingPieceInfo> starting_pieces_info;
-	std::map<std::string, Piece> starting_pieces;
-	std::map<std::string, Piece> ending_pieces;
+	std::vector<StartingPieceInfo> starting_pieces_info;
+	std::vector<Piece> starting_pieces;
+	std::vector<EndingPiece> ending_pieces;
 
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
@@ -56,30 +56,30 @@ class SlidingPuzzleSolver
 	void initialize_constant_fields(const json &puzzle_json);
 
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
+	void set_ending_pieces(const json &starting_pieces_json);
 	void set_starting_pieces(void);
-	void set_ending_pieces(const json &ending_pieces_json);
 
 	template <class T>
-	void print_board(const std::map<std::string, T> &pieces);
+	void print_board(const std::vector<T> &pieces);
 	template <class T>
-	const std::vector<std::vector<char>> get_board(const std::map<std::string, T> &pieces);
+	const std::vector<std::vector<char>> get_board(const std::vector<T> &pieces);
 	const std::vector<std::vector<char>> get_2d_vector(void);
 
-	bool add_new_state(const std::map<std::string, Piece> &pieces);
+	bool add_new_state(const std::vector<Piece> &pieces);
 
 	void solve(void);
-	void timed_print(const std::queue<std::map<std::string, Piece>> &pieces_queue);
+	void timed_print(const std::queue<std::vector<Piece>> &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
-	void update_finished(std::map<std::string, Piece> &pieces);
+	void update_finished(std::vector<Piece> &pieces);
 	void move(const int direction, Pos &piece_pos);
-	bool is_valid_move(const std::string &piece_label, const Pos &piece_pos, const std::map<std::string, Piece> &pieces);
-	bool move_doesnt_cross_puzzle_edge(const std::string &piece_label, const Pos &piece_pos);
-	bool no_intersection(const std::string &piece_label_1, const Pos &piece_1_pos, const std::map<std::string, Piece> &pieces);
-	const std::map<std::string, Piece> deepcopy_pieces_positions(const std::map<std::string, Piece> &pieces);
+	bool is_valid_move(const std::size_t piece_index, const Pos &piece_pos, const std::vector<Piece> &pieces);
+	bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);
+	bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos, const std::vector<Piece> &pieces);
+	const std::vector<Piece> deepcopy_pieces_positions(const std::vector<Piece> &pieces);
 
-	const std::string get_path_string(const std::vector<std::pair<std::string, char>> &path);
-	std::size_t get_pieces_hash(const std::map<std::string, Piece> &pieces) const;
+	const std::string get_path_string(const std::vector<std::pair<std::size_t, char>> &path);
+	std::size_t get_pieces_hash(const std::vector<Piece> &pieces) const;
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);

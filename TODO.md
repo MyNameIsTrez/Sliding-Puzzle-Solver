@@ -10,15 +10,15 @@
 * `std::unordered_map<CellIndex, PieceID> cells;`
 * `std::unordered_map<CellIndex, PieceID> active_cells;`
 
-* `std::set<CellIndex> pieces_blocked_left;`
-* `std::set<CellIndex> pieces_blocked_right;`
-* `std::set<CellIndex> pieces_blocked_up;`
-* `std::set<CellIndex> pieces_blocked_down;`
+* `std::set<PieceID> pieces_blocked_left;`
+* `std::set<PieceID> pieces_blocked_right;`
+* `std::set<PieceID> pieces_blocked_up;`
+* `std::set<PieceID> pieces_blocked_down;`
 
-* `std::set<CellIndex> pieces_maybe_movable_left;`
-* `std::set<CellIndex> pieces_maybe_movable_right;`
-* `std::set<CellIndex> pieces_maybe_movable_up;`
-* `std::set<CellIndex> pieces_maybe_movable_down;`
+* `std::set<PieceID> pieces_maybe_movable_left;`
+* `std::set<PieceID> pieces_maybe_movable_right;`
+* `std::set<PieceID> pieces_maybe_movable_up;`
+* `std::set<PieceID> pieces_maybe_movable_down;`
 
 * Use range-based for loops whenever possible.
 

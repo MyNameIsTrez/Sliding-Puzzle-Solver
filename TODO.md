@@ -4,8 +4,7 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
-* Use a 2D vector of Piece ids to keep track of which cells are occupied and by which Pieces:
-  `std::unordered_map<std::size_t, int> cells_occupation;`
+* `std::unordered_map<std::size_t, int> occupied;`
 
 * Use range-based for loops whenever possible.
 

@@ -10,7 +10,7 @@
 * `std::unordered_map<CellIndex, PieceID> cells;`
 * `std::unordered_map<CellIndex, PieceID> active_cells;`
 
-* `std::vector<int> movable_directions;` re-initialized to 0, 1, 2, 3 for every Piece and will only ever shrink.
+* `std::array<int, 4> movable_directions;`
 
 * Use range-based for loops whenever possible.
 

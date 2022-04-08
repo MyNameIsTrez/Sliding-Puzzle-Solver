@@ -279,7 +279,7 @@ void SlidingPuzzleSolver::timed_print_core(const std::queue<std::vector<std::pai
 
 	std::cout << "Elapsed time: " << elapsed_time << " seconds";
 
-	KiloFormatter kf(3);
+	KiloFormatter kf;
 
 	if (path_queue.size() > 0)
 	{

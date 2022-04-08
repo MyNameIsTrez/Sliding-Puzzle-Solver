@@ -5,25 +5,23 @@
 class KiloFormatter
 {
 public:
-	KiloFormatter(const int digits) : power(std::pow(10, digits)-1) {}
+	KiloFormatter() {}
 
 	const std::string format(double nbr)
 	{
 		std::stringstream formatted;
 
-		// formatted << std::fixed << std::setprecision(3);
-
 		if (nbr >= 1e9)
 		{
-			formatted << round_to_n_digits(nbr / 1e9) << " G";
+			formatted << shorten(nbr / 1e9) << " G";
 		}
 		else if (nbr >= 1e6)
 		{
-			formatted << round_to_n_digits(nbr / 1e6) << " M";
+			formatted << shorten(nbr / 1e6) << " M";
 		}
 		else if (nbr >= 1e3)
 		{
-			formatted << round_to_n_digits(nbr / 1e3) << " k";
+			formatted << shorten(nbr / 1e3) << " k";
 		}
 		else
 		{
@@ -33,17 +31,14 @@ public:
 		return formatted.str();
 	}
 private:
-	int power;
-
 	/*
-	Turn this into something like this:
-	function y(n){
-		const w = Math.floor(Math.log10(n)) - 3;
-		return (n / (10 ** w));
-	}
+	Outputs strings in this format:
+	1.234
+	12.34
+	123.4
 	*/
-	double round_to_n_digits(double nbr)
+	std::string shorten(double nbr)
 	{
-		return std::round(nbr * power) / power;
+		return std::to_string(nbr).substr(0, 5);
 	}
 };

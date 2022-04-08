@@ -20,13 +20,16 @@ void SlidingPuzzleSolver::run(void)
 const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
 	const std::filesystem::path puzzle_path = get_puzzle_path_from_exe_path(exe_path, puzzle_name);
+
 	std::ifstream stream(puzzle_path);
+
 	const json puzzle_json = json::parse(
 		stream,
 		nullptr, // callback
 		true, // allow exceptions
 		true // ignore_comments
 	);
+
 	return puzzle_json;
 }
 
@@ -36,7 +39,7 @@ const std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(s
 
 	// TODO: Add the file extension using the filesystem library.
 	const std::filesystem::path puzzle_path = exe_path / "puzzles" / (puzzle_name + ".jsonc");
-	
+
 	return puzzle_path;
 }
 
@@ -51,7 +54,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 	set_ending_pieces(starting_pieces_info);
 
 	set_starting_pieces();
-	
+
 	set_empty_positions(puzzle_json["empty_positions"]);
 }
 
@@ -147,7 +150,7 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(const std::v
 
 		const int y = pos.y;
 		const int x = pos.x;
-		
+
 		const int width = size.width;
 		const int height = size.height;
 
@@ -184,7 +187,7 @@ void SlidingPuzzleSolver::solve(void)
 {
 	std::queue<std::vector<Piece>> pieces_queue;
 	pieces_queue.push(starting_pieces);
-	
+
 	std::queue<std::vector<std::pair<std::size_t, char>>> path_queue;
 	const std::vector<std::pair<std::size_t, char>> initial_empty_path = std::vector<std::pair<std::size_t, char>>();
 	path_queue.push(initial_empty_path);
@@ -201,8 +204,11 @@ void SlidingPuzzleSolver::solve(void)
 
 		update_finished(pieces);
 
-		if (finished) break;
-	
+		if (finished)
+		{
+			break;
+		}
+
 		path_queue.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
 
 		for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
@@ -250,7 +256,7 @@ void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<std::pair<std
 	std::cout << std::endl;
 
 	// TODO: Try to get rid of either the running or finished field.
-	// The reason we have them both right now has to do with the last 
+	// The reason we have them both right now has to do with the last
 	while (!finished)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -276,7 +282,7 @@ void SlidingPuzzleSolver::timed_print_core(const std::queue<std::vector<std::pai
 		const std::size_t path_length = path_queue.front().size();
 		std::cout << ", Path length: " << path_length;
 	}
-	
+
 	std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
 	std::cout << ", Queue length: " << pieces_queue.size();
 	std::cout << std::flush;
@@ -302,9 +308,11 @@ void SlidingPuzzleSolver::update_finished(std::vector<Piece> &pieces)
 		const Piece &piece = pieces[ending_piece_index];
 		const Pos &piece_pos = piece.pos;
 
-		// TODO: Use a friend declared operator != to do pos comparison?
+		// TODO: Use a friend declared operator != to do pos comparison instead?
 		if (ending_piece_pos.x != piece_pos.x || ending_piece_pos.y != piece_pos.y)
+		{
 			finished = false;
+		}
 	}
 }
 
@@ -362,7 +370,9 @@ bool SlidingPuzzleSolver::no_intersection(const std::size_t piece_index_1, const
 	for (std::size_t piece_index_2 = 0; piece_index_2 != pieces.size(); ++piece_index_2)
 	{
 		if (piece_index_1 == piece_index_2)
+		{
 			continue;
+		}
 
 		const Piece &piece_2 = pieces[piece_index_2];
 
@@ -384,7 +394,9 @@ bool SlidingPuzzleSolver::no_intersection(const std::size_t piece_index_1, const
 			piece_1_left < piece_2_right &&
 			piece_1_bottom > piece_2_top &&
 			piece_1_top < piece_2_bottom)
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -440,7 +452,7 @@ std::size_t SlidingPuzzleSolver::get_pieces_hash(const std::vector<Piece> &piece
 		const Pos &piece_pos = piece.pos;
 		const int x = piece_pos.x;
 		const int y = piece_pos.y;
-		
+
 		// TODO: Profile whether calculating and storing width instead is faster.
 		// const int piece_index = x + y * width;
 

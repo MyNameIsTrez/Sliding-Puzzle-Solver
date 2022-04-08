@@ -4,9 +4,7 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
-* Use range-based for loops whenever possible!
-
-* Place {} after every for-loop, instead of only being able to have a single line after those for-loops.
+* Use range-based for loops whenever possible.
 
 * Check whether using auto whenever possible results in the same performance.
 

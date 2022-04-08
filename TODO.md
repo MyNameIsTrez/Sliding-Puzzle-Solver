@@ -13,4 +13,6 @@
 
 * The pairs data type is supposedly slow, so store a struct inside of path_queue instead of pairs.
 
-* Find a C++ formatting function that takes a number like 1100 and returns "1.1k".
+* Use the Include What You Use extension.
+
+* Find way around using json.hpp which doesn't seem to support C++20.

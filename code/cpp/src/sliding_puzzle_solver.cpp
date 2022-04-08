@@ -275,16 +275,20 @@ void SlidingPuzzleSolver::timed_print_core(const std::queue<std::vector<std::pai
 	const int states_count_diff = state_count - prev_state_count;
 	prev_state_count = state_count;
 
-	std::cout << "\rElapsed time: " << elapsed_time << " seconds";
+	std::cout << "\33[2K\r"; // Clears the line and goes back to the left.
+
+	std::cout << "Elapsed time: " << elapsed_time << " seconds";
+
+	KiloFormatter kf(3);
 
 	if (path_queue.size() > 0)
 	{
 		const std::size_t path_length = path_queue.front().size();
-		std::cout << ", Path length: " << path_length;
+		std::cout << ", Path length: " << kf.format(path_length);
 	}
 
-	std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
-	std::cout << ", Queue length: " << pieces_queue.size();
+	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
+	std::cout << ", Queue length: " << kf.format(pieces_queue.size());
 	std::cout << std::flush;
 }
 

@@ -2,25 +2,23 @@
 
 ////////
 
-#include "json.hpp" // json
+#include "json.hpp"
 using json = nlohmann::json;
 
 ////////
 
-#include "pieces.hpp" // piece
+#include "pieces.hpp"
+#include "kilo_formatter.h"
 
 ////////
 
-// TODO: Use the Include What You Use extension so that redundant
-// includes are automatically removed and these comments can be removed.
-
-#include <iostream> // std::cout, std::endl
-#include <fstream>	// ifstream
-#include <chrono>	// steady_clock::now(), ::duration()
-#include <vector>	// vector
-#include <unordered_set>		// unordered_set
-#include <queue>	// queue
-#include <thread>	// this_thread
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <vector>
+#include <unordered_set>
+#include <queue>
+#include <thread>
 
 ////////
 
@@ -80,7 +78,7 @@ class SlidingPuzzleSolver
 	bool add_new_state(const std::vector<Piece> &pieces);
 
 	void solve(void);
-	
+
 	void timed_print(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
 	void timed_print_core(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);

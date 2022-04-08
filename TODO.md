@@ -4,12 +4,12 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
+* Use a 2D vector of Piece ids to keep track of which cells are occupied and by which Pieces. -1 means not occupied:
+  `std::vector<std::vector<int>>(height, std::vector<int>(width, -1)) cells_occupation;`
+
 * Use range-based for loops whenever possible.
 
 * Check whether using auto whenever possible results in the same performance.
-
-* Use a 2D vector of booleans to keep track of occupied tiles for collision.
-* A 2D vector supposedly is slow because it packs bits, so compare with the containers that don't: `std::array` and `bitset`.
 
 * The pairs data type is supposedly slow, so store a struct inside of path_queue instead of pairs.
 

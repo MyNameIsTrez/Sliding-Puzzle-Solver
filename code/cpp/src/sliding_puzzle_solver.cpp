@@ -247,6 +247,8 @@ void SlidingPuzzleSolver::solve(void)
 
 void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue)
 {
+	std::cout << std::endl;
+
 	// TODO: Try to get rid of either the running or finished field.
 	// The reason we have them both right now has to do with the last 
 	while (!finished)
@@ -255,7 +257,7 @@ void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<std::pair<std
 		timed_print_core(path_queue, pieces_queue);
 	}
 
-	std::cout << std::endl << "Path:" << std::endl;
+	std::cout << std::endl << std::endl << "Path:" << std::endl;
 	std::cout << get_path_string(path_queue.front()) << std::endl << std::endl;
 }
 

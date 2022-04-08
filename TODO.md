@@ -4,7 +4,19 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
-* `std::unordered_map<std::size_t, int> occupied;`
+* `typedef int CellIndex;`
+* `struct CellInfo { CellIndex index; bool active; }`
+* `std::unordered_map<CellIndex, CellInfo> cells;` int is the index of the cell.
+
+* `std::set<CellIndex> pieces_blocked_left;`
+* `std::set<CellIndex> pieces_blocked_right;`
+* `std::set<CellIndex> pieces_blocked_up;`
+* `std::set<CellIndex> pieces_blocked_down;`
+
+* `std::set<CellIndex> pieces_maybe_movable_left;`
+* `std::set<CellIndex> pieces_maybe_movable_right;`
+* `std::set<CellIndex> pieces_maybe_movable_up;`
+* `std::set<CellIndex> pieces_maybe_movable_down;`
 
 * Use range-based for loops whenever possible.
 

@@ -190,7 +190,7 @@ void SlidingPuzzleSolver::solve(void)
 	path_queue.push(initial_empty_path);
 
 	// TODO: Can this be shortened?
-	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue), std::ref(path_queue));
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(path_queue), std::ref(pieces_queue));
 
 	while (!pieces_queue.empty())
 	{
@@ -198,21 +198,12 @@ void SlidingPuzzleSolver::solve(void)
 		pieces_queue.pop();
 
 		std::vector<std::pair<std::size_t, char>> path = path_queue.front();
-		path_queue.pop();
 
 		update_finished(pieces);
 
-		if (finished)
-		{
-			std::cout << std::endl << std::endl;
-			std::cout << "A shortest path of " << path.size() << " moves was found!" << std::endl;
-			std::cout << state_count << " unique states were seen." << std::endl;
-			std::cout << "The remaining queue length is " << pieces_queue.size() << "." << std::endl;
-			
-			std::cout << "Path: " << get_path_string(path) << std::endl << std::endl;
-			
-			break;
-		}
+		if (finished) break;
+	
+		path_queue.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
 
 		for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
 		{
@@ -254,32 +245,39 @@ void SlidingPuzzleSolver::solve(void)
 	timed_print_thread.join();
 }
 
-void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<Piece>> &pieces_queue, const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue)
+void SlidingPuzzleSolver::timed_print(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue)
 {
 	// TODO: Try to get rid of either the running or finished field.
 	// The reason we have them both right now has to do with the last 
 	while (!finished)
 	{
-		// TODO: Store elapsed_time in something more appropriate than int.
-		const int elapsed_time = get_elapsed_seconds().count();
-
-		const int states_count_diff = state_count - prev_state_count;
-		prev_state_count = state_count;
-
-		std::cout << "\rElapsed time: " << elapsed_time << " seconds";
-
-		if (path_queue.size() > 0)
-		{
-			const std::size_t path_length = path_queue.front().size();
-			std::cout << ", Path length: " << path_length;
-		}
-		
-		std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
-		std::cout << ", Queue length: " << pieces_queue.size();
-		std::cout << std::flush;
-
 		std::this_thread::sleep_for(std::chrono::seconds(1));
+		timed_print_core(path_queue, pieces_queue);
 	}
+
+	std::cout << std::endl << "Path:" << std::endl;
+	std::cout << get_path_string(path_queue.front()) << std::endl << std::endl;
+}
+
+void SlidingPuzzleSolver::timed_print_core(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue)
+{
+	// TODO: Store elapsed_time in something more appropriate than int.
+	const int elapsed_time = get_elapsed_seconds().count();
+
+	const int states_count_diff = state_count - prev_state_count;
+	prev_state_count = state_count;
+
+	std::cout << "\rElapsed time: " << elapsed_time << " seconds";
+
+	if (path_queue.size() > 0)
+	{
+		const std::size_t path_length = path_queue.front().size();
+		std::cout << ", Path length: " << path_length;
+	}
+	
+	std::cout << ", Unique states: " << state_count << " (+" << states_count_diff << "/s)";
+	std::cout << ", Queue length: " << pieces_queue.size();
+	std::cout << std::flush;
 }
 
 std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
@@ -414,19 +412,19 @@ const std::vector<Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(const st
 
 const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<std::size_t, char>> &path)
 {
-	// If this method ever needs to be called a lot then rewrite this to use a string stream/rope instead of += for concatenation.
-	std::string path_string;
+	// If this method ever needs to be called a lot then try using a rope instead.
+	std::stringstream path_stringstream;
 
 	for (std::vector<std::pair<std::size_t, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
 	{
 		std::size_t piece_index = pair_it->first;
-		path_string += piece_index;
+		path_stringstream << piece_index;
 
 		char direction = pair_it->second;
-		path_string += direction;
+		path_stringstream << direction;
 	}
 
-	return path_string;
+	return path_stringstream.str();
 }
 
 // Stolen from here: https://stackoverflow.com/a/27216842

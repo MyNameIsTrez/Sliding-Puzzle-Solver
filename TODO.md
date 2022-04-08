@@ -6,9 +6,13 @@
 
 * Use range-based for loops whenever possible!
 
+* Place {} after every for-loop, instead of only being able to have a single line after those for-loops.
+
 * Check whether using auto whenever possible results in the same performance.
 
 * Use a 2D vector of booleans to keep track of occupied tiles for collision.
 * A 2D vector supposedly is slow because it packs bits, so compare with the containers that don't: `std::array` and `bitset`.
 
 * The pairs data type is supposedly slow, so store a struct inside of path_queue instead of pairs.
+
+* Find a C++ formatting function that takes a number like 1100 and returns "1.1k".

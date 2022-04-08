@@ -80,7 +80,9 @@ class SlidingPuzzleSolver
 	bool add_new_state(const std::vector<Piece> &pieces);
 
 	void solve(void);
-	void timed_print(const std::queue<std::vector<Piece>> &pieces_queue, const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue);
+	
+	void timed_print(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
+	void timed_print_core(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	void update_finished(std::vector<Piece> &pieces);

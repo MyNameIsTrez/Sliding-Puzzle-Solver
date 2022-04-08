@@ -5,8 +5,10 @@
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
 * `typedef int CellIndex;`
-* `struct CellInfo { CellIndex index; bool active; }`
-* `std::unordered_map<CellIndex, CellInfo> cells;` int is the index of the cell.
+* `typedef int PieceID;`
+
+* `std::unordered_map<CellIndex, PieceID> cells;`
+* `std::unordered_map<CellIndex, PieceID> active_cells;`
 
 * `std::set<CellIndex> pieces_blocked_left;`
 * `std::set<CellIndex> pieces_blocked_right;`

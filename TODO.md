@@ -8,6 +8,7 @@
 * The pairs data type is supposedly slow, so store a struct inside of path_queue instead of pairs.
 * Use the Include What You Use extension.
 * Find way around using json.hpp which doesn't seem to support C++20.
+* Add a new JSON key for rectangular Pieces with `x, y, width, height` that substitutes having a gazillion 1x1 square Pieces. Minimizing the number of squares using rectangles should be done by a bin packing program.
 
 # New algorithm
 * `typedef int CellIndex;`

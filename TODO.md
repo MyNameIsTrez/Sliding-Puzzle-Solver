@@ -4,6 +4,7 @@
 * Consistently use "position" instead of "pos" in all the jsonc, Python and C++ code.
 * Rename self.HEIGHT and self.WIDTH to self.grid_rows and self.grid_columns. Same for C++.
 
+
 * `typedef int CellIndex;`
 * `typedef int PieceID;`
 
@@ -11,6 +12,9 @@
 * `std::unordered_map<CellIndex, PieceID> active_cells;`
 
 * `std::array<int, 4> movable_directions;`
+
+* Instead of storing empty Cells, store the wall Cells as there are 1. way fewer of them and 2. they don't need to be copied for every queued thing, unlike the approach of storing the empty cells.
+
 
 * Use range-based for loops whenever possible.
 

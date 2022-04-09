@@ -55,7 +55,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 
 	set_starting_pieces();
 
-	set_empty_positions(puzzle_json["empty_positions"]);
+	// add_empty_cells(puzzle_json["empty_cells"]);
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -111,16 +111,16 @@ void SlidingPuzzleSolver::set_starting_pieces(void)
 	}
 }
 
-void SlidingPuzzleSolver::set_empty_positions(const json &empty_positions_json)
-{
-	for (const auto &empty_position_json : empty_positions_json)
-	{
-		EmptyPosition empty_position;
-		empty_position.x = empty_position_json["x"];
-		empty_position.y = empty_position_json["y"];
-		empty_positions.push_back(empty_position);
-	}
-}
+// void SlidingPuzzleSolver::add_empty_cells(const json &empty_positions_json)
+// {
+// 	for (const auto &empty_position_json : empty_positions_json)
+// 	{
+// 		EmptyPosition empty_position;
+// 		empty_position.x = empty_position_json["x"];
+// 		empty_position.y = empty_position_json["y"];
+// 		cells.push_back(empty_position);
+// 	}
+// }
 
 template <class T>
 void SlidingPuzzleSolver::print_board(const std::vector<T> &pieces)

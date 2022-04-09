@@ -114,7 +114,7 @@
 			}
 		}
 	],
-	"empty_positions": [
+	"empty_cells": [
 		{
 			"x": 1,
 			"y": 4

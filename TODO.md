@@ -16,4 +16,4 @@
 * `std::unordered_map<CellIndex, PieceID> cells;`
 * `std::unordered_map<CellIndex, PieceID> active_cells;`
 * `std::array<int, 4> movable_directions;`
-* Instead of storing empty Cells, store the wall Cells as there are 1. way fewer of them and 2. they are static, so they don't ever need to be copied.
+* Instead of storing empty Cells, store the walls as Cells. 1. There are way fewer of them then empty Cells, and 2. they are static, so they don't ever need to be copied.

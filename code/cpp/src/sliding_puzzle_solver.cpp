@@ -16,7 +16,7 @@ void SlidingPuzzleSolver::run(void)
 
 	add_new_state(starting_pieces);
 
-	// solve(starting_pieces);
+	solve(starting_pieces);
 }
 
 const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name)
@@ -426,14 +426,17 @@ bool SlidingPuzzleSolver::is_valid_move(const std::size_t piece_index, const Pos
 
 bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos)
 {
-	const int x = piece_pos.x;
-	const int y = piece_pos.y;
+	const int piece_x = piece_pos.x;
+	const int piece_y = piece_pos.y;
 
 	const Size &starting_piece_size = starting_pieces_info[piece_index].size;
 	const int starting_piece_width = starting_piece_size.width;
 	const int starting_piece_height = starting_piece_size.height;
 
-	return y >= 0 && y + (starting_piece_height - 1) < height && x >= 0 && x + (starting_piece_width - 1) < width;
+	return (
+		piece_y >= 1 && piece_y + (starting_piece_height - 1) < height - 1 &&
+		piece_x >= 1 && piece_x + (starting_piece_width - 1) < width - 1
+	);
 }
 
 bool SlidingPuzzleSolver::no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos, const std::vector<Piece> &pieces)

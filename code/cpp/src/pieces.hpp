@@ -20,6 +20,12 @@ struct StartingPieceInfo
 	Size size;
 };
 
+struct Wall
+{
+	Pos pos;
+	Size size;
+};
+
 struct EndingPiece
 {
 	std::size_t piece_index;

@@ -1,18 +1,16 @@
 {
-	"board_size": {
-		"width": 4,
-		"height": 5
-	},
-	// ABBC
-	// ABBC
-	// DEEF
-	// DGHF
-	// I  J
+	//  ####
+	// #ABBC#
+	// #ABBC#
+	// #DEEF#
+	// #DGHF#
+	// #I##J#
+	//  #  #
 	"starting_pieces_info": [
 		{
 			"pos": {
-				"x": 0,
-				"y": 0
+				"x": 1,
+				"y": 1
 			},
 			"size": {
 				"width": 1,
@@ -21,52 +19,22 @@
 		},
 		{
 			"pos": {
-				"x": 1,
-				"y": 0
+				"x": 2,
+				"y": 1
 			},
 			"size": {
 				"width": 2,
 				"height": 2
 			},
 			"end": {
-				"x": 1,
-				"y": 3
+				"x": 2,
+				"y": 4
 			}
 		},
 		{
 			"pos": {
-				"x": 3,
-				"y": 0
-			},
-			"size": {
-				"width": 1,
-				"height": 2
-			}
-		},
-		{
-			"pos": {
-				"x": 0,
-				"y": 2
-			},
-			"size": {
-				"width": 1,
-				"height": 2
-			}
-		},
-		{
-			"pos": {
-				"x": 1,
-				"y": 2
-			},
-			"size": {
-				"width": 2,
-				"height": 1
-			}
-		},
-		{
-			"pos": {
-				"x": 3,
-				"y": 2
+				"x": 4,
+				"y": 1
 			},
 			"size": {
 				"width": 1,
@@ -80,7 +48,7 @@
 			},
 			"size": {
 				"width": 1,
-				"height": 1
+				"height": 2
 			}
 		},
 		{
@@ -89,13 +57,23 @@
 				"y": 3
 			},
 			"size": {
-				"width": 1,
+				"width": 2,
 				"height": 1
 			}
 		},
 		{
 			"pos": {
-				"x": 0,
+				"x": 4,
+				"y": 3
+			},
+			"size": {
+				"width": 1,
+				"height": 2
+			}
+		},
+		{
+			"pos": {
+				"x": 2,
 				"y": 4
 			},
 			"size": {
@@ -112,16 +90,88 @@
 				"width": 1,
 				"height": 1
 			}
-		}
-	],
-	"empty_cells": [
-		{
-			"x": 1,
-			"y": 4
 		},
 		{
-			"x": 2,
-			"y": 4
+			"pos": {
+				"x": 1,
+				"y": 5
+			},
+			"size": {
+				"width": 1,
+				"height": 1
+			}
+		},
+		{
+			"pos": {
+				"x": 4,
+				"y": 5
+			},
+			"size": {
+				"width": 1,
+				"height": 1
+			}
+		}
+	],
+	"walls": [
+		{
+			"pos": {
+				"x": 1,
+				"y": 0
+			},
+			"size": {
+				"width": 4,
+				"height": 1
+			}
+		},
+		{
+			"pos": {
+				"x": 0,
+				"y": 1
+			},
+			"size": {
+				"width": 1,
+				"height": 5
+			}
+		},
+		{
+			"pos": {
+				"x": 5,
+				"y": 1
+			},
+			"size": {
+				"width": 1,
+				"height": 5
+			}
+		},
+		{
+			"pos": {
+				"x": 2,
+				"y": 5
+			},
+			"size": {
+				"width": 2,
+				"height": 1
+			}
+		},
+		{
+			"pos": {
+				"x": 1,
+				"y": 6
+			},
+			"size": {
+				"width": 1,
+				"height": 1
+			}
+		},
+		{
+			"pos": {
+				"x": 4,
+				"y": 6
+			},
+			"size": {
+				"width": 1,
+				"height": 1
+			}
 		}
 	]
 }

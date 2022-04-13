@@ -22,16 +22,8 @@ using json = nlohmann::json;
 
 ////////
 
-struct EmptyPosition
-{
-	int x;
-	int y;
-};
-
-////////
-
-// typedef int PieceID;
-// typedef int MovableDirection;
+typedef int CellIndex;
+typedef int PieceID;
 
 ////////
 
@@ -42,17 +34,19 @@ class SlidingPuzzleSolver
 	int height;
 
 	std::vector<StartingPieceInfo> starting_pieces_info;
-	std::vector<Piece> starting_pieces;
 	std::vector<EndingPiece> ending_pieces;
 
-	// std::vector<std::vector<PieceID>> cells;
-	// std::vector<std::vector<PieceID>> active_cells;
+	std::vector<Wall> walls;
 
-	// std::array<MovableDirection, 4> movable_directions;
+	// std::unordered_map<CellIndex, PieceID> cells;
+	// std::vector<CellIndex> active_cells;
+	std::vector<std::vector<bool>> is_wall;
+	// std::array<int, 4> movable_directions;
 
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
 	const char empty_character = ' ';
+	const char wall_character = '#';
 
 	const std::vector<char> direction_characters = {'^', 'v', '<', '>'};
 
@@ -74,19 +68,25 @@ class SlidingPuzzleSolver
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_ending_pieces(const json &starting_pieces_json);
 
-	void set_starting_pieces(void);
+	std::vector<Piece> get_starting_pieces(void);
 
-	// void add_empty_cells(const json &empty_positions_json);
+	void set_width_and_height(const json &walls_json);
+	void set_walls(const json &walls_json);
+	void set_is_wall(void);
+	// int get_index(int x, int y);
 
 	template <class T>
 	void print_board(const std::vector<T> &pieces);
 	template <class T>
 	const std::vector<std::vector<char>> get_board(const std::vector<T> &pieces);
 	const std::vector<std::vector<char>> get_2d_vector(void);
+	template <class T>
+	void set_pieces_on_board(const std::vector<T> &pieces, std::vector<std::vector<char>> &board);
+	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
 	bool add_new_state(const std::vector<Piece> &pieces);
 
-	void solve(void);
+	void solve(std::vector<Piece> starting_pieces);
 
 	void timed_print(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
 	void timed_print_core(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);

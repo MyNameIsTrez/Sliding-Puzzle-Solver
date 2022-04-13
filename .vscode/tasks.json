@@ -50,10 +50,11 @@
 			  "-Wextra",
 			  "-Werror",
 			  "-g3",
-			  "${workspaceFolder}/code/cpp/src/*.cpp",
 			  "-std=c++17",
 			  "-pthread",
 			  "-O3",
+			  "${workspaceFolder}/code/cpp/src/*.cpp",
+			  "${workspaceFolder}/code/cpp/src/sliding_puzzle_solver_utils/*.cpp",
 			  "-o",
 			  "${workspaceFolder}/puzzle"
 			],

@@ -9,7 +9,7 @@
 * Use the Include What You Use extension.
 * Find way around using json.hpp which doesn't seem to support C++20.
 * Add a new JSON key for rectangular Pieces with `x, y, width, height` that substitutes having a gazillion 1x1 square Pieces. Minimizing the number of squares using rectangles should be done by a bin packing program. It may be even better to put the 1x1 square Pieces in the same vector as the rectangular Pieces by giving them a width and height of 1, but that should be profiled.
-* Move methods like set_wall_cell_indices() which aren't integral to the algorithm to SlidingPuzzleSolverUtils.
+* Move methods like set_wall_cell_indices() which aren't integral to the algorithm to other classes.
 * Make an iterator (generator?) for std::vector<T> (T can be pieces, walls, more?) that yields all x and y values.
 
 # New algorithm

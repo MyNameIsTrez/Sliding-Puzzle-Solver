@@ -38,11 +38,6 @@ class SlidingPuzzleSolver
 
 	std::vector<Wall> walls;
 
-	// std::unordered_map<CellIndex, PieceID> cells;
-	// std::vector<CellIndex> active_cells;
-	std::vector<std::vector<bool>> is_wall;
-	// std::array<int, 4> movable_directions;
-
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
 	const char empty_character = ' ';
@@ -58,6 +53,11 @@ class SlidingPuzzleSolver
 	int state_count = 0;
 	int prev_state_count = 0;
 	bool finished = false;
+
+	// std::unordered_map<CellIndex, PieceID> cells;
+	// std::vector<CellIndex> active_cells;
+	std::vector<std::vector<bool>> is_wall;
+	// std::array<int, 4> movable_directions;
 
 	// Methods
 	const json get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name);

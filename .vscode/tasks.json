@@ -42,30 +42,57 @@
 			]
 		},
 		{
-		  "type": "shell",
-		  "label": "C++ build",
-		  "command": "/usr/bin/g++",
-		  "args": [
-			  "-Wall",
-			  "-Wextra",
-			  "-Werror",
-			  "-g3",
-			  "-std=c++17",
-			  "-pthread",
-			  "-O3",
-			  "${workspaceFolder}/code/cpp/src/*.cpp",
-			  "${workspaceFolder}/code/cpp/src/sliding_puzzle_solver_utils/*.cpp",
-			  "-o",
-			  "${workspaceFolder}/puzzle"
+			"type": "shell",
+			"label": "C++ build",
+			"command": "/usr/bin/g++",
+			"args": [
+				"-Wall",
+				"-Wextra",
+				"-Werror",
+				"-g3",
+				"-std=c++17",
+				"-pthread",
+				"-O3",
+				"${workspaceFolder}/code/cpp/src/*.cpp",
+				"-o",
+				"${workspaceFolder}/puzzle"
 			],
-		  "options": {
-			"cwd": "/usr/bin"
-		  },
-		  "problemMatcher": ["$gcc"],
-		  "group": {
+			"options": {
+				"cwd": "/usr/bin"
+			},
+			"problemMatcher": ["$gcc"],
+			"group": {
 			"kind": "build",
 			"isDefault": true
-		  }
+			}
+		},
+		{
+			"type": "shell",
+			"label": "hyperfine",
+			"command": "hyperfine",
+			"args": [
+				// "--warmup",
+				// "2",
+				"--runs",
+				"1",
+				"./${input:binary_1}",
+				"./${input:binary_2}"
+			],
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+			"id": "binary_1",
+			"description": "Binary 1",
+			"default": "puzzle",
+			"type": "promptString"
+		},
+		{
+			"id": "binary_2",
+			"description": "Binary 2",
+			"default": "puzzle",
+			"type": "promptString"
 		}
 	]
 }

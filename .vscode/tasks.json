@@ -79,6 +79,12 @@
 				"./${input:binary_2}"
 			],
 			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "flamegraph",
+			"command": "sudo perf record --call-graph dwarf ./${input:binary_1} && sudo perf script | sudo ~/Programming/inferno/target/release/inferno-collapse-perf | sudo ~/Programming/inferno/target/release/inferno-flamegraph > flamegraph.svg",
+			"problemMatcher": []
 		}
 	],
 	"inputs": [

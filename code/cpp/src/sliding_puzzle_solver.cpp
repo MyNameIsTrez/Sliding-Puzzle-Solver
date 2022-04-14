@@ -58,17 +58,32 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
 {
-	for (json::const_iterator it = starting_pieces_info_json.cbegin(); it != starting_pieces_info_json.cend(); ++it)
+	// TODO: Replace with const auto & for-loop.
+	for (json::const_iterator starting_piece_info_json_iterator = starting_pieces_info_json.cbegin(); starting_piece_info_json_iterator != starting_pieces_info_json.cend(); ++starting_piece_info_json_iterator)
 	{
 		StartingPieceInfo piece;
 
-		const json &pos = (*it)["pos"];
-		piece.pos.x = pos["x"];
-		piece.pos.y = pos["y"];
+		const json &json_top_left = (*starting_piece_info_json_iterator)["top_left"];
+		piece.top_left.x = json_top_left["x"];
+		piece.top_left.y = json_top_left["y"];
 
-		const json &size = (*it)["size"];
-		piece.size.width = size["width"];
-		piece.size.height = size["height"];
+		const json &json_rects = (*starting_piece_info_json_iterator)["rects"];
+
+		// TODO: Replace with const auto & for-loop.
+		for (json::const_iterator json_rect_iterator = json_rects.cbegin(); json_rect_iterator != json_rects.cend(); ++json_rect_iterator)
+		{
+			Rect rect;
+
+			const json &json_rect_offset = (*json_rect_iterator)["offset"];
+			rect.offset.x = json_rect_offset["x"];
+			rect.offset.y = json_rect_offset["y"];
+
+			const json &json_rect_size = (*json_rect_iterator)["size"];
+			rect.size.width = json_rect_size["width"];
+			rect.size.height = json_rect_size["height"];
+
+			piece.rects.push_back(rect);
+		}
 
 		starting_pieces_info.push_back(piece);
 	}

@@ -379,19 +379,19 @@ void SlidingPuzzleSolver::update_finished(std::vector<Piece> &pieces)
 {
 	finished = true;
 
-	for (std::size_t ending_piece_vector_index = 0; ending_piece_vector_index != ending_pieces.size(); ++ending_piece_vector_index)
+	for (const auto &ending_piece : ending_pieces)
 	{
-		const EndingPiece &ending_piece = ending_pieces[ending_piece_vector_index];
 		const std::size_t ending_piece_index = ending_piece.piece_index;
-		const Pos &ending_piece_pos = ending_piece.pos;
+		const Pos &ending_piece_top_left = ending_piece.top_left;
 
 		const Piece &piece = pieces[ending_piece_index];
-		const Pos &piece_pos = piece.pos;
+		const Pos &piece_top_left = piece.top_left;
 
 		// TODO: Use a friend declared operator != to do pos comparison instead?
-		if (ending_piece_pos.x != piece_pos.x || ending_piece_pos.y != piece_pos.y)
+		if (ending_piece_top_left.x != piece_top_left.x || ending_piece_top_left.y != piece_top_left.y)
 		{
 			finished = false;
+			return;
 		}
 	}
 }

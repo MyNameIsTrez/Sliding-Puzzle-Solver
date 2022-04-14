@@ -2,10 +2,20 @@
 
 ////////
 
+struct Offset
+{
+	int x;
+	int y;
+};
+
 struct Pos
 {
 	int x;
 	int y;
+	bool operator==(const Pos &other) const
+	{
+		return (x == other.x && y == other.y);
+	}
 };
 
 struct Size
@@ -14,10 +24,16 @@ struct Size
 	int height;
 };
 
+struct Rect
+{
+	Offset offset;
+	Size size;
+};
+
 struct StartingPieceInfo
 {
-	Pos pos;
-	Size size;
+	Pos top_left;
+	std::vector<Rect> rects;
 };
 
 struct Wall
@@ -29,15 +45,15 @@ struct Wall
 struct EndingPiece
 {
 	std::size_t piece_index;
-	Pos pos;
+	Pos top_left;
 };
 
 struct Piece
 {
-	Pos pos;
+	Pos top_left;
 	bool operator==(const Piece &other) const
 	{
-		return (pos.x == other.pos.x && pos.y == other.pos.y);
+		return (top_left.x == other.top_left.x && top_left.y == other.top_left.y);
 	}
 	struct Hasher {
 		// Hashing logic stolen from here: https://stackoverflow.com/a/27216842
@@ -48,9 +64,9 @@ struct Piece
 			for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
 			{
 				const Piece &piece = pieces[piece_index];
-				const Pos &piece_pos = piece.pos;
-				const int x = piece_pos.x;
-				const int y = piece_pos.y;
+				const Pos &piece_top_left = piece.top_left;
+				const int x = piece_top_left.x;
+				const int y = piece_top_left.y;
 
 				// TODO: Profile whether calculating and storing width instead is faster.
 				// const int piece_index = x + y * width;

@@ -11,6 +11,7 @@
 * Add a new JSON key for rectangular Pieces with `x, y, width, height` that substitutes having a gazillion 1x1 square Pieces. Minimizing the number of squares using rectangles should be done by a bin packing program. It may be even better to put the 1x1 square Pieces in the same vector as the rectangular Pieces by giving them a width and height of 1, but that should be profiled.
 * Move methods like set_wall_cell_indices() which aren't integral to the algorithm to other classes.
 * Make an iterator (generator?) for std::vector<T> (T can be pieces, walls, more?) that yields all x and y values.
+* Is it faster to store a constant reference than it is to dereference twice? For example: "const Pos &piece_top_left = piece.top_left; const int x = piece_top_left.x; const int y = piece_top_left.y;"
 
 # New algorithm
 * Increment all piece positions in klotski.jsonc by 1 to account for added surrounding walls.

@@ -48,7 +48,8 @@ class SlidingPuzzleSolver
 	const bool print_board_every_path = false;
 
 	// Variables
-	std::unordered_set<std::size_t> states;
+	// std::unordered_set<std::size_t> states;
+	std::unordered_set<std::vector<Piece>, Piece::Hasher> states;
 
 	int state_count = 0;
 	int prev_state_count = 0;
@@ -100,7 +101,6 @@ class SlidingPuzzleSolver
 	const std::vector<Piece> deepcopy_pieces_positions(const std::vector<Piece> &pieces);
 
 	const std::string get_path_string(const std::vector<std::pair<std::size_t, char>> &path);
-	std::size_t get_pieces_hash(const std::vector<Piece> &pieces) const;
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);

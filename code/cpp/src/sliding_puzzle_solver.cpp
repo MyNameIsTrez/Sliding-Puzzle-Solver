@@ -254,9 +254,7 @@ void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &boa
 
 bool SlidingPuzzleSolver::add_new_state(const std::vector<Piece> &pieces)
 {
-	const std::size_t hash = get_pieces_hash(pieces);
-
-	const std::pair<std::unordered_set<std::size_t>::iterator, bool> insert_info = states.insert(hash);
+	const std::pair<std::unordered_set<std::vector<Piece>, Piece::Hasher>::iterator, bool> insert_info = states.insert(pieces);
 
 	const bool success = insert_info.second;
 
@@ -524,26 +522,4 @@ const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pa
 	}
 
 	return path_stringstream.str();
-}
-
-// Stolen from here: https://stackoverflow.com/a/27216842
-std::size_t SlidingPuzzleSolver::get_pieces_hash(const std::vector<Piece> &pieces) const
-{
-	std::size_t seed = pieces.size();
-
-	for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
-	{
-		const Piece &piece = pieces[piece_index];
-		const Pos &piece_pos = piece.pos;
-		const int x = piece_pos.x;
-		const int y = piece_pos.y;
-
-		// TODO: Profile whether calculating and storing width instead is faster.
-		// const int piece_index = x + y * width;
-
-		seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		seed ^= y + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-	}
-
-	return seed;
 }

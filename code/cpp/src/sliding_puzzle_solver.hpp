@@ -57,7 +57,7 @@ class SlidingPuzzleSolver
 
 	// std::unordered_map<CellIndex, PieceID> cells;
 	// std::vector<CellIndex> active_cells;
-	std::vector<std::vector<bool>> is_wall;
+	// std::vector<std::vector<bool>> is_wall;
 	// std::array<int, 4> movable_directions;
 
 	// Methods
@@ -73,16 +73,13 @@ class SlidingPuzzleSolver
 
 	void set_width_and_height(const json &walls_json);
 	void set_walls(const json &walls_json);
-	void set_is_wall(void);
+	// void set_is_wall(void);
 	// int get_index(int x, int y);
 
-	template <class T>
-	void print_board(const std::vector<T> &pieces);
-	template <class T>
-	const std::vector<std::vector<char>> get_board(const std::vector<T> &pieces);
+	void print_board(const std::vector<Piece> &pieces);
+	const std::vector<std::vector<char>> get_board(const std::vector<Piece> &pieces);
 	const std::vector<std::vector<char>> get_2d_vector(void);
-	template <class T>
-	void set_pieces_on_board(const std::vector<T> &pieces, std::vector<std::vector<char>> &board);
+	void set_pieces_on_board(const std::vector<Piece> &pieces, std::vector<std::vector<char>> &board);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
 	bool add_new_state(const std::vector<Piece> &pieces);

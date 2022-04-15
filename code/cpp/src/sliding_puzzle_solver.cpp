@@ -100,11 +100,11 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 			EndingPiece ending_piece;
 			ending_piece.piece_index = starting_piece_json_index;
 
-			Pos &ending_piece_pos = ending_piece.pos;
+			Pos &ending_piece_top_left = ending_piece.top_left;
 			const json &ending_piece_json_pos = starting_piece_json["end"];
 
-			ending_piece_pos.x = ending_piece_json_pos["x"];
-			ending_piece_pos.y = ending_piece_json_pos["y"];
+			ending_piece_top_left.x = ending_piece_json_pos["x"];
+			ending_piece_top_left.y = ending_piece_json_pos["y"];
 
 			ending_pieces.push_back(ending_piece);
 		}
@@ -120,7 +120,7 @@ std::vector<Piece> SlidingPuzzleSolver::get_starting_pieces(void)
 		const StartingPieceInfo &starting_piece_info = starting_pieces_info[starting_piece_info_index];
 
 		Piece starting_piece;
-		starting_piece.pos = starting_piece_info.pos;
+		starting_piece.top_left = starting_piece_info.top_left;
 
 		starting_pieces.push_back(starting_piece);
 	}
@@ -130,18 +130,25 @@ std::vector<Piece> SlidingPuzzleSolver::get_starting_pieces(void)
 
 void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 {
+	// Taking the width and height of walls into account is only necessary when the right or bottom wall is two cells thick.
+	// I can't think of a reason why they would ever be this thick since those outer wall cells wouldn't influence the puzzle.
+	// But hey, making this function handle that edge case (hah) correctly with "x + wall_width" is less puzzling than "x + 1" anyways!
+
 	width = 0;
 	height = 0;
 
 	for (const auto &wall_json : walls_json)
 	{
 		const json &wall_pos_json = wall_json["pos"];
+		const json &wall_size_json = wall_json["size"];
 
 		const int x = wall_pos_json["x"];
-		if (x + 1 > width) width = x + 1;
+		const int wall_width = wall_size_json["width"];
+		if (x + wall_width > width) width = x + wall_width;
 
 		const int y = wall_pos_json["y"];
-		if (y + 1 > height) height = y + 1;
+		const int wall_height = wall_size_json["height"];
+		if (y + wall_height > height) height = y + wall_height;
 	}
 }
 

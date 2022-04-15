@@ -45,6 +45,10 @@ class SlidingPuzzleSolver
 
 	const std::vector<char> direction_characters = {'^', 'v', '<', '>'};
 
+	// TODO: Support more than 26 piece labels in some way.
+	const std::string piece_labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	const std::size_t piece_labels_length = piece_labels.length();
+
 	const bool print_board_every_path = false;
 
 	// Variables

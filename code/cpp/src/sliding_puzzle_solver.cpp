@@ -242,19 +242,18 @@ void SlidingPuzzleSolver::set_pieces_on_board(const std::vector<Piece> &pieces, 
 		for (const auto &rect : rects)
 		{
 			const Offset &rect_offset = rect.offset;
-			const int rect_x = top_left_x + rect_offset.x;
-			const int rect_y = top_left_y + rect_offset.y;
+			const int top_left_rect_x = top_left_x + rect_offset.x;
+			const int top_left_rect_y = top_left_y + rect_offset.y;
 
 			const Size &rect_size = rect.size;
 			const int rect_width = rect_size.width;
 			const int rect_height = rect_size.height;
 
-			for (int y = rect_y; y < rect_y + rect_height; ++y)
+			for (int y = top_left_rect_y; y < top_left_rect_y + rect_height; ++y)
 			{
-				for (int x = rect_x; x < rect_x + rect_width; ++x)
+				for (int x = top_left_rect_x; x < top_left_rect_x + rect_width; ++x)
 				{
-					// TODO: Support more than 26 pieces.
-					board[y][x] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[piece_index % 26];
+					board[y][x] = piece_labels[piece_index % piece_labels_length];
 				}
 			}
 		}
@@ -271,11 +270,11 @@ void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &boa
 
 		const Size &wall_size = wall.size;
 
-		for (int y_offset = 0; y_offset < wall_size.height; ++y_offset)
+		for (int y = top_left_wall_y; y < top_left_wall_y + wall_size.height; ++y)
 		{
-			for (int x_offset = 0; x_offset < wall_size.width; ++x_offset)
+			for (int x = top_left_wall_x; x < top_left_wall_x + wall_size.width; ++x)
 			{
-				board[top_left_wall_y + y_offset][top_left_wall_x + x_offset] = wall_character;
+				board[y][x] = wall_character;
 			}
 		}
 	}

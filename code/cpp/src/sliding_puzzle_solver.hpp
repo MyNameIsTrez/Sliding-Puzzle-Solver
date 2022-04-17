@@ -17,13 +17,18 @@ using json = nlohmann::json;
 #include <chrono>
 #include <vector>
 #include <unordered_set>
-#include <queue>
+#include <stack>
 #include <thread>
 
 ////////
 
-typedef int CellIndex;
-typedef int PieceID;
+typedef int cell_id;
+
+enum
+{
+	empty_cell_id = -1,
+	wall_cell_id = -2
+}
 
 ////////
 
@@ -35,8 +40,6 @@ class SlidingPuzzleSolver
 
 	std::vector<StartingPieceInfo> starting_pieces_info;
 	std::vector<EndingPiece> ending_pieces;
-
-	std::vector<Wall> walls;
 
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
@@ -59,10 +62,8 @@ class SlidingPuzzleSolver
 	int prev_state_count = 0;
 	bool finished = false;
 
-	// std::unordered_map<CellIndex, PieceID> cells;
-	// std::vector<CellIndex> active_cells;
-	// std::vector<std::vector<bool>> is_wall;
-	// std::array<int, 4> movable_directions;
+	std::vector<std::vector<cell_id>> cells;
+	// std::vector<std::vector<bool>> active_cells;
 
 	// Methods
 	const json get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name);
@@ -76,8 +77,7 @@ class SlidingPuzzleSolver
 	std::vector<Piece> get_starting_pieces(void);
 
 	void set_width_and_height(const json &walls_json);
-	void set_walls(const json &walls_json);
-	// void set_is_wall(void);
+	void set_cells(const json &walls_json);
 	// int get_index(int x, int y);
 
 	void print_board(const std::vector<Piece> &pieces);
@@ -90,13 +90,14 @@ class SlidingPuzzleSolver
 
 	void solve(std::vector<Piece> starting_pieces);
 
-	void timed_print(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
-	void timed_print_core(const std::queue<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::queue<std::vector<Piece>> &pieces_queue);
+	void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
+	void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	void update_finished(std::vector<Piece> &pieces);
+	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const std::size_t piece_index, const Pos &piece_top_left, const std::vector<Piece> &pieces);
 	void move(const int direction, Pos &piece_pos);
-	bool is_valid_move(const std::size_t piece_index, const Pos &piece_pos, const std::vector<Piece> &pieces);
+	bool is_invalid_move(const std::size_t piece_index, const Pos &piece_pos, const std::vector<Piece> &pieces);
 	bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);
 	bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos, const std::vector<Piece> &pieces);
 	const std::vector<Piece> deepcopy_pieces_positions(const std::vector<Piece> &pieces);

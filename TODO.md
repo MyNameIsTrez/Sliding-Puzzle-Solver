@@ -12,13 +12,7 @@
 * Move methods like set_wall_cell_indices() which aren't integral to the algorithm to other classes.
 * Make an iterator (generator?) for std::vector<T> (T can be pieces, walls, more?) that yields all x and y values.
 * Is it faster to store a constant reference than it is to dereference twice? For example: "const Pos &piece_top_left = piece.top_left; const int x = piece_top_left.x; const int y = piece_top_left.y;"
+* Maybe the number of collisions is so high and hashing is so cheap that it may be faster to just always check if the state is already in states before doing collision checking?
 
 # New algorithm
-* Increment all piece positions in klotski.jsonc by 1 to account for added surrounding walls.
-* Use IDS: https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search
-* `typedef int CellIndex;`
-* `typedef int PieceID;`
-* `std::unordered_map<CellIndex, PieceID> cells;`
-* `std::unordered_map<CellIndex, PieceID> active_cells;`
-* `std::array<int, 4> movable_directions;`
-* Instead of storing empty Cells, store the walls as Cells. 1. There are way fewer of them then empty Cells, and 2. they are static, so they don't ever need to be copied.
+* Use IDDFS: https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search

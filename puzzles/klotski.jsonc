@@ -4,8 +4,8 @@
 	// #ABBC#
 	// #DEEF#
 	// #DGHF#
-	// #I##J#
-	//  #  #
+	// #I  J#
+	//  ####
 	"starting_pieces_info": [
 		{
 			"top_left": {
@@ -226,7 +226,7 @@
 		{
 			"pos": {
 				"x": 2,
-				"y": 5
+				"y": 6
 			},
 			"size": {
 				"width": 2,

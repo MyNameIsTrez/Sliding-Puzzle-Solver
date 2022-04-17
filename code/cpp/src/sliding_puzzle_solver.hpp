@@ -32,6 +32,7 @@ enum
 };
 
 #define NO_RECOVERY -1
+#define NO_NEXT_PIECE -1
 
 ////////
 
@@ -43,6 +44,8 @@ class SlidingPuzzleSolver
 
 	std::vector<StartingPieceInfo> starting_pieces_info;
 	std::vector<EndingPiece> ending_pieces;
+
+	int pieces_count;
 
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
@@ -119,7 +122,7 @@ class SlidingPuzzleSolver
 
 	piece_direction get_inverted_direction(const piece_direction &direction);
 	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);
-	piece_direction get_next_direction(const cell_id &piece_index, const piece_direction &direction);
+	piece_direction get_next_direction(const piece_direction &direction);
 
 	void move(Pos &piece_pos, const piece_direction direction);
 	bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);

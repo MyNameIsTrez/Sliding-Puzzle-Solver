@@ -326,7 +326,7 @@ void SlidingPuzzleSolver::solve(void)
 		}
 
 		// TODO: Refactor this using "auto [a, b, c, d]" from C++17.
-		std::tuple<cell_id, piece_direction, cell_id, piece_direction> pieces_stack_top = pieces_stack.top();
+		std::tuple<cell_id, piece_direction, cell_id, piece_direction> &pieces_stack_top = pieces_stack.top();
 
 		const cell_id &recovery_piece_index = std::get<0>(pieces_stack_top);
 		const piece_direction &recovery_direction = std::get<1>(pieces_stack_top);
@@ -423,7 +423,7 @@ void SlidingPuzzleSolver::update_finished()
 
 void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack)
 {
-	for (cell_id piece_index = start_piece_index; piece_index != static_cast<cell_id>(pieces.size()); ++piece_index)
+	for (cell_id &piece_index = start_piece_index; piece_index != static_cast<cell_id>(pieces.size()); ++piece_index)
 	{
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
@@ -433,10 +433,8 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 		const int piece_top_left_x_backup = piece_top_left.x;
 		const int piece_top_left_y_backup = piece_top_left.y;
 
-		for (piece_direction direction = start_direction; direction < 4; ++direction)
+		for (piece_direction &direction = start_direction; direction < 4; ++direction)
 		{
-			start_direction = 0; // TODO: Find a better approach for this.
-
 			if (a_rect_cant_be_moved(rects, direction, piece_index, piece_top_left))
 			{
 				continue;
@@ -450,7 +448,7 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 					piece_index, // Recovery piece index.
 					get_inverted_direction(direction), // Recovery direction.
 					get_next_piece_index(piece_index, direction),
-					get_next_direction(piece_index, direction)
+					get_next_direction(direction)
 				));
 
 				// std::vector<std::pair<std::size_t, char>> path_copy = path;
@@ -467,6 +465,8 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 			piece_top_left.x = piece_top_left_x_backup;
 			piece_top_left.y = piece_top_left_y_backup;
 		}
+
+		start_direction = 0; // TODO: Find better approach.
 	}
 
 	// If no piece could be moved, then recurse back.
@@ -600,15 +600,13 @@ piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_directio
 
 cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
 {
-	// TODO: What if this was the last movable piece?
-	(void)direction;
-	return piece_index + 1;
+	if (piece_index == pieces_count - 1) return NO_NEXT_PIECE; // This value should never have to be read, but *something* has to be returned.
+	if (direction <= 3) return piece_index; // Keep the same piece but go to the next direction.
+	return piece_index + 1; // If this is reached then direction == 3, so go to the next piece.
 }
 
-piece_direction SlidingPuzzleSolver::get_next_direction(const cell_id &piece_index, const piece_direction &direction)
+piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &direction)
 {
-	// TODO: What if this was the last movable piece?
-	(void)piece_index;
 	return (direction + 1) % 4;
 }
 

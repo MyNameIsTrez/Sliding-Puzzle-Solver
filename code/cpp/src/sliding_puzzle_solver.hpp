@@ -23,6 +23,7 @@ using json = nlohmann::json;
 ////////
 
 typedef int cell_id;
+typedef int piece_direction;
 
 enum
 {
@@ -65,6 +66,8 @@ class SlidingPuzzleSolver
 	std::vector<std::vector<cell_id>> cells;
 	// std::vector<std::vector<bool>> active_cells;
 
+	std::vector<Piece> pieces;
+
 	// Methods
 	const json get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name);
 	const std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path &exe_path, const std::string &puzzle_name);
@@ -80,27 +83,35 @@ class SlidingPuzzleSolver
 	void set_cells(const json &walls_json);
 	// int get_index(int x, int y);
 
-	void print_board(const std::vector<Piece> &pieces);
-	const std::vector<std::vector<char>> get_board(const std::vector<Piece> &pieces);
+	void print_board(void);
+	const std::vector<std::vector<char>> get_board(void);
 	const std::vector<std::vector<char>> get_2d_vector(void);
-	void set_pieces_on_board(const std::vector<Piece> &pieces, std::vector<std::vector<char>> &board);
+	void set_pieces_on_board(std::vector<std::vector<char>> &board);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
-	bool add_new_state(const std::vector<Piece> &pieces);
+	bool add_new_state(void);
 
 	void solve(std::vector<Piece> starting_pieces);
 
-	void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
-	void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
-	std::chrono::duration<double> get_elapsed_seconds(void);
+	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
+	// void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
+	// std::chrono::duration<double> get_elapsed_seconds(void);
 
-	void update_finished(std::vector<Piece> &pieces);
-	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const std::size_t piece_index, const Pos &piece_top_left, const std::vector<Piece> &pieces);
-	void move(const int direction, Pos &piece_pos);
-	bool is_invalid_move(const std::size_t piece_index, const Pos &piece_pos, const std::vector<Piece> &pieces);
+	void update_finished(void);
+
+	void move_piece(cell_id &piece_index, piece_direction &direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
+
+	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const cell_id piece_index, const Pos &piece_top_left);
+	bool is_invalid_move(const cell_id piece_index, const Pos &piece_pos);
+
+	piece_direction get_inverted_direction(const piece_direction &direction);
+	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);
+	piece_direction get_next_direction(const cell_id &piece_index, const piece_direction &direction);
+
+	void move(Pos &piece_pos, const piece_direction direction);
 	bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);
-	bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos, const std::vector<Piece> &pieces);
-	const std::vector<Piece> deepcopy_pieces_positions(const std::vector<Piece> &pieces);
+	bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos);
+	const std::vector<Piece> deepcopy_pieces_positions(void);
 
 	const std::string get_path_string(const std::vector<std::pair<std::size_t, char>> &path);
 

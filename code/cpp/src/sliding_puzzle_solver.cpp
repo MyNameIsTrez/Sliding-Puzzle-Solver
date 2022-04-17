@@ -12,7 +12,7 @@ void SlidingPuzzleSolver::run(void)
 {
 	std::vector<Piece> starting_pieces = get_starting_pieces();
 
-	print_board(starting_pieces);
+	print_board();
 
 	add_new_state(starting_pieces);
 
@@ -183,9 +183,9 @@ void SlidingPuzzleSolver::set_cells(const json &walls_json)
 // 	return x + y * width;
 // }
 
-void SlidingPuzzleSolver::print_board(const std::vector<Piece> &pieces)
+void SlidingPuzzleSolver::print_board()
 {
-	const std::vector<std::vector<char>> board = get_board(pieces);
+	const std::vector<std::vector<char>> board = get_board();
 
 	for (std::vector<std::vector<char>>::const_iterator it_row = board.cbegin(); it_row != board.cend(); ++it_row)
 	{
@@ -197,12 +197,12 @@ void SlidingPuzzleSolver::print_board(const std::vector<Piece> &pieces)
 	}
 }
 
-const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board(const std::vector<Piece> &pieces)
+const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board()
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
 
 	// TODO: Replace these function calls with a 2D loop going through all the cell_ids in the cells field.
-	// set_pieces_on_board(pieces, board);
+	// set_pieces_on_board(board);
 	// set_walls_on_board(board);
 
 	return board;
@@ -213,7 +213,7 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 	return std::vector<std::vector<char>>(height, std::vector<char>(width, empty_character));
 }
 
-// void SlidingPuzzleSolver::set_pieces_on_board(const std::vector<Piece> &pieces, std::vector<std::vector<char>> &board)
+// void SlidingPuzzleSolver::set_pieces_on_board(std::vector<std::vector<char>> &board)
 // {
 // 	for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
 // 	{
@@ -267,7 +267,7 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 // 	}
 // }
 
-bool SlidingPuzzleSolver::add_new_state(const std::vector<Piece> &pieces)
+bool SlidingPuzzleSolver::add_new_state()
 {
 	const std::pair<std::unordered_set<std::vector<Piece>, Piece::Hasher>::iterator, bool> insert_info = states.insert(pieces);
 
@@ -278,125 +278,102 @@ bool SlidingPuzzleSolver::add_new_state(const std::vector<Piece> &pieces)
 
 void SlidingPuzzleSolver::solve(std::vector<Piece> starting_pieces)
 {
-	std::stack<std::vector<Piece>> pieces_queue;
-	pieces_queue.push(starting_pieces);
+	std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> pieces_stack;
+	pieces_stack.push(std::make_tuple(
+		0, // recovery piece index
+		0, // recovery direction
+		0, // piece index
+		0) // direction
+	);
 
-	std::stack<std::vector<std::pair<std::size_t, char>>> path_queue;
-	const std::vector<std::pair<std::size_t, char>> initial_empty_path = std::vector<std::pair<std::size_t, char>>();
-	path_queue.push(initial_empty_path);
+	// std::stack<std::vector<std::pair<std::size_t, char>>> path_stack;
+	// const std::vector<std::pair<std::size_t, char>> initial_empty_path = std::vector<std::pair<std::size_t, char>>();
+	// path_stack.push(initial_empty_path);
 
-	// TODO: Can this be shortened?
-	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(path_queue), std::ref(pieces_queue));
+	// TODO: Can this line be shortened?
+	// std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(path_stack), std::ref(pieces_stack));
 
-	while (!pieces_queue.empty())
+	while (!pieces_stack.empty())
 	{
-		std::vector<Piece> pieces = pieces_queue.front();
-		pieces_queue.pop();
+		// TODO: Refactor this using "auto [a, b, c, d]" from C++17.
+		std::tuple<cell_id, piece_direction, cell_id, piece_direction> pieces_stack_top = pieces_stack.top();
 
-		std::vector<std::pair<std::size_t, char>> path = path_queue.front();
+		const cell_id &recovery_piece_index = std::get<0>(pieces_stack_top);
+		const piece_direction &recovery_direction = std::get<1>(pieces_stack_top);
+		recover_piece(recovery_piece_index, recovery_direction);
 
-		update_finished(pieces);
+		cell_id &piece_index = std::get<2>(pieces_stack_top);
+		piece_direction &direction = std::get<3>(pieces_stack_top);
 
+		// std::vector<std::pair<std::size_t, char>> path = path_stack.top();
+
+		update_finished();
 		if (finished)
 		{
 			break;
 		}
 
-		path_queue.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
+		// path_stack.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
 
-		for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
-		{
-			Piece &piece = pieces[piece_index];
-			Pos &piece_top_left = piece.top_left;
-
-			const std::vector<Rect> &rects = starting_pieces_info[piece_index].rects;
-
-			// Saves the position of the piece for when it needs to be moved back.
-			const int x = piece_top_left.x;
-			const int y = piece_top_left.y;
-
-			for (int direction = 0; direction < 4; ++direction)
-			{
-				if (a_rect_cant_be_moved(rects, piece_index, piece_top_left, pieces))
-				{
-					continue;
-				}
-
-				move(direction, piece_top_left);
-
-				if (add_new_state(pieces))
-				{
-					const std::vector<Piece> new_pieces_positions = deepcopy_pieces_positions(pieces);
-
-					pieces_queue.push(new_pieces_positions);
-
-					std::vector<std::pair<std::size_t, char>> path_copy = path;
-
-					std::pair<std::size_t, char> new_path_part(piece_index, direction_characters[direction]);
-					path_copy.push_back(new_path_part);
-
-					path_queue.push(path_copy);
-
-					state_count++;
-				}
-
-				// Moves the piece back.
-				piece_top_left.x = x;
-				piece_top_left.y = y;
-			}
-		}
+		move_piece();
 	}
 
-	timed_print_thread.join();
+	// timed_print_thread.join();
 }
 
-void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue)
+void recover_piece(const cell_id &recovery_piece_index, const piece_direction &recovery_direction)
 {
-	std::cout << std::endl;
-
-	while (!finished)
-	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		timed_print_core(path_queue, pieces_queue);
-	}
-
-	std::cout << std::endl << std::endl << "Path:" << std::endl;
-	std::cout << get_path_string(path_queue.front()) << std::endl << std::endl;
+	const Piece &recovery_piece = pieces[recovery_piece_index];
+	move(recovery_piece, recovery_direction);
 }
 
-void SlidingPuzzleSolver::timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue)
-{
-	// TODO: Store elapsed_time in something more appropriate than int.
-	const int elapsed_time = get_elapsed_seconds().count();
+// void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
+// {
+// 	std::cout << std::endl;
 
-	const int states_count_diff = state_count - prev_state_count;
-	prev_state_count = state_count;
+// 	while (!finished)
+// 	{
+// 		std::this_thread::sleep_for(std::chrono::seconds(1));
+// 		timed_print_core(path_stack, pieces_stack);
+// 	}
 
-	std::cout << "\33[2K\r"; // Clears the line and goes back to the left.
+// 	std::cout << std::endl << std::endl << "Path:" << std::endl;
+// 	std::cout << get_path_string(path_stack.top()) << std::endl << std::endl;
+// }
 
-	std::cout << "Elapsed time: " << elapsed_time << " seconds";
+// void SlidingPuzzleSolver::timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
+// {
+// 	// TODO: Store elapsed_time in something more appropriate than int.
+// 	const int elapsed_time = get_elapsed_seconds().count();
 
-	KiloFormatter kf;
+// 	const int states_count_diff = state_count - prev_state_count;
+// 	prev_state_count = state_count;
 
-	if (path_queue.size() > 0)
-	{
-		const std::size_t path_length = path_queue.front().size();
-		std::cout << ", Path length: " << kf.format(path_length);
-	}
+// 	std::cout << "\33[2K\r"; // Clears the line and goes back to the left.
 
-	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
-	std::cout << ", Queue length: " << kf.format(pieces_queue.size());
-	std::cout << std::flush;
-}
+// 	std::cout << "Elapsed time: " << elapsed_time << " seconds";
 
-std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
-{
-	// TODO: Cast the result to seconds in type double, cause idk how this works.
-	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-	return end_time - start_time;
-}
+// 	KiloFormatter kf;
 
-void SlidingPuzzleSolver::update_finished(std::vector<Piece> &pieces)
+// 	if (path_stack.size() > 0)
+// 	{
+// 		const std::size_t path_length = path_stack.top().size();
+// 		std::cout << ", Path length: " << kf.format(path_length);
+// 	}
+
+// 	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
+// 	std::cout << ", Queue length: " << kf.format(pieces_stack.size());
+// 	std::cout << std::flush;
+// }
+
+// std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
+// {
+// 	// TODO: Cast the result to seconds in type double, cause idk how this works.
+// 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+// 	return end_time - start_time;
+// }
+
+void SlidingPuzzleSolver::update_finished()
 {
 	finished = true;
 
@@ -417,11 +394,63 @@ void SlidingPuzzleSolver::update_finished(std::vector<Piece> &pieces)
 	}
 }
 
-bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, const std::size_t piece_index, const Pos &piece_top_left, const std::vector<Piece> &pieces)
+void SlidingPuzzleSolver::move_piece(cell_id &piece_index, piece_direction &direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack)
+{
+	for ( ; piece_index != pieces.size(); ++piece_index)
+	{
+		Piece &piece = pieces[piece_index];
+		Pos &piece_top_left = piece.top_left;
+
+		const std::vector<Rect> &rects = starting_pieces_info[piece_index].rects;
+
+		// Saves the position of the piece for when it needs to be moved back.
+		const int x = piece_top_left.x;
+		const int y = piece_top_left.y;
+
+		for ( ; direction < 4; ++direction)
+		{
+			if (a_rect_cant_be_moved(rects, piece_index, piece_top_left))
+			{
+				continue;
+			}
+
+			move(piece_top_left, direction);
+
+			if (add_new_state())
+			{
+				pieces_stack.push(std::make_tuple(
+					piece_index, // The recovery piece index.
+					get_inverted_direction(direction), // The recovery piece direction.
+					get_next_piece_index(piece_index, direction),
+					get_next_direction(piece_index, direction)
+				));
+
+				// std::vector<std::pair<std::size_t, char>> path_copy = path;
+
+				// std::pair<std::size_t, char> new_path_part(piece_index, direction_characters[direction]);
+				// path_copy.push_back(new_path_part);
+
+				// path_stack.push(path_copy);
+
+				state_count++;
+			}
+
+			// TODO: This may be unnecessary here?
+			// Moves the piece back.
+			piece_top_left.x = x;
+			piece_top_left.y = y;
+		}
+	}
+
+	// If no piece could be moved, then recurse back.
+	pieces_stack.pop();
+}
+
+bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, const cell_id piece_index, const Pos &piece_top_left)
 {
 	for (const auto &rect : rects)
 	{
-		if (is_invalid_move(piece_index, piece_top_left, pieces))
+		if (is_invalid_move(piece_index, piece_top_left))
 		{
 			return true;
 		}
@@ -430,7 +459,12 @@ bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, c
 	return false;
 }
 
-void SlidingPuzzleSolver::move(const int direction, Pos &piece_top_left)
+bool SlidingPuzzleSolver::is_invalid_move(const cell_id piece_index, const Pos &piece_top_left)
+{
+
+}
+
+void SlidingPuzzleSolver::move(Pos &piece_top_left, const piece_direction direction)
 {
 	switch (direction)
 	{
@@ -449,8 +483,31 @@ void SlidingPuzzleSolver::move(const int direction, Pos &piece_top_left)
 	}
 }
 
-bool SlidingPuzzleSolver::is_invalid_move(const std::size_t piece_index, const Pos &piece_top_left, const std::vector<Piece> &pieces)
+piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_direction &direction)
 {
+	switch (direction)
+	{
+	case 0:
+		return 1;
+	case 1:
+		return 0;
+
+	case 2:
+		return 3;
+	case 3:
+		return 2;
+	}
+}
+
+cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
+{
+	// TODO: What if this was the last movable piece?
+	return (piece_index + 1) % 4;
+}
+
+piece_direction SlidingPuzzleSolver::get_next_direction(const cell_id &piece_index, const piece_direction &direction)
+{
+	// TODO: What if this was the last movable piece?
 
 }
 
@@ -469,7 +526,7 @@ bool SlidingPuzzleSolver::is_invalid_move(const std::size_t piece_index, const P
 // 	);
 // }
 
-// bool SlidingPuzzleSolver::no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos, const std::vector<Piece> &pieces)
+// bool SlidingPuzzleSolver::no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos)
 // {
 // 	const int piece_1_x = piece_1_pos.x;
 // 	const int piece_1_y = piece_1_pos.y;
@@ -519,41 +576,19 @@ bool SlidingPuzzleSolver::is_invalid_move(const std::size_t piece_index, const P
 // 	return true;
 // }
 
-// TODO: Check if this is actually faster than a regular deepcopy call.
-const std::vector<Piece> SlidingPuzzleSolver::deepcopy_pieces_positions(const std::vector<Piece> &pieces)
-{
-	std::vector<Piece> deepcopied_pieces_positions;
+// const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<std::size_t, char>> &path)
+// {
+// 	// If this method ever needs to be called a lot then try using a rope instead.
+// 	std::stringstream path_stringstream;
 
-	for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
-	{
-		const Piece &piece = pieces[piece_index];
+// 	for (std::vector<std::pair<std::size_t, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
+// 	{
+// 		std::size_t piece_index = pair_it->first;
+// 		path_stringstream << piece_index;
 
-		const Pos &piece_top_left = piece.top_left;
+// 		char direction = pair_it->second;
+// 		path_stringstream << direction;
+// 	}
 
-		Piece deepcopied_piece;
-		Pos &deepcopied_piece_top_left = deepcopied_piece.top_left;
-		deepcopied_piece_top_left.x = piece_top_left.x;
-		deepcopied_piece_top_left.y = piece_top_left.y;
-
-		deepcopied_pieces_positions.push_back(deepcopied_piece);
-	}
-
-	return deepcopied_pieces_positions;
-}
-
-const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<std::size_t, char>> &path)
-{
-	// If this method ever needs to be called a lot then try using a rope instead.
-	std::stringstream path_stringstream;
-
-	for (std::vector<std::pair<std::size_t, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
-	{
-		std::size_t piece_index = pair_it->first;
-		path_stringstream << piece_index;
-
-		char direction = pair_it->second;
-		path_stringstream << direction;
-	}
-
-	return path_stringstream.str();
-}
+// 	return path_stringstream.str();
+// }

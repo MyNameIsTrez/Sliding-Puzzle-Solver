@@ -10,13 +10,11 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const 
 
 void SlidingPuzzleSolver::run(void)
 {
-	std::vector<Piece> starting_pieces = get_starting_pieces();
-
 	print_board();
 
-	add_new_state(starting_pieces);
+	add_new_state();
 
-	solve(starting_pieces);
+	solve();
 }
 
 const json SlidingPuzzleSolver::get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name)
@@ -108,23 +106,6 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 			ending_pieces.push_back(ending_piece);
 		}
 	}
-}
-
-std::vector<Piece> SlidingPuzzleSolver::get_starting_pieces(void)
-{
-	std::vector<Piece> starting_pieces;
-
-	for (std::size_t starting_piece_info_index = 0; starting_piece_info_index != starting_pieces_info.size(); ++starting_piece_info_index)
-	{
-		const StartingPieceInfo &starting_piece_info = starting_pieces_info[starting_piece_info_index];
-
-		Piece starting_piece;
-		starting_piece.top_left = starting_piece_info.top_left;
-
-		starting_pieces.push_back(starting_piece);
-	}
-
-	return starting_pieces;
 }
 
 void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
@@ -288,7 +269,7 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 // 	}
 // }
 
-bool SlidingPuzzleSolver::add_new_state()
+bool SlidingPuzzleSolver::add_new_state(void)
 {
 	const std::pair<std::unordered_set<std::vector<Piece>, Piece::Hasher>::iterator, bool> insert_info = states.insert(pieces);
 
@@ -297,7 +278,7 @@ bool SlidingPuzzleSolver::add_new_state()
 	return success;
 }
 
-void SlidingPuzzleSolver::solve(std::vector<Piece> starting_pieces)
+void SlidingPuzzleSolver::solve(void)
 {
 	std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> pieces_stack;
 	pieces_stack.push(std::make_tuple(

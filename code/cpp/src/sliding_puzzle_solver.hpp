@@ -84,8 +84,6 @@ class SlidingPuzzleSolver
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_ending_pieces(const json &starting_pieces_json);
 
-	std::vector<Piece> get_starting_pieces(void);
-
 	void set_width_and_height(const json &walls_json);
 	void set_wall_cells(const json &walls_json);
 	void set_piece_cells(void);
@@ -99,7 +97,7 @@ class SlidingPuzzleSolver
 
 	bool add_new_state(void);
 
-	void solve(std::vector<Piece> starting_pieces);
+	void solve(void);
 
 	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
 	// void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);

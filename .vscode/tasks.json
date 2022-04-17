@@ -52,7 +52,7 @@
 				"-g3",
 				"-std=c++17",
 				"-pthread",
-				"-O3",
+				// "-O3",
 				"${workspaceFolder}/code/cpp/src/*.cpp",
 				"-o",
 				"${workspaceFolder}/puzzle"

@@ -66,9 +66,7 @@ class SlidingPuzzleSolver
 	int prev_state_count = 0;
 	bool finished = false;
 
-	// The program assumes that unspecified cells are empty cells by default
-	// as the puzzle JSON file doesn't specify where the empty cells are.
-	std::vector<std::vector<cell_id>> cells = std::vector<std::vector<cell_id>>(height, std::vector<cell_id>(width, empty_cell_id));
+	std::vector<std::vector<cell_id>> cells;
 
 	// std::vector<std::vector<bool>> active_cells;
 
@@ -85,8 +83,12 @@ class SlidingPuzzleSolver
 	void set_ending_pieces(const json &starting_pieces_json);
 
 	void set_width_and_height(const json &walls_json);
-	void set_wall_cells(const json &walls_json);
-	void set_piece_cells(void);
+
+	void initialize_cells(void);
+	void add_wall_cells(const json &walls_json);
+	void add_piece_cells(void);
+
+	void initialize_pieces(void);
 
 	void print_board(void);
 	const std::vector<std::vector<char>> get_board(void);
@@ -105,7 +107,7 @@ class SlidingPuzzleSolver
 
 	void update_finished(void);
 
-	void move_piece(cell_id &piece_index, piece_direction &direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
+	void move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
 
 	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool is_invalid_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
@@ -113,7 +115,7 @@ class SlidingPuzzleSolver
 	bool is_horizontal_invalid_move(const cell_id piece_id, const int start_x, const int start_y, const int rect_width);
 	bool is_vertical_invalid_move(const cell_id piece_id, const int start_x, const int start_y, const int rect_height);
 
-	bool can_id_be_placed(const cell_id piece_id, const int x, const int y);
+	bool cant_move_to_cell(const cell_id piece_id, const int x, const int y);
 
 	piece_direction get_inverted_direction(const piece_direction &direction);
 	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);

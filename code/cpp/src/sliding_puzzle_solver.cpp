@@ -49,8 +49,12 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 	set_ending_pieces(puzzle_json["starting_pieces_info"]);
 
 	set_width_and_height(puzzle_json["walls"]);
-	set_wall_cells(puzzle_json["walls"]);
-	set_piece_cells();
+
+	initialize_cells();
+	add_wall_cells(puzzle_json["walls"]);
+	add_piece_cells();
+
+	initialize_pieces();
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -132,7 +136,14 @@ void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 	}
 }
 
-void SlidingPuzzleSolver::set_wall_cells(const json &walls_json)
+void SlidingPuzzleSolver::initialize_cells(void)
+{
+	// The program assumes that unspecified cells are empty cells by default
+	// as the puzzle JSON file doesn't specify where the empty cells are.
+	cells = std::vector<std::vector<cell_id>>(height, std::vector<cell_id>(width, empty_cell_id));
+}
+
+void SlidingPuzzleSolver::add_wall_cells(const json &walls_json)
 {
 	for (const auto &wall_json : walls_json)
 	{
@@ -156,7 +167,7 @@ void SlidingPuzzleSolver::set_wall_cells(const json &walls_json)
 	}
 }
 
-void SlidingPuzzleSolver::set_piece_cells(void)
+void SlidingPuzzleSolver::add_piece_cells(void)
 {
 	for (cell_id starting_piece_info_index = 0; starting_piece_info_index != static_cast<cell_id>(starting_pieces_info.size()); ++starting_piece_info_index)
 	{
@@ -181,6 +192,18 @@ void SlidingPuzzleSolver::set_piece_cells(void)
 				}
 			}
 		}
+	}
+}
+
+void SlidingPuzzleSolver::initialize_pieces(void)
+{
+	for (const auto &starting_piece_info : starting_pieces_info)
+	{
+		Piece piece;
+
+		piece.top_left = starting_piece_info.top_left;
+
+		pieces.push_back(piece);
 	}
 }
 
@@ -312,14 +335,14 @@ void SlidingPuzzleSolver::solve(void)
 			recover_piece(recovery_piece_index, recovery_direction);
 		}
 
-		cell_id &piece_index = std::get<2>(pieces_stack_top);
-		piece_direction &direction = std::get<3>(pieces_stack_top);
+		cell_id &start_piece_index = std::get<2>(pieces_stack_top);
+		piece_direction &start_direction = std::get<3>(pieces_stack_top);
 
 		// std::vector<std::pair<std::size_t, char>> path = path_stack.top();
 
 		// path_stack.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
 
-		move_piece(piece_index, direction, pieces_stack);
+		move_piece(start_piece_index, start_direction, pieces_stack);
 	}
 
 	// timed_print_thread.join();
@@ -398,9 +421,9 @@ void SlidingPuzzleSolver::update_finished()
 	}
 }
 
-void SlidingPuzzleSolver::move_piece(cell_id &piece_index, piece_direction &direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack)
+void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack)
 {
-	for ( ; piece_index != static_cast<cell_id>(pieces.size()); ++piece_index)
+	for (cell_id piece_index = start_piece_index; piece_index != static_cast<cell_id>(pieces.size()); ++piece_index)
 	{
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
@@ -410,8 +433,10 @@ void SlidingPuzzleSolver::move_piece(cell_id &piece_index, piece_direction &dire
 		const int piece_top_left_x_backup = piece_top_left.x;
 		const int piece_top_left_y_backup = piece_top_left.y;
 
-		for ( ; direction < 4; ++direction)
+		for (piece_direction direction = start_direction; direction < 4; ++direction)
 		{
+			start_direction = 0; // TODO: Find a better approach for this.
+
 			if (a_rect_cant_be_moved(rects, direction, piece_index, piece_top_left))
 			{
 				continue;
@@ -478,19 +503,19 @@ bool SlidingPuzzleSolver::is_invalid_move(const Rect &rect, const piece_directio
 	const int rect_width = rect_size.width;
 	const int rect_height = rect_size.height;
 
-	const int rect_bottom_y = rect_top_y + rect_height;
-	const int rect_right_x = rect_left_x + rect_width;
+	const int rect_bottom_y = rect_top_y + rect_height - 1;
+	const int rect_right_x = rect_left_x + rect_width - 1;
 
 	switch (direction)
 	{
 	case 0:
-		return is_horizontal_invalid_move(piece_id, rect_left_x, rect_top_y, rect_width);
+		return is_horizontal_invalid_move(piece_id, rect_left_x, rect_top_y - 1, rect_width);
 	case 1:
-		return is_horizontal_invalid_move(piece_id, rect_left_x, rect_bottom_y, rect_width);
+		return is_horizontal_invalid_move(piece_id, rect_left_x, rect_bottom_y + 1, rect_width);
 	case 2:
-		return is_vertical_invalid_move(piece_id, rect_left_x, rect_top_y, rect_height);
+		return is_vertical_invalid_move(piece_id, rect_left_x - 1, rect_top_y, rect_height);
 	default:
-		return is_vertical_invalid_move(piece_id, rect_right_x, rect_top_y, rect_height);
+		return is_vertical_invalid_move(piece_id, rect_right_x + 1, rect_top_y, rect_height);
 	}
 }
 
@@ -498,7 +523,7 @@ bool SlidingPuzzleSolver::is_horizontal_invalid_move(const cell_id piece_id, con
 {
 	for (int x_offset = 0; x_offset < rect_width; ++x_offset)
 	{
-		if (can_id_be_placed(piece_id, start_x + x_offset, start_y))
+		if (cant_move_to_cell(piece_id, start_x + x_offset, start_y))
 		{
 			return true;
 		}
@@ -511,7 +536,7 @@ bool SlidingPuzzleSolver::is_vertical_invalid_move(const cell_id piece_id, const
 {
 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
 	{
-		if (can_id_be_placed(piece_id, start_x, start_y + y_offset))
+		if (cant_move_to_cell(piece_id, start_x, start_y + y_offset))
 		{
 			return true;
 		}
@@ -520,11 +545,17 @@ bool SlidingPuzzleSolver::is_vertical_invalid_move(const cell_id piece_id, const
 	return false;
 }
 
-bool SlidingPuzzleSolver::can_id_be_placed(const cell_id piece_id, const int x, const int y)
+bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x, const int y)
 {
+	if (x < 0 || x >= width ||
+		y < 0 || y >= height)
+	{
+		return true;
+	}
+
 	const cell_id checked_cell_id = cells[y][x];
 
-	if (checked_cell_id == empty_cell_id || checked_cell_id == piece_id)
+	if (checked_cell_id != empty_cell_id && checked_cell_id != piece_id)
 	{
 		return true;
 	}

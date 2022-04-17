@@ -31,11 +31,13 @@ enum
 	wall_cell_id = -2
 }
 
+#define NO_RECOVERY -1
+
 ////////
 
 class SlidingPuzzleSolver
 {
-	// Constants
+	// Constants ////////
 	int width;
 	int height;
 
@@ -55,7 +57,8 @@ class SlidingPuzzleSolver
 
 	const bool print_board_every_path = false;
 
-	// Variables
+
+	// Variables ////////
 	// std::unordered_set<std::size_t> states;
 	std::unordered_set<std::vector<Piece>, Piece::Hasher> states;
 
@@ -63,12 +66,16 @@ class SlidingPuzzleSolver
 	int prev_state_count = 0;
 	bool finished = false;
 
-	std::vector<std::vector<cell_id>> cells;
+	// The program assumes that unspecified cells are empty cells by default
+	// as the puzzle JSON file doesn't specify where the empty cells are.
+	std::vector<std::vector<cell_id>> cells = std::vector<std::vector<cell_id>>(height, std::vector<cell_id>(width, empty_cell_id));
+
 	// std::vector<std::vector<bool>> active_cells;
 
 	std::vector<Piece> pieces;
 
-	// Methods
+
+	// Methods ////////
 	const json get_puzzle_json(std::filesystem::path &exe_path, const std::string &puzzle_name);
 	const std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path &exe_path, const std::string &puzzle_name);
 
@@ -80,7 +87,8 @@ class SlidingPuzzleSolver
 	std::vector<Piece> get_starting_pieces(void);
 
 	void set_width_and_height(const json &walls_json);
-	void set_cells(const json &walls_json);
+	void set_wall_cells(const json &walls_json);
+	void set_piece_cells(void);
 	// int get_index(int x, int y);
 
 	void print_board(void);

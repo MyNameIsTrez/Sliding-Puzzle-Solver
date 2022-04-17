@@ -51,7 +51,8 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 	set_ending_pieces(puzzle_json["starting_pieces_info"]);
 
 	set_width_and_height(puzzle_json["walls"]);
-	set_cells(puzzle_json["walls"]);
+	set_wall_cells(puzzle_json["walls"]);
+	set_piece_cells();
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -150,12 +151,8 @@ void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 	}
 }
 
-void SlidingPuzzleSolver::set_cells(const json &walls_json)
+void SlidingPuzzleSolver::set_wall_cells(const json &walls_json)
 {
-	// The program assumes that unspecified cells are empty cells by default
-	// as the puzzle JSON file doesn't specify where the empty cells are.
-	cells = std::vector<std::vector<cell_id>>(height, std::vector<cell_id>(width, empty_cell_id));
-
 	for (const auto &wall_json : walls_json)
 	{
 		Wall wall;
@@ -173,6 +170,30 @@ void SlidingPuzzleSolver::set_cells(const json &walls_json)
 			for (int x_offset = 0; x_offset < wall.size.width; ++x_offset)
 			{
 				cells[wall.pos.y + y_offset][wall.pos.x + x_offset] = wall_cell_id;
+			}
+		}
+	}
+}
+
+void SlidingPuzzleSolver::set_piece_cells(void)
+{
+	for (cell_id starting_piece_info_index = 0; starting_piece_info_index != starting_pieces_info.size(); ++starting_piece_info_index)
+	{
+		const StartingPieceInfo &starting_piece_info = starting_pieces_info[starting_piece_info_index];
+		const Pos &top_left = starting_piece_info.top_left;
+
+		const std::vector<Rect> &rects = starting_piece_info.rects;
+		for (const auto &rect : rects)
+		{
+			const Offset &rect_offset = rect.offset;
+			const Size &rect_size = rect.size;
+
+			for (int y_offset = 0; y_offset < rect_size.height; ++y_offset)
+			{
+				for (int x_offset = 0; x_offset < rect_size.width; ++x_offset)
+				{
+					cells[top_left.y + y_offset][top_left.x + x_offset] = starting_piece_info_index;
+				}
 			}
 		}
 	}
@@ -280,11 +301,11 @@ void SlidingPuzzleSolver::solve(std::vector<Piece> starting_pieces)
 {
 	std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> pieces_stack;
 	pieces_stack.push(std::make_tuple(
-		0, // recovery piece index
-		0, // recovery direction
-		0, // piece index
-		0) // direction
-	);
+		NO_RECOVERY, // Recovery piece index.
+		NO_RECOVERY, // Recovery direction.
+		0, // Piece index.
+		0 // Direction.
+	));
 
 	// std::stack<std::vector<std::pair<std::size_t, char>>> path_stack;
 	// const std::vector<std::pair<std::size_t, char>> initial_empty_path = std::vector<std::pair<std::size_t, char>>();
@@ -300,7 +321,10 @@ void SlidingPuzzleSolver::solve(std::vector<Piece> starting_pieces)
 
 		const cell_id &recovery_piece_index = std::get<0>(pieces_stack_top);
 		const piece_direction &recovery_direction = std::get<1>(pieces_stack_top);
-		recover_piece(recovery_piece_index, recovery_direction);
+		if (recovery_piece_index != NO_RECOVERY)
+		{
+			recover_piece(recovery_piece_index, recovery_direction);
+		}
 
 		cell_id &piece_index = std::get<2>(pieces_stack_top);
 		piece_direction &direction = std::get<3>(pieces_stack_top);
@@ -419,8 +443,8 @@ void SlidingPuzzleSolver::move_piece(cell_id &piece_index, piece_direction &dire
 			if (add_new_state())
 			{
 				pieces_stack.push(std::make_tuple(
-					piece_index, // The recovery piece index.
-					get_inverted_direction(direction), // The recovery piece direction.
+					piece_index, // Recovery piece index.
+					get_inverted_direction(direction), // Recovery direction.
 					get_next_piece_index(piece_index, direction),
 					get_next_direction(piece_index, direction)
 				));

@@ -29,7 +29,7 @@ enum
 {
 	empty_cell_id = -1,
 	wall_cell_id = -2
-}
+};
 
 #define NO_RECOVERY -1
 
@@ -87,7 +87,6 @@ class SlidingPuzzleSolver
 	void set_width_and_height(const json &walls_json);
 	void set_wall_cells(const json &walls_json);
 	void set_piece_cells(void);
-	// int get_index(int x, int y);
 
 	void print_board(void);
 	const std::vector<std::vector<char>> get_board(void);
@@ -98,6 +97,7 @@ class SlidingPuzzleSolver
 	bool add_new_state(void);
 
 	void solve(void);
+	void recover_piece(const cell_id &recovery_piece_index, const piece_direction &recovery_direction);
 
 	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
 	// void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
@@ -107,8 +107,13 @@ class SlidingPuzzleSolver
 
 	void move_piece(cell_id &piece_index, piece_direction &direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
 
-	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const cell_id piece_index, const Pos &piece_top_left);
-	bool is_invalid_move(const cell_id piece_index, const Pos &piece_pos);
+	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
+	bool is_invalid_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
+
+	bool is_horizontal_invalid_move(const cell_id piece_id, const int start_x, const int start_y, const int rect_width);
+	bool is_vertical_invalid_move(const cell_id piece_id, const int start_x, const int start_y, const int rect_height);
+
+	bool can_id_be_placed(const cell_id piece_id, const int x, const int y);
 
 	piece_direction get_inverted_direction(const piece_direction &direction);
 	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);

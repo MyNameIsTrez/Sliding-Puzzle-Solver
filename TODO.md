@@ -13,6 +13,7 @@
 * Make an iterator (generator?) for std::vector<T> (T can be pieces, walls, more?) that yields all x and y values.
 * Is it faster to store a constant reference than it is to dereference twice? For example: "const Pos &piece_top_left = piece.top_left; const int x = piece_top_left.x; const int y = piece_top_left.y;"
 * Maybe the number of collisions is so high and hashing is so cheap that it may be faster to just always check if the state is already in states before doing collision checking?
+* Use < or != consistently in for-loops.
 
 # New algorithm
 * Use IDDFS: https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search

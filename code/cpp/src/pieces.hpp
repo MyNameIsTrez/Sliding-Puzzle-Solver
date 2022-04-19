@@ -14,7 +14,7 @@ struct Pos
 	int y;
 	bool operator==(const Pos &other) const
 	{
-		return (x == other.x && y == other.y);
+		return x == other.x && y == other.y;
 	}
 };
 
@@ -53,7 +53,7 @@ struct Piece
 	Pos top_left;
 	bool operator==(const Piece &other) const
 	{
-		return (top_left.x == other.top_left.x && top_left.y == other.top_left.y);
+		return top_left == other.top_left;
 	}
 	struct Hasher {
 		// Hashing logic stolen from here: https://stackoverflow.com/a/27216842

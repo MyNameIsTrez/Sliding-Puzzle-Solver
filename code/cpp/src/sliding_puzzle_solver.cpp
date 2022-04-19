@@ -63,11 +63,11 @@ void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_i
 	// TODO: Replace with const auto & for-loop.
 	for (json::const_iterator starting_piece_info_json_iterator = starting_pieces_info_json.cbegin(); starting_piece_info_json_iterator != starting_pieces_info_json.cend(); ++starting_piece_info_json_iterator)
 	{
-		StartingPieceInfo piece;
+		StartingPieceInfo starting_piece_info;
 
 		const json &json_top_left = (*starting_piece_info_json_iterator)["top_left"];
-		piece.top_left.x = json_top_left["x"];
-		piece.top_left.y = json_top_left["y"];
+		starting_piece_info.top_left.x = json_top_left["x"];
+		starting_piece_info.top_left.y = json_top_left["y"];
 
 		const json &json_rects = (*starting_piece_info_json_iterator)["rects"];
 
@@ -84,10 +84,10 @@ void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_i
 			rect.size.width = json_rect_size["width"];
 			rect.size.height = json_rect_size["height"];
 
-			piece.rects.push_back(rect);
+			starting_piece_info.rects.push_back(rect);
 		}
 
-		starting_pieces_info.push_back(piece);
+		starting_pieces_info.push_back(starting_piece_info);
 	}
 }
 

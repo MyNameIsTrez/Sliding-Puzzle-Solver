@@ -5,7 +5,9 @@
 SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name)
 {
 	const json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
+
 	initialize_constant_fields(puzzle_json);
+	initialize_variable_fields(puzzle_json);
 }
 
 void SlidingPuzzleSolver::run(void)
@@ -46,16 +48,11 @@ const std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(s
 void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 {
 	set_starting_pieces_info(puzzle_json["starting_pieces_info"]);
+	set_pieces_count();
+
 	set_ending_pieces(puzzle_json["starting_pieces_info"]);
 
 	set_width_and_height(puzzle_json["walls"]);
-
-	initialize_cells();
-	add_wall_cells(puzzle_json["walls"]);
-	add_piece_cells();
-
-	initialize_pieces();
-	initialize_pieces_count();
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -91,6 +88,11 @@ void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_i
 	}
 }
 
+void SlidingPuzzleSolver::set_pieces_count(void)
+{
+	pieces_count = starting_pieces_info.size();
+}
+
 void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 {
 	for (std::size_t starting_piece_json_index = 0; starting_piece_json_index != starting_pieces_json.size(); ++starting_piece_json_index)
@@ -115,6 +117,7 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 
 void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 {
+	// Note that the program assumes that walls will *always* surround the puzzle, which is fine.
 	// Taking the width and height of walls into account is only necessary when the right or bottom wall is two cells thick.
 	// I can't think of a reason why they would ever be this thick since those outer wall cells wouldn't influence the puzzle.
 	// But hey, making this function handle that edge case (hah) correctly with "x + wall_width" is less puzzling than "x + 1" anyways!
@@ -135,6 +138,25 @@ void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 		const int wall_height = wall_size_json["height"];
 		if (y + wall_height > height) height = y + wall_height;
 	}
+}
+
+void set_collision_checked_offsets(void)
+{
+
+}
+
+void set_emptied_cell_offsets(void)
+{
+
+}
+
+void SlidingPuzzleSolver::initialize_variable_fields(const json &puzzle_json)
+{
+	initialize_cells();
+	add_wall_cells(puzzle_json["walls"]);
+	add_piece_cells();
+
+	initialize_pieces();
 }
 
 void SlidingPuzzleSolver::initialize_cells(void)
@@ -206,11 +228,6 @@ void SlidingPuzzleSolver::initialize_pieces(void)
 
 		pieces.push_back(piece);
 	}
-}
-
-void SlidingPuzzleSolver::initialize_pieces_count(void)
-{
-	pieces_count = pieces.size();
 }
 
 void SlidingPuzzleSolver::print_board()
@@ -613,17 +630,26 @@ bool SlidingPuzzleSolver::cant_move(const Rect &rect, const piece_direction &dir
 
 	const Size &rect_size = rect.size;
 
+	int start_x = rect_left_x;
+	int start_y = rect_top_y;
+
 	switch (direction)
 	{
 	case 0:
-		return cant_move_in_direction(piece_id, rect_left_x, rect_top_y - 1, rect_size);
+		start_y--;
+		break;
 	case 1:
-		return cant_move_in_direction(piece_id, rect_left_x, rect_top_y + 1, rect_size);
+		start_y++;
+		break;
 	case 2:
-		return cant_move_in_direction(piece_id, rect_left_x - 1, rect_top_y, rect_size);
-	default:
-		return cant_move_in_direction(piece_id, rect_left_x + 1, rect_top_y, rect_size);
+		start_x--;
+		break;
+	case 3:
+		start_x++;
+		break;
 	}
+
+	return cant_move_in_direction(piece_id, start_x, start_y, rect_size);
 }
 
 bool SlidingPuzzleSolver::cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size)

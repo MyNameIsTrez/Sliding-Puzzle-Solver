@@ -55,6 +55,7 @@ void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
 	add_piece_cells();
 
 	initialize_pieces();
+	initialize_pieces_count();
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -207,6 +208,11 @@ void SlidingPuzzleSolver::initialize_pieces(void)
 	}
 }
 
+void SlidingPuzzleSolver::initialize_pieces_count(void)
+{
+	pieces_count = pieces.size();
+}
+
 void SlidingPuzzleSolver::print_board()
 {
 	const std::vector<std::vector<char>> board = get_board();
@@ -302,17 +308,11 @@ bool SlidingPuzzleSolver::add_new_state(void)
 
 void SlidingPuzzleSolver::solve(void)
 {
-	std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> pieces_stack;
+	std::stack<std::tuple<cell_id, piece_direction>> pieces_stack;
 	pieces_stack.push(std::make_tuple(
-		NO_RECOVERY, // Recovery piece index.
-		NO_RECOVERY, // Recovery direction.
 		0, // Piece index.
 		0 // Direction.
 	));
-
-	// std::stack<std::vector<std::pair<std::size_t, char>>> path_stack;
-	// const std::vector<std::pair<std::size_t, char>> initial_empty_path = std::vector<std::pair<std::size_t, char>>();
-	// path_stack.push(initial_empty_path);
 
 	// TODO: Can this line be shortened?
 	// std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(path_stack), std::ref(pieces_stack));
@@ -326,21 +326,21 @@ void SlidingPuzzleSolver::solve(void)
 		}
 
 		// TODO: Refactor this using "auto [a, b, c, d]" from C++17.
-		std::tuple<cell_id, piece_direction, cell_id, piece_direction> &pieces_stack_top = pieces_stack.top();
+		std::tuple<cell_id, piece_direction> &pieces_stack_top = pieces_stack.top();
+		const cell_id &stack_piece_index = std::get<0>(pieces_stack_top);
+		const piece_direction &stack_direction = std::get<1>(pieces_stack_top);
 
-		const cell_id &recovery_piece_index = std::get<0>(pieces_stack_top);
-		const piece_direction &recovery_direction = std::get<1>(pieces_stack_top);
-		if (recovery_piece_index != NO_RECOVERY)
+		if (no_next_piece_or_direction(stack_piece_index, stack_direction))
 		{
-			recover_piece(recovery_piece_index, recovery_direction);
+			continue;
 		}
 
-		cell_id &start_piece_index = std::get<2>(pieces_stack_top);
-		piece_direction &start_direction = std::get<3>(pieces_stack_top);
+		const cell_id &recovery_piece_index = stack_piece_index;
+		const piece_direction &recovery_direction = get_inverted_direction(stack_direction);
+		recover_piece(recovery_piece_index, recovery_direction);
 
-		// std::vector<std::pair<std::size_t, char>> path = path_stack.top();
-
-		// path_stack.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
+		cell_id start_piece_index = get_next_piece_index(stack_piece_index, stack_direction);
+		piece_direction start_direction = get_next_direction(stack_direction);
 
 		move_piece(start_piece_index, start_direction, pieces_stack);
 	}
@@ -348,10 +348,130 @@ void SlidingPuzzleSolver::solve(void)
 	// timed_print_thread.join();
 }
 
+bool SlidingPuzzleSolver::no_next_piece_or_direction(const cell_id &stack_piece_index, const piece_direction &stack_direction)
+{
+	return (
+		stack_piece_index == pieces_count - 1 &&
+		stack_direction == 3
+	);
+}
+
+cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
+{
+	// Keeps the same piece by going to the next direction.
+	if (direction < 3) return piece_index;
+
+	// If this is reached then direction == 3, so go to the next piece.
+	return piece_index + 1;
+}
+
+piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &direction)
+{
+	return (direction + 1) % 4;
+}
+
+piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_direction &direction)
+{
+	switch (direction)
+	{
+	case 0:
+		return 1;
+	case 1:
+		return 0;
+
+	case 2:
+		return 3;
+	default:
+		return 2;
+	}
+}
+
 void SlidingPuzzleSolver::recover_piece(const cell_id &recovery_piece_index, const piece_direction &recovery_direction)
 {
 	Piece &recovery_piece = pieces[recovery_piece_index];
-	move(recovery_piece.top_left, recovery_direction);
+
+	const StartingPieceInfo &recovery_piece_info = starting_pieces_info[recovery_piece_index];
+
+	move(recovery_piece.top_left, recovery_direction, recovery_piece_info.rects, recovery_piece_index);
+}
+
+void SlidingPuzzleSolver::move(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id)
+{
+	move_piece_top_left(piece_top_left, direction);
+
+	move_piece_cells(piece_top_left, direction, rects, piece_id);
+}
+
+void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_direction direction)
+{
+	switch (direction)
+	{
+	case 0:
+		piece_top_left.y += -1;
+		break;
+	case 1:
+		piece_top_left.y += 1;
+		break;
+	case 2:
+		piece_top_left.x += -1;
+		break;
+	case 3:
+		piece_top_left.x += 1;
+		break;
+	}
+}
+
+void SlidingPuzzleSolver::move_piece_cells(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id)
+{
+	// TODO: This function first sets *all* of a piece its cells to empty_cells_id,
+	// shifts its view according to direction and then sets *all* of them to piece_id.
+	// It must be possible to do this much more efficiently by caching which few cells need to be set to empty_cells_id.
+
+	int start_x = piece_top_left.x;
+	int start_y = piece_top_left.y;
+
+	for (const auto &rect : rects)
+	{
+		set_rect_cell_ids(rect, start_x, start_y, empty_cell_id);
+	}
+
+	switch (direction)
+	{
+	case 0:
+		start_y += -1;
+		break;
+	case 1:
+		start_y += 1;
+		break;
+	case 2:
+		start_x += -1;
+		break;
+	case 3:
+		start_x += 1;
+		break;
+	}
+
+	for (const auto &rect : rects)
+	{
+		set_rect_cell_ids(rect, start_x, start_y, piece_id);
+	}
+}
+
+void SlidingPuzzleSolver::set_rect_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
+{
+	const Size &rect_size = rect.size;
+	const int rect_height = rect_size.height;
+	const int rect_width = rect_size.width;
+
+	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
+	{
+		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
+		{
+			const int x = start_x + x_offset;
+			const int y = start_y + y_offset;
+			cells[y][x] = id;
+		}
+	}
 }
 
 // void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
@@ -421,14 +541,15 @@ void SlidingPuzzleSolver::update_finished()
 	}
 }
 
-void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack)
+void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction>> &pieces_stack)
 {
 	for (cell_id &piece_index = start_piece_index; piece_index != static_cast<cell_id>(pieces.size()); ++piece_index)
 	{
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
 
-		const std::vector<Rect> &rects = starting_pieces_info[piece_index].rects;
+		const StartingPieceInfo &starting_piece_info = starting_pieces_info[piece_index];
+		const std::vector<Rect> &rects = starting_piece_info.rects;
 
 		const int piece_top_left_x_backup = piece_top_left.x;
 		const int piece_top_left_y_backup = piece_top_left.y;
@@ -440,23 +561,14 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 				continue;
 			}
 
-			move(piece_top_left, direction);
+			move(piece_top_left, direction, rects, piece_index);
 
 			if (add_new_state())
 			{
 				pieces_stack.push(std::make_tuple(
-					piece_index, // Recovery piece index.
-					get_inverted_direction(direction), // Recovery direction.
-					get_next_piece_index(piece_index, direction),
-					get_next_direction(direction)
+					piece_index,
+					direction
 				));
-
-				// std::vector<std::pair<std::size_t, char>> path_copy = path;
-
-				// std::pair<std::size_t, char> new_path_part(piece_index, direction_characters[direction]);
-				// path_copy.push_back(new_path_part);
-
-				// path_stack.push(path_copy);
 
 				state_count++;
 			}
@@ -477,7 +589,7 @@ bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, c
 {
 	for (const auto &rect : rects)
 	{
-		if (is_invalid_move(rect, direction, piece_id, piece_top_left))
+		if (cant_move(rect, direction, piece_id, piece_top_left))
 		{
 			return true;
 		}
@@ -486,7 +598,7 @@ bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, c
 	return false;
 }
 
-bool SlidingPuzzleSolver::is_invalid_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
+bool SlidingPuzzleSolver::cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
 {
 	/*
 	Only the cells on the edges are checked for a collision, in this numbered order:
@@ -500,51 +612,38 @@ bool SlidingPuzzleSolver::is_invalid_move(const Rect &rect, const piece_directio
 	const int rect_top_y = piece_top_left.y + rect.offset.y;
 
 	const Size &rect_size = rect.size;
-	const int rect_width = rect_size.width;
-	const int rect_height = rect_size.height;
-
-	const int rect_bottom_y = rect_top_y + rect_height - 1;
-	const int rect_right_x = rect_left_x + rect_width - 1;
 
 	switch (direction)
 	{
 	case 0:
-		return is_horizontal_invalid_move(piece_id, rect_left_x, rect_top_y - 1, rect_width);
+		return cant_move_in_direction(piece_id, rect_left_x, rect_top_y - 1, rect_size);
 	case 1:
-		return is_horizontal_invalid_move(piece_id, rect_left_x, rect_bottom_y + 1, rect_width);
+		return cant_move_in_direction(piece_id, rect_left_x, rect_top_y + 1, rect_size);
 	case 2:
-		return is_vertical_invalid_move(piece_id, rect_left_x - 1, rect_top_y, rect_height);
+		return cant_move_in_direction(piece_id, rect_left_x - 1, rect_top_y, rect_size);
 	default:
-		return is_vertical_invalid_move(piece_id, rect_right_x + 1, rect_top_y, rect_height);
+		return cant_move_in_direction(piece_id, rect_left_x + 1, rect_top_y, rect_size);
 	}
 }
 
-bool SlidingPuzzleSolver::is_horizontal_invalid_move(const cell_id piece_id, const int start_x, const int start_y, const int rect_width)
+bool SlidingPuzzleSolver::cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size)
 {
-	for (int x_offset = 0; x_offset < rect_width; ++x_offset)
-	{
-		if (cant_move_to_cell(piece_id, start_x + x_offset, start_y))
-		{
-			return true;
-		}
-	}
+	const int rect_height = rect_size.height;
+	const int rect_width = rect_size.width;
 
-	return false;
-}
-
-bool SlidingPuzzleSolver::is_vertical_invalid_move(const cell_id piece_id, const int start_x, const int start_y, const int rect_height)
-{
 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
 	{
-		if (cant_move_to_cell(piece_id, start_x, start_y + y_offset))
+		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
 		{
-			return true;
+			if (cant_move_to_cell(piece_id, start_x + x_offset, start_y + y_offset))
+			{
+				return true;
+			}
 		}
 	}
 
 	return false;
 }
-
 bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x, const int y)
 {
 	if (x < 0 || x >= width ||
@@ -561,53 +660,6 @@ bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x,
 	}
 
 	return false;
-}
-
-void SlidingPuzzleSolver::move(Pos &piece_top_left, const piece_direction direction)
-{
-	switch (direction)
-	{
-	case 0:
-		piece_top_left.y += -1;
-		break;
-	case 1:
-		piece_top_left.y += 1;
-		break;
-	case 2:
-		piece_top_left.x += -1;
-		break;
-	case 3:
-		piece_top_left.x += 1;
-		break;
-	}
-}
-
-piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_direction &direction)
-{
-	switch (direction)
-	{
-	case 0:
-		return 1;
-	case 1:
-		return 0;
-
-	case 2:
-		return 3;
-	default:
-		return 2;
-	}
-}
-
-cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
-{
-	if (piece_index == pieces_count - 1) return NO_NEXT_PIECE; // This value should never have to be read, but *something* has to be returned.
-	if (direction <= 3) return piece_index; // Keep the same piece but go to the next direction.
-	return piece_index + 1; // If this is reached then direction == 3, so go to the next piece.
-}
-
-piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &direction)
-{
-	return (direction + 1) % 4;
 }
 
 // bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_top_left)

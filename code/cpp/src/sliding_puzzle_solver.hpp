@@ -25,16 +25,12 @@ using json = nlohmann::json;
 typedef int cell_id;
 typedef int piece_direction;
 
-// typedef std::vector<Offset> piece_direction_cell_offsets;
-// typedef std::array<piece_direction_cell_offsets, 4> piece_directions_cell_offsets;
-// typedef std::vector<piece_directions_cell_offsets> pieces_directions_cell_offsets;
-
 ////////
 
 class SlidingPuzzleSolver
 {
 	// Adding consts, structs and enums ////////
-	int const direction_count = 4;
+	static int const direction_count = 4;
 
 	struct pieces_directions_cell_offsets
 	{
@@ -54,7 +50,6 @@ class SlidingPuzzleSolver
 		empty_cell_id = -1,
 		wall_cell_id = -2
 	};
-
 
 	// Constants ////////
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
@@ -96,7 +91,7 @@ class SlidingPuzzleSolver
 	" pppp"
 	" p  p"
 
-	then these "@" characters denote the cells it will check for collision:
+	then these "#" characters denote the cells it will check for collision:
 	"#pppp"
 	"#p #p"
 
@@ -140,6 +135,7 @@ class SlidingPuzzleSolver
 	void add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	void set_collision_checked_offsets(void);
+	void add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	// Initialize variables
 	void initialize_variable_fields(const json &puzzle_json);

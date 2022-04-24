@@ -142,17 +142,19 @@ void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 
 void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 {
-	for (piece_direction direction = 0; direction < direction_count; ++direction)
+	emptied_cell_offsets.pieces.resize(pieces_count);
+
+	// TODO: Turn the looping through all cells into an iterator/generator function.
+	for (cell_id piece_index = 0; piece_index < pieces_count; ++piece_index)
 	{
-		// TODO: Turn the looping through all cells into an iterator/generator function.
-		for (cell_id piece_index = 0; piece_index < starting_pieces_info.size(); ++piece_index)
+		const auto &starting_piece_info = starting_pieces_info[piece_index];
+
+		const auto &piece_top_left = starting_piece_info.top_left;
+		const auto &piece_top_left_x = piece_top_left.x;
+		const auto &piece_top_left_y = piece_top_left.y;
+
+		for (piece_direction direction = 0; direction < direction_count; ++direction)
 		{
-			const auto &starting_piece_info = starting_pieces_info[piece_index];
-
-			const auto &piece_top_left = starting_piece_info.top_left;
-			const auto &piece_top_left_x = piece_top_left.x;
-			const auto &piece_top_left_y = piece_top_left.y;
-
 			for (const auto &rect : starting_piece_info.rects)
 			{
 				const auto &rect_offset = rect.offset;
@@ -167,37 +169,41 @@ void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 				{
 					for (int rect_width_offset = 0; rect_width_offset < rect_width; ++rect_width_offset)
 					{
-						auto checked_x = piece_top_left_x + rect_offset_x + rect_width_offset;
-						auto checked_y = piece_top_left_y + rect_offset_y + rect_height_offset;
+						const auto cell_offset_x = rect_offset_x + rect_width_offset;
+						const auto cell_offset_y = rect_offset_y + rect_height_offset;
 
+						auto checked_x = piece_top_left_x + cell_offset_x;
+						auto checked_y = piece_top_left_y + cell_offset_y;
+
+						// See the documentation for emptied_cell_offsets in the class header to understand why the switch looks like this.
 						switch (direction)
 						{
 							case 0:
-								checked_y--;
-								break;
-							case 1:
 								checked_y++;
 								break;
+							case 1:
+								checked_y--;
+								break;
 							case 2:
-								checked_x--;
+								checked_x++;
 								break;
 							case 3:
-								checked_x++;
+								checked_x--;
 								break;
 						}
 
 						if (checked_x < 0 || checked_x >= width ||
 							checked_y < 0 || checked_y >= height)
 						{
-							add_offset_to_emptied_cell_offsets(checked_x, checked_y, piece_index, direction);
+							add_offset_to_emptied_cell_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
 							continue;
 						}
 
 						const auto &checked_index = cells[checked_y][checked_x];
 
-						if (checked_index == piece_index)
+						if (checked_index != piece_index)
 						{
-							add_offset_to_emptied_cell_offsets(checked_x, checked_y, piece_index, direction);
+							add_offset_to_emptied_cell_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
 						}
 					}
 				}
@@ -208,7 +214,7 @@ void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 
 void SlidingPuzzleSolver::add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
 {
-	// TODO: Initialize this as a const somehow.
+	// TODO: Initialize offset as a const somehow.
 	Offset offset;
 	offset.x = x;
 	offset.y = y;
@@ -218,7 +224,55 @@ void SlidingPuzzleSolver::add_offset_to_emptied_cell_offsets(const int x, const 
 
 void SlidingPuzzleSolver::set_collision_checked_offsets(void)
 {
+	collision_checked_offsets.pieces.resize(pieces_count);
 
+	for (cell_id piece_index = 0; piece_index < pieces_count; ++piece_index)
+	{
+		const auto &piece = emptied_cell_offsets.pieces[piece_index];
+
+		for (piece_direction direction = 0; direction < direction_count; ++direction)
+		{
+			const auto &piece_direction = piece.directions[get_inverted_direction(direction)];
+
+			for (size_t offset_index = 0; offset_index < piece_direction.offsets.size(); ++offset_index)
+			{
+				const auto &offset = piece_direction.offsets[offset_index];
+				auto cell_offset_x = offset.x;
+				auto cell_offset_y = offset.y;
+
+				// See the documentation for collision_checked_offsets in the class header to understand why the switch looks like this.
+				switch (direction)
+				{
+					case 0:
+						cell_offset_y--;
+						break;
+					case 1:
+						cell_offset_y++;
+						break;
+					case 2:
+						cell_offset_x--;
+						break;
+					case 3:
+						cell_offset_x++;
+						break;
+				}
+
+				add_offset_to_collision_checked_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
+			}
+		}
+	}
+}
+
+// TODO: Somehow combine this method with add_offset_to_emptied_cell_offsets()
+// without having to constantly pass emptied_cell_offsets/collision_checked_offsets as an argument.
+void SlidingPuzzleSolver::add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
+{
+	// TODO: Initialize offset as a const somehow.
+	Offset offset;
+	offset.x = x;
+	offset.y = y;
+
+	collision_checked_offsets.pieces[piece_index].directions[direction].offsets.push_back(offset);
 }
 
 void SlidingPuzzleSolver::initialize_variable_fields(const json &puzzle_json)
@@ -263,7 +317,7 @@ void SlidingPuzzleSolver::add_wall_cells(const json &walls_json)
 
 void SlidingPuzzleSolver::add_piece_cells(void)
 {
-	for (cell_id starting_piece_info_index = 0; starting_piece_info_index != static_cast<cell_id>(starting_pieces_info.size()); ++starting_piece_info_index)
+	for (cell_id starting_piece_info_index = 0; starting_piece_info_index != pieces_count; ++starting_piece_info_index)
 	{
 		const StartingPieceInfo &starting_piece_info = starting_pieces_info[starting_piece_info_index];
 		const Pos &top_left = starting_piece_info.top_left;
@@ -631,7 +685,7 @@ void SlidingPuzzleSolver::update_finished()
 
 void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction>> &pieces_stack)
 {
-	for (cell_id &piece_index = start_piece_index; piece_index != static_cast<cell_id>(pieces.size()); ++piece_index)
+	for (cell_id &piece_index = start_piece_index; piece_index != pieces_count; ++piece_index)
 	{
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;

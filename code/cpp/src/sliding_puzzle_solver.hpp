@@ -29,7 +29,7 @@ typedef int piece_direction;
 
 class SlidingPuzzleSolver
 {
-	// Adding consts, structs and enums ////////
+	// Static consts, structs and enums ////////
 	static int const direction_count = 4;
 
 	struct pieces_directions_cell_offsets
@@ -67,6 +67,8 @@ class SlidingPuzzleSolver
 
 
 	// Constants after constructor ////////
+	std::vector<Wall> walls;
+
 	int width;
 	int height;
 
@@ -103,7 +105,6 @@ class SlidingPuzzleSolver
 
 
 	// Variables ////////
-	// std::unordered_set<std::size_t> states;
 	std::unordered_set<std::vector<Piece>, Piece::Hasher> states;
 
 	int state_count = 0;
@@ -111,8 +112,6 @@ class SlidingPuzzleSolver
 	bool finished = false;
 
 	std::vector<std::vector<cell_id>> cells;
-
-	// std::vector<std::vector<bool>> active_cells;
 
 	std::vector<Piece> pieces;
 
@@ -122,14 +121,15 @@ class SlidingPuzzleSolver
 	const std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path &exe_path, const std::string &puzzle_name);
 
 	// Set constants
-	void initialize_constant_fields(const json &puzzle_json);
+	void set_constant_fields(const json &puzzle_json);
 
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_pieces_count(void);
 
 	void set_ending_pieces(const json &starting_pieces_json);
 
-	void set_width_and_height(const json &walls_json);
+	void set_walls(const json &walls_json);
+	void set_width_and_height(void);
 
 	void set_emptied_cell_offsets(void);
 	void add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);

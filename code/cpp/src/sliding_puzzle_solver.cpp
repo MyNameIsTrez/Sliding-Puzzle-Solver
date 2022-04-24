@@ -6,7 +6,7 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const 
 {
 	const json puzzle_json = get_puzzle_json(exe_path, puzzle_name);
 
-	initialize_constant_fields(puzzle_json);
+	set_constant_fields(puzzle_json);
 	initialize_variable_fields(puzzle_json);
 
 	set_emptied_cell_offsets();
@@ -48,14 +48,15 @@ const std::filesystem::path SlidingPuzzleSolver::get_puzzle_path_from_exe_path(s
 	return puzzle_path;
 }
 
-void SlidingPuzzleSolver::initialize_constant_fields(const json &puzzle_json)
+void SlidingPuzzleSolver::set_constant_fields(const json &puzzle_json)
 {
 	set_starting_pieces_info(puzzle_json["starting_pieces_info"]);
 	set_pieces_count();
 
 	set_ending_pieces(puzzle_json["starting_pieces_info"]);
 
-	set_width_and_height(puzzle_json["walls"]);
+	set_walls(puzzle_json["walls"]);
+	set_width_and_height();
 }
 
 void SlidingPuzzleSolver::set_starting_pieces_info(const json &starting_pieces_info_json)
@@ -98,7 +99,7 @@ void SlidingPuzzleSolver::set_pieces_count(void)
 
 void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 {
-	for (std::size_t starting_piece_json_index = 0; starting_piece_json_index != starting_pieces_json.size(); ++starting_piece_json_index)
+	for (cell_id starting_piece_json_index = 0; starting_piece_json_index != pieces_count; ++starting_piece_json_index)
 	{
 		const json &starting_piece_json = starting_pieces_json[starting_piece_json_index];
 
@@ -118,24 +119,45 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 	}
 }
 
-void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
+void SlidingPuzzleSolver::set_walls(const json &walls_json)
+{
+	for (const auto &wall_json : walls_json)
+	{
+		Wall wall;
+
+		const json &wall_pos_json = wall_json["pos"];
+		const json &wall_size_json = wall_json["size"];
+
+		Pos &wall_pos = wall.pos;
+		wall_pos.x = wall_pos_json["x"];
+		wall_pos.y = wall_pos_json["y"];
+
+		Size &wall_size = wall.size;
+		wall_size.width = wall_size_json["width"];
+		wall_size.height = wall_size_json["height"];
+
+		walls.push_back(wall);
+	}
+}
+
+void SlidingPuzzleSolver::set_width_and_height(void)
 {
 	// Keep in mind that this function assumes that walls will *always* surround the puzzle.
 
 	width = 0;
 	height = 0;
 
-	for (const auto &wall_json : walls_json)
+	for (const auto &wall : walls)
 	{
-		const json &wall_pos_json = wall_json["pos"];
-		const json &wall_size_json = wall_json["size"];
+		const auto &wall_pos = wall.pos;
+		const auto &wall_size = wall.size;
 
-		const int x = wall_pos_json["x"];
-		const int wall_width = wall_size_json["width"];
+		const auto x = wall_pos.x;
+		const auto wall_width = wall_size.width;
 		if (x + wall_width > width) width = x + wall_width;
 
-		const int y = wall_pos_json["y"];
-		const int wall_height = wall_size_json["height"];
+		const auto y = wall_pos.y;
+		const auto wall_height = wall_size.height;
 		if (y + wall_height > height) height = y + wall_height;
 	}
 }
@@ -373,9 +395,8 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_board()
 {
 	std::vector<std::vector<char>> board = get_2d_vector();
 
-	// TODO: Replace these function calls with a 2D loop going through all the cell_ids in the cells field.
-	// set_pieces_on_board(board);
-	// set_walls_on_board(board);
+	set_pieces_on_board(board);
+	set_walls_on_board(board);
 
 	return board;
 }
@@ -385,59 +406,59 @@ const std::vector<std::vector<char>> SlidingPuzzleSolver::get_2d_vector(void)
 	return std::vector<std::vector<char>>(height, std::vector<char>(width, empty_character));
 }
 
-// void SlidingPuzzleSolver::set_pieces_on_board(std::vector<std::vector<char>> &board)
-// {
-// 	for (std::size_t piece_index = 0; piece_index != pieces.size(); ++piece_index)
-// 	{
-// 		const Piece &piece = pieces[piece_index];
+void SlidingPuzzleSolver::set_pieces_on_board(std::vector<std::vector<char>> &board)
+{
+	for (cell_id piece_index = 0; piece_index != pieces_count; ++piece_index)
+	{
+		const Piece &piece = pieces[piece_index];
 
-// 		const Pos &top_left = piece.top_left;
-// 		const int top_left_x = top_left.x;
-// 		const int top_left_y = top_left.y;
+		const Pos &top_left = piece.top_left;
+		const int top_left_x = top_left.x;
+		const int top_left_y = top_left.y;
 
-// 		const StartingPieceInfo &starting_piece_info = starting_pieces_info[piece_index];
-// 		const std::vector<Rect> &rects = starting_piece_info.rects;
+		const StartingPieceInfo &starting_piece_info = starting_pieces_info[piece_index];
+		const std::vector<Rect> &rects = starting_piece_info.rects;
 
-// 		for (const auto &rect : rects)
-// 		{
-// 			const Offset &rect_offset = rect.offset;
-// 			const int top_left_rect_x = top_left_x + rect_offset.x;
-// 			const int top_left_rect_y = top_left_y + rect_offset.y;
+		for (const auto &rect : rects)
+		{
+			const Offset &rect_offset = rect.offset;
+			const int top_left_rect_x = top_left_x + rect_offset.x;
+			const int top_left_rect_y = top_left_y + rect_offset.y;
 
-// 			const Size &rect_size = rect.size;
-// 			const int rect_width = rect_size.width;
-// 			const int rect_height = rect_size.height;
+			const Size &rect_size = rect.size;
+			const int rect_width = rect_size.width;
+			const int rect_height = rect_size.height;
 
-// 			for (int y = top_left_rect_y; y < top_left_rect_y + rect_height; ++y)
-// 			{
-// 				for (int x = top_left_rect_x; x < top_left_rect_x + rect_width; ++x)
-// 				{
-// 					board[y][x] = piece_labels[piece_index % piece_labels_length];
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+			for (int y = top_left_rect_y; y < top_left_rect_y + rect_height; ++y)
+			{
+				for (int x = top_left_rect_x; x < top_left_rect_x + rect_width; ++x)
+				{
+					board[y][x] = piece_labels[piece_index % piece_labels_length];
+				}
+			}
+		}
+	}
+}
 
-// void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &board)
-// {
-// 	for (const auto &wall : walls)
-// 	{
-// 		const Pos &wall_pos = wall.pos;
-// 		const int top_left_wall_x = wall_pos.x;
-// 		const int top_left_wall_y = wall_pos.y;
+void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &board)
+{
+	for (const auto &wall : walls)
+	{
+		const Pos &wall_pos = wall.pos;
+		const int top_left_wall_x = wall_pos.x;
+		const int top_left_wall_y = wall_pos.y;
 
-// 		const Size &wall_size = wall.size;
+		const Size &wall_size = wall.size;
 
-// 		for (int y = top_left_wall_y; y < top_left_wall_y + wall_size.height; ++y)
-// 		{
-// 			for (int x = top_left_wall_x; x < top_left_wall_x + wall_size.width; ++x)
-// 			{
-// 				board[y][x] = wall_character;
-// 			}
-// 		}
-// 	}
-// }
+		for (int y = top_left_wall_y; y < top_left_wall_y + wall_size.height; ++y)
+		{
+			for (int x = top_left_wall_x; x < top_left_wall_x + wall_size.width; ++x)
+			{
+				board[y][x] = wall_character;
+			}
+		}
+	}
+}
 
 bool SlidingPuzzleSolver::add_new_state(void)
 {
@@ -616,7 +637,7 @@ void SlidingPuzzleSolver::set_rect_cell_ids(const Rect &rect, const int start_x,
 	}
 }
 
-// void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
+// void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<cell_id, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
 // {
 // 	std::cout << std::endl;
 
@@ -630,7 +651,7 @@ void SlidingPuzzleSolver::set_rect_cell_ids(const Rect &rect, const int start_x,
 // 	std::cout << get_path_string(path_stack.top()) << std::endl << std::endl;
 // }
 
-// void SlidingPuzzleSolver::timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
+// void SlidingPuzzleSolver::timed_print_core(const std::stack<std::vector<std::pair<cell_id, char>>> &path_stack, const std::stack<std::vector<Piece>> &pieces_stack)
 // {
 // 	// TODO: Store elapsed_time in something more appropriate than int.
 // 	const int elapsed_time = get_elapsed_seconds().count();
@@ -668,7 +689,7 @@ void SlidingPuzzleSolver::update_finished()
 
 	for (const auto &ending_piece : ending_pieces)
 	{
-		const std::size_t ending_piece_index = ending_piece.piece_index;
+		const cell_id ending_piece_index = ending_piece.piece_index;
 		const Pos &ending_piece_top_left = ending_piece.top_left;
 
 		const Piece &piece = pieces[ending_piece_index];
@@ -813,7 +834,7 @@ bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x,
 	return false;
 }
 
-// bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_top_left)
+// bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const cell_id piece_index, const Pos &piece_top_left)
 // {
 // 	const int piece_x = piece_top_left.x;
 // 	const int piece_y = piece_top_left.y;
@@ -828,7 +849,7 @@ bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x,
 // 	);
 // }
 
-// bool SlidingPuzzleSolver::no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos)
+// bool SlidingPuzzleSolver::no_intersection(const cell_id piece_index_1, const Pos &piece_1_pos)
 // {
 // 	const int piece_1_x = piece_1_pos.x;
 // 	const int piece_1_y = piece_1_pos.y;
@@ -843,7 +864,7 @@ bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x,
 // 	const int piece_1_left = piece_1_x;
 // 	const int piece_1_right = piece_1_x + piece_1_width;
 
-// 	for (std::size_t piece_index_2 = 0; piece_index_2 != pieces.size(); ++piece_index_2)
+// 	for (cell_id piece_index_2 = 0; piece_index_2 != pieces_count; ++piece_index_2)
 // 	{
 // 		if (piece_index_1 == piece_index_2)
 // 		{
@@ -878,17 +899,17 @@ bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x,
 // 	return true;
 // }
 
-// const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<std::size_t, char>> &path)
+// const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<cell_id, char>> &path)
 // {
 // 	// If this method ever needs to be called a lot then try using a rope instead.
 // 	std::stringstream path_stringstream;
 
-// 	for (std::vector<std::pair<std::size_t, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
+// 	for (std::vector<std::pair<cell_id, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
 // 	{
-// 		std::size_t piece_index = pair_it->first;
+// 		const cell_id piece_index = pair_it->first;
 // 		path_stringstream << piece_index;
 
-// 		char direction = pair_it->second;
+// 		const char direction = pair_it->second;
 // 		path_stringstream << direction;
 // 	}
 

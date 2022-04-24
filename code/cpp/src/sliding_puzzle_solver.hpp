@@ -29,29 +29,33 @@ typedef int piece_direction;
 // typedef std::array<piece_direction_cell_offsets, 4> piece_directions_cell_offsets;
 // typedef std::vector<piece_directions_cell_offsets> pieces_directions_cell_offsets;
 
-struct pieces_directions_cell_offsets
-{
-	struct direction
-	{
-		struct offsets
-		{
-			std::vector<Offset> offsets;
-		};
-		std::array<offsets, 4> directions;
-	};
-	std::vector<direction> pieces;
-};
-
-enum
-{
-	empty_cell_id = -1,
-	wall_cell_id = -2
-};
-
 ////////
 
 class SlidingPuzzleSolver
 {
+	// Adding consts, structs and enums ////////
+	int const direction_count = 4;
+
+	struct pieces_directions_cell_offsets
+	{
+		struct directions
+		{
+			struct offsets
+			{
+				std::vector<Offset> offsets;
+			};
+			std::array<offsets, direction_count> directions;
+		};
+		std::vector<directions> pieces;
+	};
+
+	enum
+	{
+		empty_cell_id = -1,
+		wall_cell_id = -2
+	};
+
+
 	// Constants ////////
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
@@ -75,19 +79,6 @@ class SlidingPuzzleSolver
 	std::vector<EndingPiece> ending_pieces;
 
 	/*
-	If this piece needs to check if it can move left:
-	" pppp"
-	" p  p"
-
-	then these "@" characters denote the cells it will check for collision:
-	"#pppp"
-	"#p #p"
-
-	These "#" characters are stored here as offsets relative to the top-left "p".
-	*/
-	pieces_directions_cell_offsets collision_checked_offsets;
-
-	/*
 	If this piece needs to move left:
 	" pppp"
 	" p  p"
@@ -99,6 +90,19 @@ class SlidingPuzzleSolver
 	These "#" characters are stored here as offsets relative to the top-left "p".
 	*/
 	pieces_directions_cell_offsets emptied_cell_offsets;
+
+	/*
+	If this piece needs to check if it can move left:
+	" pppp"
+	" p  p"
+
+	then these "@" characters denote the cells it will check for collision:
+	"#pppp"
+	"#p #p"
+
+	These "#" characters are stored here as offsets relative to the top-left "p".
+	*/
+	pieces_directions_cell_offsets collision_checked_offsets;
 
 	int pieces_count;
 
@@ -132,8 +136,10 @@ class SlidingPuzzleSolver
 
 	void set_width_and_height(const json &walls_json);
 
-	void set_collision_checked_offsets(void);
 	void set_emptied_cell_offsets(void);
+	void add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
+
+	void set_collision_checked_offsets(void);
 
 	// Initialize variables
 	void initialize_variable_fields(const json &puzzle_json);

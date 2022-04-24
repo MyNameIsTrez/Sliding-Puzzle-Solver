@@ -8,6 +8,9 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const 
 
 	initialize_constant_fields(puzzle_json);
 	initialize_variable_fields(puzzle_json);
+
+	set_emptied_cell_offsets();
+	set_collision_checked_offsets();
 }
 
 void SlidingPuzzleSolver::run(void)
@@ -117,10 +120,7 @@ void SlidingPuzzleSolver::set_ending_pieces(const json &starting_pieces_json)
 
 void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 {
-	// Note that the program assumes that walls will *always* surround the puzzle, which is fine.
-	// Taking the width and height of walls into account is only necessary when the right or bottom wall is two cells thick.
-	// I can't think of a reason why they would ever be this thick since those outer wall cells wouldn't influence the puzzle.
-	// But hey, making this function handle that edge case (hah) correctly with "x + wall_width" is less puzzling than "x + 1" anyways!
+	// Keep in mind that this function assumes that walls will *always* surround the puzzle.
 
 	width = 0;
 	height = 0;
@@ -140,12 +140,83 @@ void SlidingPuzzleSolver::set_width_and_height(const json &walls_json)
 	}
 }
 
-void set_collision_checked_offsets(void)
+void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 {
+	for (piece_direction direction = 0; direction < direction_count; ++direction)
+	{
+		// TODO: Turn the looping through all cells into an iterator/generator function.
+		for (cell_id piece_index = 0; piece_index < starting_pieces_info.size(); ++piece_index)
+		{
+			const auto &starting_piece_info = starting_pieces_info[piece_index];
 
+			const auto &piece_top_left = starting_piece_info.top_left;
+			const auto &piece_top_left_x = piece_top_left.x;
+			const auto &piece_top_left_y = piece_top_left.y;
+
+			for (const auto &rect : starting_piece_info.rects)
+			{
+				const auto &rect_offset = rect.offset;
+				const auto &rect_offset_x = rect_offset.x;
+				const auto &rect_offset_y = rect_offset.y;
+
+				const auto &rect_size = rect.size;
+				const auto &rect_width = rect_size.width;
+				const auto &rect_height = rect_size.height;
+
+				for (int rect_height_offset = 0; rect_height_offset < rect_height; ++rect_height_offset)
+				{
+					for (int rect_width_offset = 0; rect_width_offset < rect_width; ++rect_width_offset)
+					{
+						auto checked_x = piece_top_left_x + rect_offset_x + rect_width_offset;
+						auto checked_y = piece_top_left_y + rect_offset_y + rect_height_offset;
+
+						switch (direction)
+						{
+							case 0:
+								checked_y--;
+								break;
+							case 1:
+								checked_y++;
+								break;
+							case 2:
+								checked_x--;
+								break;
+							case 3:
+								checked_x++;
+								break;
+						}
+
+						if (checked_x < 0 || checked_x >= width ||
+							checked_y < 0 || checked_y >= height)
+						{
+							add_offset_to_emptied_cell_offsets(checked_x, checked_y, piece_index, direction);
+							continue;
+						}
+
+						const auto &checked_index = cells[checked_y][checked_x];
+
+						if (checked_index == piece_index)
+						{
+							add_offset_to_emptied_cell_offsets(checked_x, checked_y, piece_index, direction);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
-void set_emptied_cell_offsets(void)
+void SlidingPuzzleSolver::add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
+{
+	// TODO: Initialize this as a const somehow.
+	Offset offset;
+	offset.x = x;
+	offset.y = y;
+
+	emptied_cell_offsets.pieces[piece_index].directions[direction].offsets.push_back(offset);
+}
+
+void SlidingPuzzleSolver::set_collision_checked_offsets(void)
 {
 
 }
@@ -384,7 +455,7 @@ cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, co
 
 piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &direction)
 {
-	return (direction + 1) % 4;
+	return (direction + 1) % direction_count;
 }
 
 piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_direction &direction)
@@ -571,7 +642,7 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 		const int piece_top_left_x_backup = piece_top_left.x;
 		const int piece_top_left_y_backup = piece_top_left.y;
 
-		for (piece_direction &direction = start_direction; direction < 4; ++direction)
+		for (piece_direction &direction = start_direction; direction < direction_count; ++direction)
 		{
 			if (a_rect_cant_be_moved(rects, direction, piece_index, piece_top_left))
 			{

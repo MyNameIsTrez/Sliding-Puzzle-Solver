@@ -15,6 +15,9 @@
 * Maybe the number of collisions is so high and hashing is so cheap that it may be faster to just always check if the state is already in states before doing collision checking?
 * Use < or != consistently in for-loops.
 * Turn -O3 back on.
+* Check if initializing all for and while loop conditions as consts before the loops is faster.
+* Rename id to index everywhere.
+* emplace_back() should be faster than push_back()
 
 # New algorithm
 * Use IDDFS: https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search

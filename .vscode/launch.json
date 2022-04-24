@@ -33,5 +33,27 @@
 			"miDebuggerPath": "/usr/bin/gdb",
 			"internalConsoleOptions": "neverOpen"
 		},
+		// {
+		// 	"name": "test.cpp",
+		// 	"type": "cppdbg",
+		// 	"request": "launch",
+		// 	"program": "${workspaceFolder}/test",
+		// 	"args": [],
+		// 	"stopAtEntry": false,
+		// 	"cwd": "${workspaceFolder}",
+		// 	"environment": [],
+		// 	"externalConsole": false,
+		// 	"MIMode": "gdb",
+		// 	"setupCommands": [
+		// 	  {
+		// 		"description": "Enable pretty-printing for gdb",
+		// 		"text": "-enable-pretty-printing",
+		// 		"ignoreFailures": true
+		// 	  }
+		// 	],
+		// 	"preLaunchTask": "test.cpp build",
+		// 	"miDebuggerPath": "/usr/bin/gdb",
+		// 	"internalConsoleOptions": "neverOpen"
+		// },
 	]
 }

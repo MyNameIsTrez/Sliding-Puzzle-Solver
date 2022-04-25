@@ -569,9 +569,11 @@ void SlidingPuzzleSolver::recover_piece(const cell_id &recovery_piece_index, con
 
 void SlidingPuzzleSolver::move(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id)
 {
+	set_piece_cell_ids(piece_top_left, empty_cell_id);
+
 	move_piece_top_left(piece_top_left, direction);
 
-	move_piece_cells(piece_top_left, direction, rects, piece_id);
+	set_piece_cell_ids(piece_top_left, piece_id);
 }
 
 void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_direction direction)
@@ -579,57 +581,21 @@ void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_d
 	switch (direction)
 	{
 	case 0:
-		piece_top_left.y += -1;
+		piece_top_left.y--;
 		break;
 	case 1:
-		piece_top_left.y += 1;
+		piece_top_left.y++;
 		break;
 	case 2:
-		piece_top_left.x += -1;
+		piece_top_left.x--;
 		break;
 	case 3:
-		piece_top_left.x += 1;
+		piece_top_left.x++;
 		break;
 	}
 }
 
-void SlidingPuzzleSolver::move_piece_cells(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id)
-{
-	// TODO: This function first sets *all* of a piece its cells to empty_cells_id,
-	// shifts its view according to direction and then sets *all* of them to piece_id.
-	// It must be possible to do this much more efficiently by caching which few cells need to be set to empty_cells_id.
-
-	int start_x = piece_top_left.x;
-	int start_y = piece_top_left.y;
-
-	for (const auto &rect : rects)
-	{
-		set_rect_cell_ids(rect, start_x, start_y, empty_cell_id);
-	}
-
-	switch (direction)
-	{
-	case 0:
-		start_y += -1;
-		break;
-	case 1:
-		start_y += 1;
-		break;
-	case 2:
-		start_x += -1;
-		break;
-	case 3:
-		start_x += 1;
-		break;
-	}
-
-	for (const auto &rect : rects)
-	{
-		set_rect_cell_ids(rect, start_x, start_y, piece_id);
-	}
-}
-
-void SlidingPuzzleSolver::set_rect_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
+void SlidingPuzzleSolver::set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
 {
 	const Size &rect_size = rect.size;
 	const int rect_height = rect_size.height;
@@ -639,9 +605,7 @@ void SlidingPuzzleSolver::set_rect_cell_ids(const Rect &rect, const int start_x,
 	{
 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
 		{
-			const int x = start_x + x_offset;
-			const int y = start_y + y_offset;
-			cells[y][x] = id;
+			cells[start_y + y_offset][start_x + x_offset] = id;
 		}
 	}
 }

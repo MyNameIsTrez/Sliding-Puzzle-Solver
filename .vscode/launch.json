@@ -13,7 +13,7 @@
 		},
 		{
 			"name": "C++",
-			"type": "cppdbg",
+			"type": "lldb",
 			"request": "launch",
 			"program": "${workspaceFolder}/puzzle",
 			"args": [],
@@ -21,7 +21,6 @@
 			"cwd": "${workspaceFolder}",
 			"environment": [],
 			"externalConsole": false,
-			"MIMode": "gdb",
 			"setupCommands": [
 			  {
 				"description": "Enable pretty-printing for gdb",
@@ -30,7 +29,6 @@
 			  }
 			],
 			"preLaunchTask": "C++ build",
-			"miDebuggerPath": "/usr/bin/gdb",
 			"internalConsoleOptions": "neverOpen"
 		},
 	]

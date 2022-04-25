@@ -2,6 +2,10 @@
 
 ////////
 
+#include <sstream>      // std::stringstream
+
+////////
+
 class KiloFormatter
 {
 public:

@@ -26,33 +26,34 @@ using json = nlohmann::json;
 typedef int cell_id;
 typedef int piece_direction;
 
-// typedef std::vector<Offset> piece_direction_cell_offsets;
-// typedef std::array<piece_direction_cell_offsets, 4> piece_directions_cell_offsets;
-// typedef std::vector<piece_directions_cell_offsets> pieces_directions_cell_offsets;
-
-struct pieces_directions_cell_offsets
-{
-	struct direction
-	{
-		struct offsets
-		{
-			std::vector<Offset> offsets;
-		};
-		std::array<offsets, 4> directions;
-	};
-	std::vector<direction> pieces;
-};
-
-enum
-{
-	empty_cell_id = -1,
-	wall_cell_id = -2
-};
-
 ////////
 
 class SlidingPuzzleSolver
 {
+	// Static consts, structs and enums ////////
+	static int const direction_count = 4;
+
+	int const no_recovery = -1;
+
+	struct pieces_directions_cell_offsets
+	{
+		struct directions
+		{
+			struct offsets
+			{
+				std::vector<Offset> offsets;
+			};
+			std::array<offsets, direction_count> directions;
+		};
+		std::vector<directions> pieces;
+	};
+
+	enum
+	{
+		empty_cell_id = -1,
+		wall_cell_id = -2
+	};
+
 	// Constants ////////
 	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
@@ -69,24 +70,13 @@ class SlidingPuzzleSolver
 
 
 	// Constants after constructor ////////
+	std::vector<Wall> walls;
+
 	int width;
 	int height;
 
 	std::vector<StartingPieceInfo> starting_pieces_info;
 	std::vector<EndingPiece> ending_pieces;
-
-	/*
-	If this piece needs to check if it can move left:
-	" pppp"
-	" p  p"
-
-	then these "@" characters denote the cells it will check for collision:
-	"#pppp"
-	"#p #p"
-
-	These "#" characters are stored here as offsets relative to the top-left "p".
-	*/
-	pieces_directions_cell_offsets collision_checked_offsets;
 
 	/*
 	If this piece needs to move left:
@@ -101,11 +91,23 @@ class SlidingPuzzleSolver
 	*/
 	pieces_directions_cell_offsets emptied_cell_offsets;
 
+	/*
+	If this piece needs to check if it can move left:
+	" pppp"
+	" p  p"
+
+	then these "#" characters denote the cells it will check for collision:
+	"#pppp"
+	"#p #p"
+
+	These "#" characters are stored here as offsets relative to the top-left "p".
+	*/
+	pieces_directions_cell_offsets collision_checked_offsets;
+
 	int pieces_count;
 
 
 	// Variables ////////
-	// std::unordered_set<std::size_t> states;
 	std::unordered_set<std::vector<Piece>, Piece::Hasher> states;
 
 	int state_count = 0;
@@ -113,8 +115,6 @@ class SlidingPuzzleSolver
 	bool finished = false;
 
 	std::vector<std::vector<cell_id>> cells;
-
-	// std::vector<std::vector<bool>> active_cells;
 
 	std::vector<Piece> pieces;
 
@@ -124,17 +124,21 @@ class SlidingPuzzleSolver
 	const std::filesystem::path get_puzzle_path_from_exe_path(std::filesystem::path &exe_path, const std::string &puzzle_name);
 
 	// Set constants
-	void initialize_constant_fields(const json &puzzle_json);
+	void set_constant_fields(const json &puzzle_json);
 
 	void set_starting_pieces_info(const json &starting_pieces_info_json);
 	void set_pieces_count(void);
 
 	void set_ending_pieces(const json &starting_pieces_json);
 
-	void set_width_and_height(const json &walls_json);
+	void set_walls(const json &walls_json);
+	void set_width_and_height(void);
+
+	void set_emptied_cell_offsets(void);
+	void add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	void set_collision_checked_offsets(void);
-	void set_emptied_cell_offsets(void);
+	void add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	// Initialize variables
 	void initialize_variable_fields(const json &puzzle_json);
@@ -152,15 +156,14 @@ class SlidingPuzzleSolver
 	void set_pieces_on_board(std::vector<std::vector<char>> &board);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
-	bool add_new_state(void);
+	bool add_current_state(void);
 
 	void solve(void);
-	bool no_next_piece_or_direction(const cell_id &stack_piece_index, const piece_direction &stack_direction);
+	bool no_next_piece_or_direction(const cell_id &start_piece_index, const piece_direction &start_direction);
 	void recover_piece(const cell_id &recovery_piece_index, const piece_direction &recovery_direction);
 	void move(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
-	void move_piece_cells(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id);
-	void set_rect_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
+	void set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
 
 	// Print progress
 	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
@@ -170,7 +173,7 @@ class SlidingPuzzleSolver
 	void update_finished(void);
 
 	// Move a Piece
-	void move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction>> &pieces_stack);
+	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
 	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size);

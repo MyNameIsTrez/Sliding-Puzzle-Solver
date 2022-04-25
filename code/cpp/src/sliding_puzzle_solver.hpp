@@ -32,6 +32,8 @@ class SlidingPuzzleSolver
 	// Static consts, structs and enums ////////
 	static int const direction_count = 4;
 
+	int const no_recovery = -1;
+
 	struct pieces_directions_cell_offsets
 	{
 		struct directions
@@ -153,10 +155,10 @@ class SlidingPuzzleSolver
 	void set_pieces_on_board(std::vector<std::vector<char>> &board);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
-	bool add_new_state(void);
+	bool add_current_state(void);
 
 	void solve(void);
-	bool no_next_piece_or_direction(const cell_id &stack_piece_index, const piece_direction &stack_direction);
+	bool no_next_piece_or_direction(const cell_id &start_piece_index, const piece_direction &start_direction);
 	void recover_piece(const cell_id &recovery_piece_index, const piece_direction &recovery_direction);
 	void move(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
@@ -171,7 +173,7 @@ class SlidingPuzzleSolver
 	void update_finished(void);
 
 	// Move a Piece
-	void move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction>> &pieces_stack);
+	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
 	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size);

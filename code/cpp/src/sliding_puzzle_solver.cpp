@@ -17,7 +17,7 @@ void SlidingPuzzleSolver::run(void)
 {
 	print_board();
 
-	add_new_state();
+	add_current_state();
 
 	solve();
 }
@@ -460,7 +460,7 @@ void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &boa
 	}
 }
 
-bool SlidingPuzzleSolver::add_new_state(void)
+bool SlidingPuzzleSolver::add_current_state(void)
 {
 	const std::pair<std::unordered_set<std::vector<Piece>, Piece::Hasher>::iterator, bool> insert_info = states.insert(pieces);
 
@@ -471,10 +471,12 @@ bool SlidingPuzzleSolver::add_new_state(void)
 
 void SlidingPuzzleSolver::solve(void)
 {
-	std::stack<std::tuple<cell_id, piece_direction>> pieces_stack;
+	std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> pieces_stack;
 	pieces_stack.push(std::make_tuple(
 		0, // Piece index.
-		0 // Direction.
+		0, // Direction.
+		no_recovery, // Recovery piece index.
+		no_recovery // Recovery direction.
 	));
 
 	// TODO: Can this line be shortened?
@@ -488,34 +490,41 @@ void SlidingPuzzleSolver::solve(void)
 			break;
 		}
 
-		// TODO: Refactor this using "auto [a, b, c, d]" from C++17.
-		std::tuple<cell_id, piece_direction> &pieces_stack_top = pieces_stack.top();
-		const cell_id &stack_piece_index = std::get<0>(pieces_stack_top);
-		const piece_direction &stack_direction = std::get<1>(pieces_stack_top);
+		// TODO: Refactor this using "auto [a, b, c]" from C++17.
+		std::tuple<cell_id, piece_direction, cell_id, piece_direction> &pieces_stack_top = pieces_stack.top();
 
-		if (no_next_piece_or_direction(stack_piece_index, stack_direction))
+		cell_id &start_piece_index = std::get<0>(pieces_stack_top);
+		piece_direction &start_direction = std::get<1>(pieces_stack_top);
+
+		if (no_next_piece_or_direction(start_piece_index, start_direction))
 		{
 			continue;
 		}
 
-		const cell_id &recovery_piece_index = stack_piece_index;
-		const piece_direction &recovery_direction = get_inverted_direction(stack_direction);
-		recover_piece(recovery_piece_index, recovery_direction);
+		if (move_piece(start_piece_index, start_direction, pieces_stack) == false)
+		{
+			// If no piece could be moved, then recurse back.
+			const piece_direction &recovery_direction = std::get<3>(pieces_stack_top);
 
-		cell_id start_piece_index = get_next_piece_index(stack_piece_index, stack_direction);
-		piece_direction start_direction = get_next_direction(stack_direction);
+			if (recovery_direction != no_recovery)
+			{
+				const piece_direction &recovery_piece_index = std::get<2>(pieces_stack_top);
 
-		move_piece(start_piece_index, start_direction, pieces_stack);
+				recover_piece(recovery_piece_index, recovery_direction);
+			}
+
+			pieces_stack.pop();
+		}
 	}
 
 	// timed_print_thread.join();
 }
 
-bool SlidingPuzzleSolver::no_next_piece_or_direction(const cell_id &stack_piece_index, const piece_direction &stack_direction)
+bool SlidingPuzzleSolver::no_next_piece_or_direction(const cell_id &start_piece_index, const piece_direction &start_direction)
 {
 	return (
-		stack_piece_index == pieces_count - 1 &&
-		stack_direction == 3
+		start_piece_index == pieces_count - 1 &&
+		start_direction == 3
 	);
 }
 
@@ -704,7 +713,7 @@ void SlidingPuzzleSolver::update_finished()
 	}
 }
 
-void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction>> &pieces_stack)
+bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack)
 {
 	for (cell_id &piece_index = start_piece_index; piece_index != pieces_count; ++piece_index)
 	{
@@ -726,17 +735,23 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 
 			move(piece_top_left, direction, rects, piece_index);
 
-			if (add_new_state())
+			if (add_current_state())
 			{
 				pieces_stack.push(std::make_tuple(
-					piece_index,
-					direction
+					0, // Piece index.
+					0, // Direction.
+					piece_index, // Recovery piece index.
+					get_inverted_direction(direction) // Recovery direction.
 				));
 
+				start_piece_index = get_next_piece_index(piece_index, direction);
+				start_direction = get_next_direction(direction);
+
 				state_count++;
+
+				return true;
 			}
 
-			// TODO: This may be unnecessary here?
 			piece_top_left.x = piece_top_left_x_backup;
 			piece_top_left.y = piece_top_left_y_backup;
 		}
@@ -744,8 +759,7 @@ void SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 		start_direction = 0; // TODO: Find better approach.
 	}
 
-	// If no piece could be moved, then recurse back.
-	pieces_stack.pop();
+	return false;
 }
 
 bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
@@ -816,6 +830,7 @@ bool SlidingPuzzleSolver::cant_move_in_direction(const cell_id piece_id, const i
 
 	return false;
 }
+
 bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x, const int y)
 {
 	if (x < 0 || x >= width ||

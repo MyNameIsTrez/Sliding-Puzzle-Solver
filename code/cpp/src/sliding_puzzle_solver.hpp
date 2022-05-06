@@ -130,6 +130,7 @@ class SlidingPuzzleSolver
 	void add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	void set_collision_checked_offsets(void);
+	piece_direction get_inverted_direction(const piece_direction &direction);
 	void add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	// Initialize variables
@@ -152,9 +153,18 @@ class SlidingPuzzleSolver
 
 	void solve(void);
 	bool no_next_piece_or_direction(const MoveInfo &next);
-	void undo_move(const MoveInfo &undo);
+
+	void update_finished(void);
+
+	// Move a Piece
+	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &pieces_stack);
+	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
 	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
+	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);
+	piece_direction get_next_direction(const piece_direction &direction);
+	void undo_move(const MoveInfo &undo);
+
 	// void set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
 
 	// Print progress
@@ -162,25 +172,15 @@ class SlidingPuzzleSolver
 	// void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
 	// std::chrono::duration<double> get_elapsed_seconds(void);
 
-	void update_finished(void);
-
-	// Move a Piece
-	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &pieces_stack);
-	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
 	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size);
 	// bool cant_move_to_cell(const cell_id piece_id, const int x, const int y);
 
-	piece_direction get_inverted_direction(const piece_direction &direction);
-	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);
-	piece_direction get_next_direction(const piece_direction &direction);
+	// bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);
+	// bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos);
 
-	bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);
-	bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos);
-	const std::vector<Piece> deepcopy_pieces_positions(void);
-
-	const std::string get_path_string(const std::vector<std::pair<std::size_t, char>> &path);
+	// const std::string get_path_string(const std::vector<std::pair<std::size_t, char>> &path);
 
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);

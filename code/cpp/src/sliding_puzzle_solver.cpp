@@ -297,6 +297,23 @@ void SlidingPuzzleSolver::set_collision_checked_offsets(void)
 }
 
 
+piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_direction &direction)
+{
+	switch (direction)
+	{
+	case 0:
+		return 1;
+	case 1:
+		return 0;
+
+	case 2:
+		return 3;
+	default:
+		return 2;
+	}
+}
+
+
 // TODO: Somehow combine this method with add_offset_to_emptied_cell_offsets()
 // without having to constantly pass emptied_cell_offsets/collision_checked_offsets as an argument.
 void SlidingPuzzleSolver::add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
@@ -547,93 +564,6 @@ bool SlidingPuzzleSolver::no_next_piece_or_direction(const MoveInfo &next)
 }
 
 
-cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
-{
-	// Keeps the same piece by going to the next direction.
-	if (direction < 3) return piece_index;
-
-	// If this is reached then direction == 3, so go to the next piece.
-	return piece_index + 1;
-}
-
-
-piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &direction)
-{
-	return (direction + 1) % direction_count;
-}
-
-
-piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_direction &direction)
-{
-	switch (direction)
-	{
-	case 0:
-		return 1;
-	case 1:
-		return 0;
-
-	case 2:
-		return 3;
-	default:
-		return 2;
-	}
-}
-
-
-void SlidingPuzzleSolver::undo_move(const MoveInfo &undo)
-{
-	Piece &undo_piece = pieces[undo.index];
-
-	move(undo_piece.top_left, undo.index, undo.direction);
-}
-
-
-void SlidingPuzzleSolver::move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction)
-{
-	// set_piece_cell_ids(piece_top_left, empty_cell_id);
-
-	move_piece_top_left(piece_top_left, direction);
-
-	// set_piece_cell_ids(piece_top_left, piece_index);
-}
-
-
-// void SlidingPuzzleSolver::set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
-// {
-// 	const Size &rect_size = rect.size;
-// 	const int rect_height = rect_size.height;
-// 	const int rect_width = rect_size.width;
-
-// 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
-// 	{
-// 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
-// 		{
-// 			cells[start_y + y_offset][start_x + x_offset] = id;
-// 		}
-// 	}
-// }
-
-
-void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_direction direction)
-{
-	switch (direction)
-	{
-	case 0:
-		piece_top_left.y--;
-		break;
-	case 1:
-		piece_top_left.y++;
-		break;
-	case 2:
-		piece_top_left.x--;
-		break;
-	case 3:
-		piece_top_left.x++;
-		break;
-	}
-}
-
-
 // void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<cell_id, char>>> &path_stack, const std::stack<std::vector<Piece>> &move_stack)
 // {
 // 	std::cout << std::endl;
@@ -711,9 +641,6 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
 
-		const StartingPieceInfo &starting_piece_info = starting_pieces_info[piece_index];
-		const std::vector<Rect> &rects = starting_piece_info.rects;
-
 		const int piece_top_left_x_backup = piece_top_left.x;
 		const int piece_top_left_y_backup = piece_top_left.y;
 
@@ -755,6 +682,76 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction)
 {
 
+}
+
+
+void SlidingPuzzleSolver::move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction)
+{
+	// set_piece_cell_ids(piece_top_left, empty_cell_id);
+
+	move_piece_top_left(piece_top_left, direction);
+
+	// set_piece_cell_ids(piece_top_left, piece_index);
+}
+
+
+// void SlidingPuzzleSolver::set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
+// {
+// 	const Size &rect_size = rect.size;
+// 	const int rect_height = rect_size.height;
+// 	const int rect_width = rect_size.width;
+
+// 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
+// 	{
+// 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
+// 		{
+// 			cells[start_y + y_offset][start_x + x_offset] = id;
+// 		}
+// 	}
+// }
+
+
+void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_direction direction)
+{
+	switch (direction)
+	{
+	case 0:
+		piece_top_left.y--;
+		break;
+	case 1:
+		piece_top_left.y++;
+		break;
+	case 2:
+		piece_top_left.x--;
+		break;
+	case 3:
+		piece_top_left.x++;
+		break;
+	}
+}
+
+
+cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
+{
+	// Keeps the same piece by going to the next direction.
+	if (direction < 3) return piece_index;
+
+	// If this is reached then direction == 3, so go to the next piece.
+	return piece_index + 1;
+}
+
+
+piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &direction)
+{
+	return (direction + 1) % direction_count;
+}
+
+
+void SlidingPuzzleSolver::undo_move(const MoveInfo &undo)
+{
+	Piece &undo_piece = pieces[undo.index];
+
+	move(undo_piece.top_left, undo.index, undo.direction);
 }
 
 

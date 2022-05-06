@@ -6,6 +6,7 @@ using json = nlohmann::json;
 
 
 #include "pieces.hpp"
+#include "move.hpp"
 #include "kilo_formatter.h"
 
 

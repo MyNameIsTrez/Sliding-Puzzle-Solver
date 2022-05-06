@@ -8,8 +8,8 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const 
 	set_constant_fields(puzzle_json);
 	initialize_variable_fields(puzzle_json);
 
-	set_emptied_cell_offsets();
-	set_collision_checked_offsets();
+	set_emptied_offsets();
+	set_collision_offsets();
 }
 
 
@@ -171,9 +171,9 @@ void SlidingPuzzleSolver::set_width_and_height(void)
 }
 
 
-void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
+void SlidingPuzzleSolver::set_emptied_offsets(void)
 {
-	emptied_cell_offsets.pieces.resize(pieces_count);
+	emptied_offsets.pieces.resize(pieces_count);
 
 	// TODO: Turn the looping through all cells into an iterator/generator function.
 	for (cell_id piece_index = 0; piece_index < pieces_count; ++piece_index)
@@ -206,7 +206,7 @@ void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 						auto checked_x = piece_top_left_x + cell_offset_x;
 						auto checked_y = piece_top_left_y + cell_offset_y;
 
-						// See the documentation for emptied_cell_offsets in the class header to understand why the switch looks like this.
+						// See the documentation for emptied_offsets in the class header to understand why the switch looks like this.
 						switch (direction)
 						{
 							case 0:
@@ -223,10 +223,9 @@ void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 								break;
 						}
 
-						if (checked_x < 0 || checked_x >= width ||
-							checked_y < 0 || checked_y >= height)
+						if (is_out_of_bounds(checked_x, checked_y))
 						{
-							add_offset_to_emptied_cell_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
+							add_offset_to_emptied_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
 							continue;
 						}
 
@@ -234,7 +233,7 @@ void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 
 						if (checked_index != piece_index)
 						{
-							add_offset_to_emptied_cell_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
+							add_offset_to_emptied_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
 						}
 					}
 				}
@@ -244,53 +243,63 @@ void SlidingPuzzleSolver::set_emptied_cell_offsets(void)
 }
 
 
-void SlidingPuzzleSolver::add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
+bool SlidingPuzzleSolver::is_out_of_bounds(int x, int y)
 {
-	// TODO: Initialize offset as a const somehow.
-	Offset offset;
-	offset.x = x;
-	offset.y = y;
-
-	emptied_cell_offsets.pieces[piece_index].directions[direction].offsets.push_back(offset);
+	return (
+		x < 0 || x >= width ||
+		y < 0 || y >= height
+	);
 }
 
 
-void SlidingPuzzleSolver::set_collision_checked_offsets(void)
+void SlidingPuzzleSolver::add_offset_to_emptied_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
 {
-	collision_checked_offsets.pieces.resize(pieces_count);
+	emptied_offsets.pieces[piece_index].directions[direction].offsets.push_back({
+		.x = x,
+		.y = y
+	});
+}
+
+
+void SlidingPuzzleSolver::set_collision_offsets(void)
+{
+	collision_offsets.pieces.resize(pieces_count);
 
 	for (cell_id piece_index = 0; piece_index < pieces_count; ++piece_index)
 	{
-		const auto &piece = emptied_cell_offsets.pieces[piece_index];
+		const auto &emptied_piece = emptied_offsets.pieces[piece_index];
 
-		for (piece_direction direction = 0; direction < direction_count; ++direction)
+		for (piece_direction collision_direction = 0; collision_direction < direction_count; ++collision_direction)
 		{
-			const auto &piece_direction = piece.directions[get_inverted_direction(direction)];
+			const auto &emptied_piece_direction = emptied_piece.directions[get_inverted_direction(collision_direction)];
 
-			for (size_t offset_index = 0; offset_index < piece_direction.offsets.size(); ++offset_index)
+			for (size_t offset_index = 0; offset_index < emptied_piece_direction.offsets.size(); ++offset_index)
 			{
-				const auto &offset = piece_direction.offsets[offset_index];
-				auto cell_offset_x = offset.x;
-				auto cell_offset_y = offset.y;
+				const auto &emptied_offset = emptied_piece_direction.offsets[offset_index];
+				auto emptied_offset_x = emptied_offset.x;
+				auto emptied_offset_y = emptied_offset.y;
 
-				// See the documentation for collision_checked_offsets in the class header to understand why the switch looks like this.
-				switch (direction)
+				// See the documentation for collision_offsets in the class header to understand why the switch looks like this.
+				switch (collision_direction)
 				{
 					case 0:
-						cell_offset_y--;
+						emptied_offset_y--;
 						break;
 					case 1:
-						cell_offset_y++;
+						emptied_offset_y++;
 						break;
 					case 2:
-						cell_offset_x--;
+						emptied_offset_x--;
 						break;
 					case 3:
-						cell_offset_x++;
+						emptied_offset_x++;
 						break;
 				}
 
-				add_offset_to_collision_checked_offsets(cell_offset_x, cell_offset_y, piece_index, direction);
+				collision_offsets.pieces[piece_index].directions[collision_direction].offsets.push_back({
+					.x = emptied_offset_x,
+					.y = emptied_offset_y
+				});
 			}
 		}
 	}
@@ -311,19 +320,6 @@ piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_directio
 	default:
 		return 2;
 	}
-}
-
-
-// TODO: Somehow combine this method with add_offset_to_emptied_cell_offsets()
-// without having to constantly pass emptied_cell_offsets/collision_checked_offsets as an argument.
-void SlidingPuzzleSolver::add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction)
-{
-	// TODO: Initialize offset as a const somehow.
-	Offset offset;
-	offset.x = x;
-	offset.y = y;
-
-	collision_checked_offsets.pieces[piece_index].directions[direction].offsets.push_back(offset);
 }
 
 
@@ -679,36 +675,54 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 }
 
 
-bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction)
+bool SlidingPuzzleSolver::cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction)
 {
+	const auto &collision_piece = collision_offsets.pieces[piece_index];
 
+	const auto &collision_piece_direction = collision_piece.directions[get_inverted_direction(direction)];
+
+	for (const auto offset : collision_piece_direction.offsets)
+	{
+		const auto x = piece_top_left.x + offset.x;
+		const auto y = piece_top_left.y + offset.y;
+
+		if (is_out_of_bounds(x, y))
+		{
+			return true;
+		}
+
+		if (cells[y][x] != empty_cell_id)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
 void SlidingPuzzleSolver::move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction)
 {
-	// set_piece_cell_ids(piece_top_left, empty_cell_id);
+	const auto &offsets = emptied_offsets.pieces[piece_index].directions[direction].offsets;
+
+	apply_offsets_to_cells(piece_top_left, offsets, empty_cell_id);
+
+	apply_offsets_to_cells(piece_top_left, offsets, piece_index);
 
 	move_piece_top_left(piece_top_left, direction);
-
-	// set_piece_cell_ids(piece_top_left, piece_index);
 }
 
 
-// void SlidingPuzzleSolver::set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
-// {
-// 	const Size &rect_size = rect.size;
-// 	const int rect_height = rect_size.height;
-// 	const int rect_width = rect_size.width;
+void SlidingPuzzleSolver::apply_offsets_to_cells(Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index)
+{
+	for (const auto &offset : offsets)
+	{
+		const int x = piece_top_left.x + offset.x;
+		const int y = piece_top_left.y + offset.y;
 
-// 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
-// 	{
-// 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
-// 		{
-// 			cells[start_y + y_offset][start_x + x_offset] = id;
-// 		}
-// 	}
-// }
+		cells[x][y] = index;
+	}
+}
 
 
 void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_direction direction)

@@ -81,7 +81,7 @@ class SlidingPuzzleSolver
 
 	These "#" characters are stored here as offsets relative to the top-left "p".
 	*/
-	pieces_directions_cell_offsets emptied_cell_offsets;
+	pieces_directions_cell_offsets emptied_offsets;
 
 	/*
 	If this piece needs to check if it can move left:
@@ -94,7 +94,7 @@ class SlidingPuzzleSolver
 
 	These "#" characters are stored here as offsets relative to the top-left "p".
 	*/
-	pieces_directions_cell_offsets collision_checked_offsets;
+	pieces_directions_cell_offsets collision_offsets;
 
 	int pieces_count;
 
@@ -126,12 +126,12 @@ class SlidingPuzzleSolver
 	void set_walls(const json &walls_json);
 	void set_width_and_height(void);
 
-	void set_emptied_cell_offsets(void);
-	void add_offset_to_emptied_cell_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
+	void set_emptied_offsets(void);
+	bool is_out_of_bounds(int x, int y);
+	void add_offset_to_emptied_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
-	void set_collision_checked_offsets(void);
+	void set_collision_offsets(void);
 	piece_direction get_inverted_direction(const piece_direction &direction);
-	void add_offset_to_collision_checked_offsets(const int x, const int y, const cell_id piece_index, const piece_direction direction);
 
 	// Initialize variables
 	void initialize_variable_fields(const json &puzzle_json);
@@ -160,12 +160,11 @@ class SlidingPuzzleSolver
 	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &pieces_stack);
 	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
 	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
+	void apply_offsets_to_cells(Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
 	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);
 	piece_direction get_next_direction(const piece_direction &direction);
 	void undo_move(const MoveInfo &undo);
-
-	// void set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
 
 	// Print progress
 	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);

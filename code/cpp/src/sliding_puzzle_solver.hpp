@@ -1,16 +1,13 @@
 #pragma once
 
-////////
 
 #include "json.hpp"
 using json = nlohmann::json;
 
-////////
 
 #include "pieces.hpp"
 #include "kilo_formatter.h"
 
-////////
 
 #include <iostream>
 #include <fstream>
@@ -21,19 +18,13 @@ using json = nlohmann::json;
 #include <thread>
 #include <filesystem>
 
-////////
-
-typedef int cell_id;
-typedef int piece_direction;
-
-////////
 
 class SlidingPuzzleSolver
 {
 	// Static consts, structs and enums ////////
 	static int const direction_count = 4;
 
-	int const no_recovery = -1;
+	int const no_undo = -1;
 
 	struct pieces_directions_cell_offsets
 	{
@@ -159,11 +150,11 @@ class SlidingPuzzleSolver
 	bool add_current_state(void);
 
 	void solve(void);
-	bool no_next_piece_or_direction(const cell_id &start_piece_index, const piece_direction &start_direction);
-	void recover_piece(const cell_id &recovery_piece_index, const piece_direction &recovery_direction);
-	void move(Pos &piece_top_left, const piece_direction direction, const std::vector<Rect> &rects, const cell_id &piece_id);
+	bool no_next_piece_or_direction(const MoveInfo &next);
+	void recover_piece(const MoveInfo &undo);
+	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
-	void set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
+	// void set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
 
 	// Print progress
 	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
@@ -173,7 +164,7 @@ class SlidingPuzzleSolver
 	void update_finished(void);
 
 	// Move a Piece
-	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<std::tuple<cell_id, piece_direction, cell_id, piece_direction>> &pieces_stack);
+	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &pieces_stack);
 	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	bool cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size);

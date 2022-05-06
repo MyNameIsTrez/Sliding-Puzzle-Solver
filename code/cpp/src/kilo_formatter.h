@@ -1,10 +1,6 @@
 #pragma once
 
-////////
-
 #include <sstream>      // std::stringstream
-
-////////
 
 class KiloFormatter
 {

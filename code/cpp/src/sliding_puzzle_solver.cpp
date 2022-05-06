@@ -512,7 +512,7 @@ void SlidingPuzzleSolver::solve(void)
 
 	Move start_move = {
 		.next = { .index = 0, .direction = 0 },
-		.undo = { .index = 0, .direction = 0 }
+		.undo = { .index = no_undo, .direction = no_undo }
 	};
 
 	move_stack.push(start_move);
@@ -679,7 +679,7 @@ bool SlidingPuzzleSolver::cant_move(const Pos &piece_top_left, cell_id piece_ind
 {
 	const auto &collision_piece = collision_offsets.pieces[piece_index];
 
-	const auto &collision_piece_direction = collision_piece.directions[get_inverted_direction(direction)];
+	const auto &collision_piece_direction = collision_piece.directions[direction];
 
 	for (const auto offset : collision_piece_direction.offsets)
 	{
@@ -748,7 +748,7 @@ void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_d
 cell_id SlidingPuzzleSolver::get_next_piece_index(const cell_id &piece_index, const piece_direction &direction)
 {
 	// Keeps the same piece by going to the next direction.
-	if (direction < 3) return piece_index;
+	if (direction <= 2) return piece_index;
 
 	// If this is reached then direction == 3, so go to the next piece.
 	return piece_index + 1;

@@ -152,7 +152,7 @@ class SlidingPuzzleSolver
 
 	void solve(void);
 	bool no_next_piece_or_direction(const MoveInfo &next);
-	void recover_piece(const MoveInfo &undo);
+	void undo_move(const MoveInfo &undo);
 	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
 	// void set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id);
@@ -166,10 +166,11 @@ class SlidingPuzzleSolver
 
 	// Move a Piece
 	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &pieces_stack);
-	bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
-	bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
-	bool cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size);
-	bool cant_move_to_cell(const cell_id piece_id, const int x, const int y);
+	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
+	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
+	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
+	// bool cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size);
+	// bool cant_move_to_cell(const cell_id piece_id, const int x, const int y);
 
 	piece_direction get_inverted_direction(const piece_direction &direction);
 	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);

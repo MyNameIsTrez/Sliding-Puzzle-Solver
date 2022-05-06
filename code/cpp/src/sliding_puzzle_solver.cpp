@@ -519,15 +519,15 @@ void SlidingPuzzleSolver::solve(void)
 
 		if (no_next_piece_or_direction(move.next))
 		{
+			move_stack.pop();
 			continue;
 		}
 
-		if (move_piece(start_piece_index, start_direction, move_stack) == false)
+		if (move_piece(move.next.index, move.next.direction, move_stack) == false)
 		{
-			// If no piece could be moved, recurse back.
 			if (move.undo.direction != no_undo)
 			{
-				recover_piece(move.undo);
+				undo_move(move.undo);
 			}
 
 			move_stack.pop();
@@ -580,7 +580,7 @@ piece_direction SlidingPuzzleSolver::get_inverted_direction(const piece_directio
 }
 
 
-void SlidingPuzzleSolver::recover_piece(const MoveInfo &undo)
+void SlidingPuzzleSolver::undo_move(const MoveInfo &undo)
 {
 	Piece &undo_piece = pieces[undo.index];
 
@@ -596,6 +596,22 @@ void SlidingPuzzleSolver::move(Pos &piece_top_left, const cell_id piece_index, c
 
 	// set_piece_cell_ids(piece_top_left, piece_index);
 }
+
+
+// void SlidingPuzzleSolver::set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
+// {
+// 	const Size &rect_size = rect.size;
+// 	const int rect_height = rect_size.height;
+// 	const int rect_width = rect_size.width;
+
+// 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
+// 	{
+// 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
+// 		{
+// 			cells[start_y + y_offset][start_x + x_offset] = id;
+// 		}
+// 	}
+// }
 
 
 void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_direction direction)
@@ -616,22 +632,6 @@ void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_d
 		break;
 	}
 }
-
-
-// void SlidingPuzzleSolver::set_piece_cell_ids(const Rect &rect, const int start_x, const int start_y, const cell_id &id)
-// {
-// 	const Size &rect_size = rect.size;
-// 	const int rect_height = rect_size.height;
-// 	const int rect_width = rect_size.width;
-
-// 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
-// 	{
-// 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
-// 		{
-// 			cells[start_y + y_offset][start_x + x_offset] = id;
-// 		}
-// 	}
-// }
 
 
 // void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<cell_id, char>>> &path_stack, const std::stack<std::vector<Piece>> &move_stack)
@@ -719,7 +719,7 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 
 		for (piece_direction &direction = start_direction; direction < direction_count; ++direction)
 		{
-			if (a_rect_cant_be_moved(rects, direction, piece_index, piece_top_left))
+			if (cant_move(piece_top_left, piece_index, direction))
 			{
 				continue;
 			}
@@ -752,95 +752,101 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 }
 
 
-bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
+bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction)
 {
-	for (const auto &rect : rects)
-	{
-		if (cant_move(rect, direction, piece_id, piece_top_left))
-		{
-			return true;
-		}
-	}
 
-	return false;
 }
 
 
-bool SlidingPuzzleSolver::cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
-{
-	/*
-	Only the cells on the edges are checked for a collision, in this numbered order:
-	11111
-	3   4
-	3   4
-	22222
-	*/
+// bool SlidingPuzzleSolver::a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
+// {
+// 	for (const auto &rect : rects)
+// 	{
+// 		if (cant_move(rect, direction, piece_id, piece_top_left))
+// 		{
+// 			return true;
+// 		}
+// 	}
 
-	const int rect_left_x = piece_top_left.x + rect.offset.x;
-	const int rect_top_y = piece_top_left.y + rect.offset.y;
-
-	const Size &rect_size = rect.size;
-
-	int start_x = rect_left_x;
-	int start_y = rect_top_y;
-
-	switch (direction)
-	{
-	case 0:
-		start_y--;
-		break;
-	case 1:
-		start_y++;
-		break;
-	case 2:
-		start_x--;
-		break;
-	case 3:
-		start_x++;
-		break;
-	}
-
-	return cant_move_in_direction(piece_id, start_x, start_y, rect_size);
-}
+// 	return false;
+// }
 
 
-bool SlidingPuzzleSolver::cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size)
-{
-	const int rect_height = rect_size.height;
-	const int rect_width = rect_size.width;
+// bool SlidingPuzzleSolver::cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left)
+// {
+// 	/*
+// 	Only the cells on the edges are checked for a collision, in this numbered order:
+// 	11111
+// 	3   4
+// 	3   4
+// 	22222
+// 	*/
 
-	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
-	{
-		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
-		{
-			if (cant_move_to_cell(piece_id, start_x + x_offset, start_y + y_offset))
-			{
-				return true;
-			}
-		}
-	}
+// 	const int rect_left_x = piece_top_left.x + rect.offset.x;
+// 	const int rect_top_y = piece_top_left.y + rect.offset.y;
 
-	return false;
-}
+// 	const Size &rect_size = rect.size;
+
+// 	int start_x = rect_left_x;
+// 	int start_y = rect_top_y;
+
+// 	switch (direction)
+// 	{
+// 	case 0:
+// 		start_y--;
+// 		break;
+// 	case 1:
+// 		start_y++;
+// 		break;
+// 	case 2:
+// 		start_x--;
+// 		break;
+// 	case 3:
+// 		start_x++;
+// 		break;
+// 	}
+
+// 	return cant_move_in_direction(piece_id, start_x, start_y, rect_size);
+// }
 
 
-bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x, const int y)
-{
-	if (x < 0 || x >= width ||
-		y < 0 || y >= height)
-	{
-		return true;
-	}
+// bool SlidingPuzzleSolver::cant_move_in_direction(const cell_id piece_id, const int start_x, const int start_y, const Size &rect_size)
+// {
+// 	const int rect_height = rect_size.height;
+// 	const int rect_width = rect_size.width;
 
-	const cell_id checked_cell_id = cells[y][x];
+// 	for (int y_offset = 0; y_offset < rect_height; ++y_offset)
+// 	{
+// 		for (int x_offset = 0; x_offset < rect_width; ++x_offset)
+// 		{
+// 			if (cant_move_to_cell(piece_id, start_x + x_offset, start_y + y_offset))
+// 			{
+// 				return true;
+// 			}
+// 		}
+// 	}
 
-	if (checked_cell_id != empty_cell_id && checked_cell_id != piece_id)
-	{
-		return true;
-	}
+// 	return false;
+// }
 
-	return false;
-}
+
+// bool SlidingPuzzleSolver::cant_move_to_cell(const cell_id piece_id, const int x, const int y)
+// {
+// 	if (x < 0 || x >= width ||
+// 		y < 0 || y >= height)
+// 	{
+// 		return true;
+// 	}
+
+// 	const cell_id checked_cell_id = cells[y][x];
+
+// 	if (checked_cell_id != empty_cell_id && checked_cell_id != piece_id)
+// 	{
+// 		return true;
+// 	}
+
+// 	return false;
+// }
 
 
 // bool SlidingPuzzleSolver::move_doesnt_cross_puzzle_edge(const cell_id piece_index, const Pos &piece_top_left)

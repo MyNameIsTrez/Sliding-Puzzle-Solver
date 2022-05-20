@@ -22,6 +22,11 @@ using json = nlohmann::json;
 
 class SlidingPuzzleSolver
 {
+public:
+	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);
+	void run(void);
+
+private:
 	// Static consts, structs and enums ////////
 	static int const direction_count = 4;
 
@@ -147,6 +152,7 @@ class SlidingPuzzleSolver
 	const std::vector<std::vector<char>> get_board(void);
 	const std::vector<std::vector<char>> get_2d_vector(void);
 	void set_pieces_on_board(std::vector<std::vector<char>> &board);
+	char get_piece_label(cell_id piece_index);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
 	bool add_current_state(void);
@@ -167,9 +173,12 @@ class SlidingPuzzleSolver
 	void undo_move(const MoveInfo &undo);
 
 	// Print progress
-	// void timed_print(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
-	// void timed_print_core(const std::stack<std::vector<std::pair<std::size_t, char>>> &path_queue, const std::stack<std::vector<Piece>> &pieces_queue);
-	// std::chrono::duration<double> get_elapsed_seconds(void);
+	void timed_print(const std::stack<Move> &move_stack);
+	void timed_print_core(const std::stack<Move> &move_stack);
+	std::chrono::duration<double> get_elapsed_seconds(void);
+
+	const std::string get_path_string(const std::stack<Move> &move_stack);
+	std::stack<Move> get_reversed_move_stack(std::stack<Move> move_stack);
 
 	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
@@ -178,10 +187,4 @@ class SlidingPuzzleSolver
 
 	// bool move_doesnt_cross_puzzle_edge(const std::size_t piece_index, const Pos &piece_pos);
 	// bool no_intersection(const std::size_t piece_index_1, const Pos &piece_1_pos);
-
-	// const std::string get_path_string(const std::vector<std::pair<std::size_t, char>> &path);
-
-public:
-	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);
-	void run(void);
 };

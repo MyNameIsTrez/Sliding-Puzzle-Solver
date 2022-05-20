@@ -468,11 +468,17 @@ void SlidingPuzzleSolver::set_pieces_on_board(std::vector<std::vector<char>> &bo
 			{
 				for (int x = top_left_rect_x; x < top_left_rect_x + rect_width; ++x)
 				{
-					board[y][x] = piece_labels[piece_index % piece_labels_length];
+					board[y][x] = get_piece_label(piece_index);
 				}
 			}
 		}
 	}
+}
+
+
+char SlidingPuzzleSolver::get_piece_label(cell_id piece_index)
+{
+	return piece_labels[piece_index % piece_labels_length];
 }
 
 
@@ -513,13 +519,13 @@ void SlidingPuzzleSolver::solve(void)
 
 	Move start_move = {
 		.next = { .index = 0, .direction = 0 },
-		.undo = { .index = no_undo, .direction = no_undo }
+		.undo = { .index = 0, .direction = no_undo }
 	};
 
 	move_stack.push(start_move);
 
 	// TODO: Can this line be shortened?
-	// std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(path_stack), std::ref(move_stack));
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack));
 
 	while (!move_stack.empty())
 	{
@@ -550,7 +556,7 @@ void SlidingPuzzleSolver::solve(void)
 		}
 	}
 
-	// timed_print_thread.join();
+	timed_print_thread.join();
 }
 
 
@@ -563,52 +569,89 @@ bool SlidingPuzzleSolver::no_next_piece_or_direction(const MoveInfo &next)
 }
 
 
-// void SlidingPuzzleSolver::timed_print(const std::stack<std::vector<std::pair<cell_id, char>>> &path_stack, const std::stack<std::vector<Piece>> &move_stack)
-// {
-// 	std::cout << std::endl;
+void SlidingPuzzleSolver::timed_print(const std::stack<Move> &move_stack)
+{
+	std::cout << std::endl;
 
-// 	while (!finished)
-// 	{
-// 		std::this_thread::sleep_for(std::chrono::seconds(1));
-// 		timed_print_core(path_stack, move_stack);
-// 	}
+	while (!finished)
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		timed_print_core(move_stack);
+	}
 
-// 	std::cout << std::endl << std::endl << "Path:" << std::endl;
-// 	std::cout << get_path_string(path_stack.top()) << std::endl << std::endl;
-// }
+	std::cout << std::endl << std::endl << "Path:" << std::endl;
+	std::cout << get_path_string(move_stack) << std::endl << std::endl;
+}
 
 
-// void SlidingPuzzleSolver::timed_print_core(const std::stack<std::vector<std::pair<cell_id, char>>> &path_stack, const std::stack<std::vector<Piece>> &move_stack)
-// {
-// 	// TODO: Store elapsed_time in something more appropriate than int.
-// 	const int elapsed_time = get_elapsed_seconds().count();
+void SlidingPuzzleSolver::timed_print_core(const std::stack<Move> &move_stack)
+{
+	// TODO: Store elapsed_time in something more appropriate than int.
+	const int elapsed_time = get_elapsed_seconds().count();
 
-// 	const int states_count_diff = state_count - prev_state_count;
-// 	prev_state_count = state_count;
+	const int states_count_diff = state_count - prev_state_count;
+	prev_state_count = state_count;
 
-// 	std::cout << "\33[2K\r"; // Clears the line and goes back to the left.
+	std::cout << "\33[2K\r"; // Clears the line and goes back to the left.
 
-// 	std::cout << "Elapsed time: " << elapsed_time << " seconds";
+	std::cout << "Elapsed time: " << elapsed_time << " seconds";
 
-// 	KiloFormatter kf;
+	KiloFormatter kf;
 
-// 	if (path_stack.size() > 0)
-// 	{
-// 		const std::size_t path_length = path_stack.top().size();
-// 		std::cout << ", Path length: " << kf.format(path_length);
-// 	}
+	std::cout << ", Path length: " << kf.format(move_stack.size());
+	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
 
-// 	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
-// 	std::cout << ", Queue length: " << kf.format(move_stack.size());
-// 	std::cout << std::flush;
-// }
+	std::cout << std::flush;
+}
 
-// std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
-// {
-// 	// TODO: Cast the result to seconds in type double, cause idk how this works.
-// 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-// 	return end_time - start_time;
-// }
+
+std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
+{
+	// TODO: Cast the result to seconds in type double, cause idk how this works.
+	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+	return end_time - start_time;
+}
+
+
+const std::string SlidingPuzzleSolver::get_path_string(const std::stack<Move> &move_stack)
+{
+	// If this method ever needs to be called a lot then try using a rope instead.
+	std::stringstream path_stringstream;
+
+	auto reversed_move_stack = get_reversed_move_stack(move_stack);
+
+	while (!reversed_move_stack.empty())
+	{
+		const auto &move = reversed_move_stack.top();
+		
+		const cell_id piece_index = move.undo.index;
+		path_stringstream << get_piece_label(piece_index);
+
+		const piece_direction direction = get_inverted_direction(move.undo.direction);
+		path_stringstream << direction_characters[direction];
+
+		reversed_move_stack.pop();
+	}
+
+	return path_stringstream.str();
+}
+
+
+std::stack<Move> SlidingPuzzleSolver::get_reversed_move_stack(std::stack<Move> move_stack)
+{
+	std::stack<Move> reversed_move_stack;
+
+	while (!move_stack.empty())
+	{
+		const auto &move = move_stack.top();
+		
+		reversed_move_stack.push(move);
+		
+		move_stack.pop();
+	}
+
+	return reversed_move_stack;
+}
 
 
 void SlidingPuzzleSolver::update_finished()
@@ -925,22 +968,4 @@ void SlidingPuzzleSolver::undo_move(const MoveInfo &undo)
 // 	}
 
 // 	return true;
-// }
-
-
-// const std::string SlidingPuzzleSolver::get_path_string(const std::vector<std::pair<cell_id, char>> &path)
-// {
-// 	// If this method ever needs to be called a lot then try using a rope instead.
-// 	std::stringstream path_stringstream;
-
-// 	for (std::vector<std::pair<cell_id, char>>::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
-// 	{
-// 		const cell_id piece_index = pair_it->first;
-// 		path_stringstream << piece_index;
-
-// 		const char direction = pair_it->second;
-// 		path_stringstream << direction;
-// 	}
-
-// 	return path_stringstream.str();
 // }

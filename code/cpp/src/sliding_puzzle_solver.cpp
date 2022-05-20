@@ -514,7 +514,7 @@ bool SlidingPuzzleSolver::add_current_state(void)
 
 void SlidingPuzzleSolver::solve(void)
 {
-	std::stack<Move> move_stack;
+	std::vector<Move> move_stack;
 
 	int max_depth = 1;
 
@@ -540,14 +540,14 @@ void SlidingPuzzleSolver::solve(void)
 }
 
 
-void SlidingPuzzleSolver::solve_up_till_max_depth(std::stack<Move> &move_stack, int max_depth)
+void SlidingPuzzleSolver::solve_up_till_max_depth(std::vector<Move> &move_stack, int max_depth)
 {
 	Move start_move = {
 		.next = { .index = 0, .direction = 0 },
 		.undo = { .index = 0, .direction = no_undo }
 	};
 
-	move_stack.push(start_move);
+	move_stack.push_back(start_move);
 
 	add_current_state();
 
@@ -561,7 +561,7 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::stack<Move> &move_stack, 
 			return;
 		}
 
-		Move &move = move_stack.top();
+		Move &move = move_stack.back();
 
 		int depth = move_stack.size();
 		if ((depth >= max_depth) ||
@@ -569,7 +569,7 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::stack<Move> &move_stack, 
 			(move_piece(move.next.index, move.next.direction, move_stack) == false))
 		{
 			undo_move(move.undo);
-			move_stack.pop();
+			move_stack.pop_back();
 		}
 	}
 }
@@ -584,7 +584,7 @@ bool SlidingPuzzleSolver::no_next_piece_or_direction(const MoveInfo &next)
 }
 
 
-void SlidingPuzzleSolver::timed_print(const std::stack<Move> &move_stack, const int max_depth)
+void SlidingPuzzleSolver::timed_print(const std::vector<Move> &move_stack, const int max_depth)
 {
 	std::cout << std::endl;
 
@@ -630,7 +630,7 @@ std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
 }
 
 
-const std::string SlidingPuzzleSolver::get_path_string(const std::stack<Move> &move_stack)
+const std::string SlidingPuzzleSolver::get_path_string(const std::vector<Move> &move_stack)
 {
 	// If this method ever needs to be called a lot then try using a rope instead.
 	std::stringstream path_stringstream;
@@ -639,7 +639,7 @@ const std::string SlidingPuzzleSolver::get_path_string(const std::stack<Move> &m
 
 	while (!reversed_move_stack.empty())
 	{
-		const auto &move = reversed_move_stack.top();
+		const auto &move = reversed_move_stack.back();
 		
 		if (move.undo.direction != no_undo)
 		{
@@ -650,24 +650,24 @@ const std::string SlidingPuzzleSolver::get_path_string(const std::stack<Move> &m
 			path_stringstream << direction_characters[direction];
 		}
 
-		reversed_move_stack.pop();
+		reversed_move_stack.pop_back();
 	}
 
 	return path_stringstream.str();
 }
 
 
-std::stack<Move> SlidingPuzzleSolver::get_reversed_move_stack(std::stack<Move> move_stack)
+std::vector<Move> SlidingPuzzleSolver::get_reversed_move_stack(std::vector<Move> move_stack)
 {
-	std::stack<Move> reversed_move_stack;
+	std::vector<Move> reversed_move_stack;
 
 	while (!move_stack.empty())
 	{
-		const auto &move = move_stack.top();
+		const auto &move = move_stack.back();
 		
-		reversed_move_stack.push(move);
+		reversed_move_stack.push_back(move);
 		
-		move_stack.pop();
+		move_stack.pop_back();
 	}
 
 	return reversed_move_stack;
@@ -696,7 +696,7 @@ void SlidingPuzzleSolver::update_finished()
 }
 
 
-bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &move_stack)
+bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &move_stack)
 {
 	for (cell_id &piece_index = start_piece_index; piece_index != pieces_count; ++piece_index)
 	{
@@ -714,7 +714,7 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 
 			if (add_current_state())
 			{
-				move_stack.push({
+				move_stack.push_back({
 					.next = { .index = 0, .direction = 0 },
 					.undo = { .index = piece_index, .direction = get_inverted_direction(direction) }
 				});

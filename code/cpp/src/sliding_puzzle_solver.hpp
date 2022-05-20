@@ -161,13 +161,13 @@ private:
 	bool add_current_state(void);
 
 	void solve(void);
-	void solve_up_till_max_depth(std::stack<Move> &move_stack, int max_depth);
+	void solve_up_till_max_depth(std::vector<Move> &move_stack, int max_depth);
 	bool no_next_piece_or_direction(const MoveInfo &next);
 
 	void update_finished(void);
 
 	// Move a Piece
-	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::stack<Move> &pieces_stack);
+	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &pieces_stack);
 	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
 	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
 	void apply_offsets_to_cells(Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index);
@@ -177,12 +177,12 @@ private:
 	void undo_move(const MoveInfo &undo);
 
 	// Print progress
-	void timed_print(const std::stack<Move> &move_stack, const int max_depth);
+	void timed_print(const std::vector<Move> &move_stack, const int max_depth);
 	void timed_print_core(const int max_depth);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
-	const std::string get_path_string(const std::stack<Move> &move_stack);
-	std::stack<Move> get_reversed_move_stack(std::stack<Move> move_stack);
+	const std::string get_path_string(const std::vector<Move> &move_stack);
+	std::vector<Move> get_reversed_move_stack(std::vector<Move> move_stack);
 
 	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);

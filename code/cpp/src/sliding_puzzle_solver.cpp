@@ -15,7 +15,7 @@ SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const 
 
 void SlidingPuzzleSolver::run(void)
 {
-	print_board();
+	// print_board();
 
 	add_current_state();
 
@@ -276,29 +276,30 @@ void SlidingPuzzleSolver::set_collision_offsets(void)
 			for (size_t offset_index = 0; offset_index < emptied_piece_direction.offsets.size(); ++offset_index)
 			{
 				const auto &emptied_offset = emptied_piece_direction.offsets[offset_index];
-				auto emptied_offset_x = emptied_offset.x;
-				auto emptied_offset_y = emptied_offset.y;
+				
+				auto collision_offset_x = emptied_offset.x;
+				auto collision_offset_y = emptied_offset.y;
 
 				// See the documentation for collision_offsets in the class header to understand why the switch looks like this.
 				switch (collision_direction)
 				{
 					case 0:
-						emptied_offset_y--;
+						collision_offset_y--;
 						break;
 					case 1:
-						emptied_offset_y++;
+						collision_offset_y++;
 						break;
 					case 2:
-						emptied_offset_x--;
+						collision_offset_x--;
 						break;
 					case 3:
-						emptied_offset_x++;
+						collision_offset_x++;
 						break;
 				}
 
 				collision_offsets.pieces[piece_index].directions[collision_direction].offsets.push_back({
-					.x = emptied_offset_x,
-					.y = emptied_offset_y
+					.x = collision_offset_x,
+					.y = collision_offset_y
 				});
 			}
 		}
@@ -522,6 +523,8 @@ void SlidingPuzzleSolver::solve(void)
 
 	while (!move_stack.empty())
 	{
+		print_board();
+
 		update_finished();
 		if (finished)
 		{
@@ -637,9 +640,6 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
 
-		const int piece_top_left_x_backup = piece_top_left.x;
-		const int piece_top_left_y_backup = piece_top_left.y;
-
 		for (piece_direction &direction = start_direction; direction < direction_count; ++direction)
 		{
 			if (cant_move(piece_top_left, piece_index, direction))
@@ -664,8 +664,7 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 				return true;
 			}
 
-			piece_top_left.x = piece_top_left_x_backup;
-			piece_top_left.y = piece_top_left_y_backup;
+			move(piece_top_left, piece_index, get_inverted_direction(direction));
 		}
 
 		start_direction = 0; // TODO: Find better approach.
@@ -703,11 +702,13 @@ bool SlidingPuzzleSolver::cant_move(const Pos &piece_top_left, cell_id piece_ind
 
 void SlidingPuzzleSolver::move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction)
 {
-	const auto &offsets = emptied_offsets.pieces[piece_index].directions[direction].offsets;
+	const auto &piece_emptied_offsets = emptied_offsets.pieces[piece_index].directions[direction].offsets;
 
-	apply_offsets_to_cells(piece_top_left, offsets, empty_cell_id);
+	apply_offsets_to_cells(piece_top_left, piece_emptied_offsets, empty_cell_id);
 
-	apply_offsets_to_cells(piece_top_left, offsets, piece_index);
+	const auto &piece_collision_offsets = collision_offsets.pieces[piece_index].directions[direction].offsets;
+
+	apply_offsets_to_cells(piece_top_left, piece_collision_offsets, piece_index);
 
 	move_piece_top_left(piece_top_left, direction);
 }
@@ -720,7 +721,7 @@ void SlidingPuzzleSolver::apply_offsets_to_cells(Pos &piece_top_left, const std:
 		const int x = piece_top_left.x + offset.x;
 		const int y = piece_top_left.y + offset.y;
 
-		cells[x][y] = index;
+		cells[y][x] = index;
 	}
 }
 

@@ -517,15 +517,36 @@ void SlidingPuzzleSolver::solve(void)
 {
 	std::stack<Move> move_stack;
 
+	// TODO: Can this line be shortened?
+	// TODO: Is the std::ref() necessary?
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack));
+
+	int max_depth = 1;
+
+	while (!finished)
+	{
+		while (!move_stack.empty())
+		{
+			move_stack.pop();
+		}
+
+		solve_up_till_max_depth(move_stack, max_depth);
+
+		max_depth++;
+	}
+
+	timed_print_thread.join();
+}
+
+
+void SlidingPuzzleSolver::solve_up_till_max_depth(std::stack<Move> &move_stack, int max_depth)
+{
 	Move start_move = {
 		.next = { .index = 0, .direction = 0 },
 		.undo = { .index = 0, .direction = no_undo }
 	};
 
 	move_stack.push(start_move);
-
-	// TODO: Can this line be shortened?
-	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack));
 
 	while (!move_stack.empty())
 	{
@@ -534,7 +555,13 @@ void SlidingPuzzleSolver::solve(void)
 		update_finished();
 		if (finished)
 		{
-			break;
+			return;
+		}
+
+		int depth = move_stack.size();
+		if (depth >= max_depth)
+		{
+			return;
 		}
 
 		Move &move = move_stack.top();
@@ -555,8 +582,6 @@ void SlidingPuzzleSolver::solve(void)
 			move_stack.pop();
 		}
 	}
-
-	timed_print_thread.join();
 }
 
 

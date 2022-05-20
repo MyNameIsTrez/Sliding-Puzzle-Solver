@@ -158,6 +158,7 @@ private:
 	bool add_current_state(void);
 
 	void solve(void);
+	void solve_up_till_max_depth(std::stack<Move> &move_stack, int max_depth);
 	bool no_next_piece_or_direction(const MoveInfo &next);
 
 	void update_finished(void);

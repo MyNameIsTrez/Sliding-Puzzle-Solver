@@ -7,7 +7,7 @@ class KiloFormatter
 public:
 	KiloFormatter() {}
 
-	const std::string format(double nbr)
+	const std::string format(const double nbr)
 	{
 		std::stringstream formatted;
 
@@ -37,7 +37,7 @@ private:
 	12.34
 	123.4
 	*/
-	std::string shorten(double nbr)
+	std::string shorten(const double nbr)
 	{
 		return std::to_string(nbr).substr(0, 5);
 	}

@@ -108,7 +108,10 @@ private:
 	std::unordered_set<std::vector<Piece>, Piece::Hasher> states;
 
 	int state_count = 0;
-	int prev_state_count = 0;
+	// int prev_state_count = 0;
+
+	int often_duplicate_states_seen = 0;
+
 	bool finished = false;
 
 	std::vector<std::vector<cell_id>> cells;
@@ -174,8 +177,8 @@ private:
 	void undo_move(const MoveInfo &undo);
 
 	// Print progress
-	void timed_print(const std::stack<Move> &move_stack);
-	void timed_print_core(const std::stack<Move> &move_stack);
+	void timed_print(const std::stack<Move> &move_stack, const int max_depth);
+	void timed_print_core(const int max_depth);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	const std::string get_path_string(const std::stack<Move> &move_stack);

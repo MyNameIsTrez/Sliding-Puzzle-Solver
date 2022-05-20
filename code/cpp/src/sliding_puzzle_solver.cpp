@@ -17,8 +17,6 @@ void SlidingPuzzleSolver::run(void)
 {
 	// print_board();
 
-	add_current_state();
-
 	solve();
 }
 
@@ -421,6 +419,7 @@ void SlidingPuzzleSolver::print_board()
 		}
 		std::cout << std::endl;
 	}
+	std::cout << std::endl;
 }
 
 
@@ -517,25 +516,27 @@ void SlidingPuzzleSolver::solve(void)
 {
 	std::stack<Move> move_stack;
 
-	// TODO: Can this line be shortened?
-	// TODO: Is the std::ref() necessary?
-	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack));
-
 	int max_depth = 1;
+
+	// TODO: Can this line be shortened?
+	// TODO: Why can the std::ref() around move_stack be omitted, while this is not the case for max_depth?
+	// std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack), std::ref(max_depth));
 
 	while (!finished)
 	{
-		while (!move_stack.empty())
-		{
-			move_stack.pop();
-		}
+		// std::cout << std::endl << "----------------" << std::endl;
+
+		states.clear();
+
+		state_count = 0;
+		// prev_state_count = 0;
 
 		solve_up_till_max_depth(move_stack, max_depth);
 
 		max_depth++;
 	}
 
-	timed_print_thread.join();
+	// timed_print_thread.join();
 }
 
 
@@ -548,9 +549,11 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::stack<Move> &move_stack, 
 
 	move_stack.push(start_move);
 
+	add_current_state();
+
 	while (!move_stack.empty())
 	{
-		print_board();
+		// print_board();
 
 		update_finished();
 		if (finished)
@@ -558,27 +561,14 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::stack<Move> &move_stack, 
 			return;
 		}
 
-		int depth = move_stack.size();
-		if (depth >= max_depth)
-		{
-			return;
-		}
-
 		Move &move = move_stack.top();
 
-		if (no_next_piece_or_direction(move.next))
+		int depth = move_stack.size();
+		if ((depth >= max_depth) ||
+			(no_next_piece_or_direction(move.next)) ||
+			(move_piece(move.next.index, move.next.direction, move_stack) == false))
 		{
-			move_stack.pop();
-			continue;
-		}
-
-		if (move_piece(move.next.index, move.next.direction, move_stack) == false)
-		{
-			if (move.undo.direction != no_undo)
-			{
-				undo_move(move.undo);
-			}
-
+			undo_move(move.undo);
 			move_stack.pop();
 		}
 	}
@@ -594,28 +584,29 @@ bool SlidingPuzzleSolver::no_next_piece_or_direction(const MoveInfo &next)
 }
 
 
-void SlidingPuzzleSolver::timed_print(const std::stack<Move> &move_stack)
+void SlidingPuzzleSolver::timed_print(const std::stack<Move> &move_stack, const int max_depth)
 {
 	std::cout << std::endl;
 
 	while (!finished)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		timed_print_core(move_stack);
+		timed_print_core(max_depth);
 	}
 
 	std::cout << std::endl << std::endl << "Path:" << std::endl;
+	std::cout << "Often duplicate states seen:" << often_duplicate_states_seen << std::endl;
 	std::cout << get_path_string(move_stack) << std::endl << std::endl;
 }
 
 
-void SlidingPuzzleSolver::timed_print_core(const std::stack<Move> &move_stack)
+void SlidingPuzzleSolver::timed_print_core(const int max_depth)
 {
 	// TODO: Store elapsed_time in something more appropriate than int.
 	const int elapsed_time = get_elapsed_seconds().count();
 
-	const int states_count_diff = state_count - prev_state_count;
-	prev_state_count = state_count;
+	// const int states_count_diff = state_count - prev_state_count;
+	// prev_state_count = state_count;
 
 	std::cout << "\33[2K\r"; // Clears the line and goes back to the left.
 
@@ -623,8 +614,9 @@ void SlidingPuzzleSolver::timed_print_core(const std::stack<Move> &move_stack)
 
 	KiloFormatter kf;
 
-	std::cout << ", Path length: " << kf.format(move_stack.size());
-	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
+	std::cout << ", Max depth: " << kf.format(max_depth);
+	std::cout << ", Unique states: " << kf.format(state_count);
+	// std::cout << " (+" << kf.format(states_count_diff) << "/s)";
 
 	std::cout << std::flush;
 }
@@ -649,11 +641,14 @@ const std::string SlidingPuzzleSolver::get_path_string(const std::stack<Move> &m
 	{
 		const auto &move = reversed_move_stack.top();
 		
-		const cell_id piece_index = move.undo.index;
-		path_stringstream << get_piece_label(piece_index);
+		if (move.undo.direction != no_undo)
+		{
+			const cell_id piece_index = move.undo.index;
+			path_stringstream << get_piece_label(piece_index);
 
-		const piece_direction direction = get_inverted_direction(move.undo.direction);
-		path_stringstream << direction_characters[direction];
+			const piece_direction direction = get_inverted_direction(move.undo.direction);
+			path_stringstream << direction_characters[direction];
+		}
 
 		reversed_move_stack.pop();
 	}
@@ -728,6 +723,8 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 				start_direction = get_next_direction(direction);
 
 				state_count++;
+
+				often_duplicate_states_seen++;
 
 				return true;
 			}
@@ -832,9 +829,12 @@ piece_direction SlidingPuzzleSolver::get_next_direction(const piece_direction &d
 
 void SlidingPuzzleSolver::undo_move(const MoveInfo &undo)
 {
-	Piece &undo_piece = pieces[undo.index];
+	if (undo.direction != no_undo)
+	{
+		Piece &undo_piece = pieces[undo.index];
 
-	move(undo_piece.top_left, undo.index, undo.direction);
+		move(undo_piece.top_left, undo.index, undo.direction);
+	}
 }
 
 

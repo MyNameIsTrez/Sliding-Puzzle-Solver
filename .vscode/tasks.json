@@ -41,6 +41,7 @@
 				"run"
 			]
 		},
+		
 		{
 			"type": "shell",
 			"label": "C++ build",

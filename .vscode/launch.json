@@ -11,6 +11,7 @@
 			"program": "${workspaceFolder}/code/python/main.py",
 			"console": "integratedTerminal"
 		},
+		
 		{
 			"name": "C++",
 			// "type": "lldb",

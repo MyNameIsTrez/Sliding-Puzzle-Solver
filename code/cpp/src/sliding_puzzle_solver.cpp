@@ -511,7 +511,7 @@ void SlidingPuzzleSolver::solve(void)
 {
 	const auto starting_pieces = get_starting_pieces();
 
-	print_board(starting_pieces);
+	// print_board(starting_pieces);
 
 	add_state(starting_pieces);
 
@@ -528,9 +528,6 @@ void SlidingPuzzleSolver::solve(void)
 		pieces_queue.pop();
 
 		// print_board(pieces);
-
-		// state_count = 0;
-		// prev_state_count = 0;
 
 		update_finished(pieces);
 		if (finished)
@@ -663,10 +660,6 @@ void SlidingPuzzleSolver::queue_valid_moves(pieces_queue_t &pieces_queue, pieces
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
 
-		// Save the position for later when it needs to be moved back.
-		const int x = piece_top_left.x;
-		const int y = piece_top_left.y;
-
 		for (piece_direction direction = 0; direction < direction_count; ++direction)
 		{
 			if (cant_move(piece_top_left, piece_index, direction, cells))
@@ -683,9 +676,7 @@ void SlidingPuzzleSolver::queue_valid_moves(pieces_queue_t &pieces_queue, pieces
 				state_count++;
 			}
 
-			// Move the piece back.
-			piece_top_left.x = x;
-			piece_top_left.y = y;
+			move(piece_top_left, piece_index, get_inverted_direction(direction), cells);
 		}
 	}
 }

@@ -41,7 +41,6 @@
 				"run"
 			]
 		},
-
 		{
 			"type": "shell",
 			"label": "C++ build",
@@ -58,7 +57,7 @@
 				"-g3",
 				"-std=c++17",
 				"-pthread",
-				// "-O3",
+				"-O3",
 				// "-fsanitize=address",
 				"${workspaceFolder}/code/cpp/src/*.cpp",
 				"-o",

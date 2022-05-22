@@ -14,7 +14,6 @@ using json = nlohmann::json;
 #include <fstream>
 #include <chrono>
 #include <vector>
-#include <unordered_set>
 #include <stack>
 #include <thread>
 #include <filesystem>
@@ -105,12 +104,8 @@ private:
 
 
 	// Variables ////////
-	std::unordered_set<std::vector<Piece>, Piece::Hasher> states;
-
 	int state_count = 0;
 	// int prev_state_count = 0;
-
-	int often_duplicate_states_seen = 0;
 
 	bool finished = false;
 
@@ -157,8 +152,6 @@ private:
 	void set_pieces_on_board(std::vector<std::vector<char>> &board);
 	char get_piece_label(cell_id piece_index);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
-
-	bool add_current_state(void);
 
 	void solve(void);
 	void solve_up_till_max_depth(std::vector<Move> &move_stack, int max_depth);

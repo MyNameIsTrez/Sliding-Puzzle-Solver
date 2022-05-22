@@ -274,7 +274,7 @@ void SlidingPuzzleSolver::set_collision_offsets(void)
 			for (size_t offset_index = 0; offset_index < emptied_piece_direction.offsets.size(); ++offset_index)
 			{
 				const auto &emptied_offset = emptied_piece_direction.offsets[offset_index];
-				
+
 				auto collision_offset_x = emptied_offset.x;
 				auto collision_offset_y = emptied_offset.y;
 
@@ -502,16 +502,6 @@ void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &boa
 }
 
 
-bool SlidingPuzzleSolver::add_current_state(void)
-{
-	const std::pair<std::unordered_set<std::vector<Piece>, Piece::Hasher>::iterator, bool> insert_info = states.insert(pieces);
-
-	const bool success = insert_info.second;
-
-	return success;
-}
-
-
 void SlidingPuzzleSolver::solve(void)
 {
 	std::vector<Move> move_stack;
@@ -524,11 +514,9 @@ void SlidingPuzzleSolver::solve(void)
 
 	while (!finished)
 	{
-		// std::cout << std::endl << "----------------" << std::endl;
+		std::cout << std::endl << "----------------" << std::endl;
 
-		states.clear();
-
-		state_count = 0;
+		// state_count = 0;
 		// prev_state_count = 0;
 
 		solve_up_till_max_depth(move_stack, max_depth);
@@ -548,8 +536,6 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::vector<Move> &move_stack,
 	};
 
 	move_stack.push_back(start_move);
-
-	add_current_state();
 
 	while (!move_stack.empty())
 	{
@@ -595,7 +581,6 @@ void SlidingPuzzleSolver::timed_print(const std::vector<Move> &move_stack, const
 	}
 
 	std::cout << std::endl << std::endl << "Path:" << std::endl;
-	std::cout << "Often duplicate states seen:" << often_duplicate_states_seen << std::endl;
 	std::cout << get_path_string(move_stack) << std::endl << std::endl;
 }
 
@@ -615,7 +600,7 @@ void SlidingPuzzleSolver::timed_print_core(const int max_depth)
 	KiloFormatter kf;
 
 	std::cout << ", Max depth: " << kf.format(max_depth);
-	std::cout << ", Unique states: " << kf.format(state_count);
+	std::cout << ", States count: " << kf.format(state_count);
 	// std::cout << " (+" << kf.format(states_count_diff) << "/s)";
 
 	std::cout << std::flush;
@@ -640,7 +625,7 @@ const std::string SlidingPuzzleSolver::get_path_string(const std::vector<Move> &
 	while (!reversed_move_stack.empty())
 	{
 		const auto &move = reversed_move_stack.back();
-		
+
 		if (move.undo.direction != no_undo)
 		{
 			const cell_id piece_index = move.undo.index;
@@ -664,9 +649,9 @@ std::vector<Move> SlidingPuzzleSolver::get_reversed_move_stack(std::vector<Move>
 	while (!move_stack.empty())
 	{
 		const auto &move = move_stack.back();
-		
+
 		reversed_move_stack.push_back(move);
-		
+
 		move_stack.pop_back();
 	}
 
@@ -698,12 +683,12 @@ void SlidingPuzzleSolver::update_finished()
 
 bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &move_stack)
 {
-	for (cell_id &piece_index = start_piece_index; piece_index != pieces_count; ++piece_index)
+	for (cell_id piece_index = start_piece_index; piece_index != pieces_count; ++piece_index)
 	{
 		Piece &piece = pieces[piece_index];
 		Pos &piece_top_left = piece.top_left;
 
-		for (piece_direction &direction = start_direction; direction < direction_count; ++direction)
+		for (piece_direction direction = start_direction; direction < direction_count; ++direction)
 		{
 			if (cant_move(piece_top_left, piece_index, direction))
 			{
@@ -712,24 +697,17 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 
 			move(piece_top_left, piece_index, direction);
 
-			if (add_current_state())
-			{
-				move_stack.push_back({
-					.next = { .index = 0, .direction = 0 },
-					.undo = { .index = piece_index, .direction = get_inverted_direction(direction) }
-				});
+			start_piece_index = get_next_piece_index(piece_index, direction);
+			start_direction = get_next_direction(direction);
 
-				start_piece_index = get_next_piece_index(piece_index, direction);
-				start_direction = get_next_direction(direction);
+			move_stack.push_back({
+				.next = { .index = 0, .direction = 0 },
+				.undo = { .index = piece_index, .direction = get_inverted_direction(direction) }
+			});
 
-				state_count++;
+			state_count++;
 
-				often_duplicate_states_seen++;
-
-				return true;
-			}
-
-			move(piece_top_left, piece_index, get_inverted_direction(direction));
+			return true;
 		}
 
 		start_direction = 0; // TODO: Find better approach.

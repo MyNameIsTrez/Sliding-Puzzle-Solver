@@ -1,30 +1,42 @@
 #pragma once
 
 
-#include "json.hpp"
-using json = nlohmann::json;
-
-
-#include "pieces.hpp"
-#include "move.hpp"
-#include "kilo_formatter.h"
-
+#include <vector>
+#include <unordered_set>
+#include <queue>
 
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <vector>
-#include <unordered_map>
-#include <stack>
+
 #include <thread>
 #include <filesystem>
+
+
+typedef int cell_id;
+typedef int piece_direction;
+
+
+typedef std::vector<std::vector<cell_id>> cells_t;
+
+struct Piece;
+typedef std::vector<Piece> pieces_t;
+
+typedef std::queue<std::pair<pieces_t, cells_t>> pieces_queue_t;
+
+
+#include "json.hpp"
+using json = nlohmann::json;
+
+#include "pieces.hpp"
+#include "kilo_formatter.h"
 
 
 class SlidingPuzzleSolver
 {
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);
-	void run(void);
+	void solve(void);
 
 private:
 	// Static consts, structs and enums ////////
@@ -103,18 +115,16 @@ private:
 
 	int pieces_count;
 
+	cells_t starting_cells;
+
 
 	// Variables ////////
-	std::unordered_map<std::vector<Piece>, int, Piece::HashFunction> states;
+	std::unordered_set<pieces_t, Piece::HashFunction> states;
 
 	int state_count = 0;
-	// int prev_state_count = 0;
+	int prev_state_count = 0;
 
 	bool finished = false;
-
-	std::vector<std::vector<cell_id>> cells;
-
-	std::vector<Piece> pieces;
 
 
 	// Methods ////////
@@ -142,45 +152,45 @@ private:
 	// Initialize variables
 	void initialize_variable_fields(const json &puzzle_json);
 
-	void initialize_cells(void);
+	void set_starting_cells(void);
 	void add_wall_cells(const json &walls_json);
 	void add_piece_cells(void);
 
-	void initialize_pieces(void);
+
+
+	pieces_t get_starting_pieces(void);
+
+
 
 	// Print board
-	void print_board(void);
-	const std::vector<std::vector<char>> get_board(void);
+	void print_board(const pieces_t &pieces);
+	const std::vector<std::vector<char>> get_board(const pieces_t &pieces);
 	const std::vector<std::vector<char>> get_2d_vector(void);
-	void set_pieces_on_board(std::vector<std::vector<char>> &board);
+	void set_pieces_on_board(std::vector<std::vector<char>> &board, const pieces_t &pieces);
 	char get_piece_label(cell_id piece_index);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
-	bool add_current_state(int depth);
+	bool add_state(const pieces_t &pieces);
 
-	void solve(void);
-	void solve_up_till_max_depth(std::vector<Move> &move_stack, const int max_depth);
-	bool no_next_piece_or_direction(const MoveInfo &next);
+	void update_finished(const pieces_t &pieces);
 
-	void update_finished(void);
-
-	// Move a Piece
-	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &move_stack, int depth);
-	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
-	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
-	void apply_offsets_to_cells(Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index);
+	// Move Pieces
+	void queue_valid_moves(pieces_queue_t &pieces_queue, pieces_t &pieces, cells_t &cells);
+	bool cant_move(const Pos &piece_top_left, const cell_id piece_index, const piece_direction direction, cells_t &cells);
+	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction, cells_t &cells);
+	void apply_offsets_to_cells(cells_t &cells, Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index);
 	void move_piece_top_left(Pos &piece_top_left, const piece_direction direction);
-	cell_id get_next_piece_index(const cell_id &piece_index, const piece_direction &direction);
-	piece_direction get_next_direction(const piece_direction &direction);
-	void undo_move(const MoveInfo &undo);
+
+	pieces_t get_pieces_copy(const pieces_t &pieces);
+	cells_t get_cells_copy(const cells_t &cells);
 
 	// Print progress
-	void timed_print(const std::vector<Move> &move_stack, const int &max_depth);
-	void timed_print_core(const int &max_depth);
+	void timed_print(const pieces_queue_t &pieces_queue);
+	void timed_print_core(void);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
-	const std::string get_path_string(const std::vector<Move> &move_stack);
-	std::vector<Move> get_reversed_move_stack(std::vector<Move> move_stack);
+	// const std::string get_path_string(const std::vector<Move> &move_stack);
+	// std::vector<Move> get_reversed_move_stack(std::vector<Move> move_stack);
 
 	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);

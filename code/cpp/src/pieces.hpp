@@ -29,6 +29,7 @@ struct Rect
 	Size size;
 };
 
+// TODO: Is it cleaner to replace Pos with Piece in here?
 struct StartingPieceInfo
 {
 	Pos top_left;
@@ -56,7 +57,7 @@ struct Piece
 	}
 	struct HashFunction {
 		// Hashing logic stolen from here: https://stackoverflow.com/a/27216842
-		size_t operator() (const std::vector<Piece> &pieces) const
+		size_t operator() (const pieces_t &pieces) const
 		{
 			std::size_t seed = pieces.size();
 

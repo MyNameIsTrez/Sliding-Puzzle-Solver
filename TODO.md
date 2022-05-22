@@ -18,6 +18,7 @@
 * Check if initializing all for and while loop conditions as consts before the loops is faster.
 * Rename id to index everywhere.
 * emplace_back() should be faster than push_back()
+* Custom typedef for x, y, width and height so they aren't hardcoded as ints. uint8_t might even be faster?
 
 # New algorithm
 * Use IDDFS: https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search

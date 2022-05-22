@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
 	SlidingPuzzleSolver sliding_puzzle_solver(exe_path, "klotski");
 
-	sliding_puzzle_solver.run();
+	sliding_puzzle_solver.solve();
 
 	return EXIT_SUCCESS;
 }

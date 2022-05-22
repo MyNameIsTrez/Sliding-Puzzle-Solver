@@ -502,6 +502,33 @@ void SlidingPuzzleSolver::set_walls_on_board(std::vector<std::vector<char>> &boa
 }
 
 
+bool SlidingPuzzleSolver::add_current_state(int depth)
+{
+	auto insert_info = states.insert(std::pair<std::vector<Piece>, int>(pieces, depth));
+
+	auto &stored = *insert_info.first;
+
+	const bool success = insert_info.second;
+
+	if (success)
+	{
+		return true;
+	}
+
+	// const auto stored_pieces = stored.first;
+
+	int &stored_depth = stored.second;
+
+	if (depth < stored_depth)
+	{
+		stored_depth = depth;
+		return true;
+	}
+
+	return false;
+}
+
+
 void SlidingPuzzleSolver::solve(void)
 {
 	std::vector<Move> move_stack;
@@ -509,26 +536,27 @@ void SlidingPuzzleSolver::solve(void)
 	int max_depth = 1;
 
 	// TODO: Can this line be shortened?
-	// TODO: Why can the std::ref() around move_stack be omitted, while this is not the case for max_depth?
-	// std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack), std::ref(max_depth));
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(move_stack), std::ref(max_depth));
 
 	while (!finished)
 	{
-		std::cout << std::endl << "----------------" << std::endl;
+		// std::cout << std::endl << "----------------" << std::endl;
 
 		// state_count = 0;
 		// prev_state_count = 0;
+
+		states.clear();
 
 		solve_up_till_max_depth(move_stack, max_depth);
 
 		max_depth++;
 	}
 
-	// timed_print_thread.join();
+	timed_print_thread.join();
 }
 
 
-void SlidingPuzzleSolver::solve_up_till_max_depth(std::vector<Move> &move_stack, int max_depth)
+void SlidingPuzzleSolver::solve_up_till_max_depth(std::vector<Move> &move_stack, const int max_depth)
 {
 	Move start_move = {
 		.next = { .index = 0, .direction = 0 },
@@ -536,6 +564,8 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::vector<Move> &move_stack,
 	};
 
 	move_stack.push_back(start_move);
+
+	add_current_state(move_stack.size());
 
 	while (!move_stack.empty())
 	{
@@ -550,9 +580,10 @@ void SlidingPuzzleSolver::solve_up_till_max_depth(std::vector<Move> &move_stack,
 		Move &move = move_stack.back();
 
 		int depth = move_stack.size();
+
 		if ((depth >= max_depth) ||
 			(no_next_piece_or_direction(move.next)) ||
-			(move_piece(move.next.index, move.next.direction, move_stack) == false))
+			(move_piece(move.next.index, move.next.direction, move_stack, depth) == false))
 		{
 			undo_move(move.undo);
 			move_stack.pop_back();
@@ -570,7 +601,7 @@ bool SlidingPuzzleSolver::no_next_piece_or_direction(const MoveInfo &next)
 }
 
 
-void SlidingPuzzleSolver::timed_print(const std::vector<Move> &move_stack, const int max_depth)
+void SlidingPuzzleSolver::timed_print(const std::vector<Move> &move_stack, const int &max_depth)
 {
 	std::cout << std::endl;
 
@@ -579,13 +610,13 @@ void SlidingPuzzleSolver::timed_print(const std::vector<Move> &move_stack, const
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		timed_print_core(max_depth);
 	}
+	std::cout << std::endl << "Finished: " << finished << std::endl;
 
-	std::cout << std::endl << std::endl << "Path:" << std::endl;
-	std::cout << get_path_string(move_stack) << std::endl << std::endl;
+	std::cout << std::endl << std::endl << "Path:" << std::endl << get_path_string(move_stack) << std::endl << std::endl;
 }
 
 
-void SlidingPuzzleSolver::timed_print_core(const int max_depth)
+void SlidingPuzzleSolver::timed_print_core(const int &max_depth)
 {
 	// TODO: Store elapsed_time in something more appropriate than int.
 	const int elapsed_time = get_elapsed_seconds().count();
@@ -681,7 +712,7 @@ void SlidingPuzzleSolver::update_finished()
 }
 
 
-bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &move_stack)
+bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &move_stack, int depth)
 {
 	for (cell_id piece_index = start_piece_index; piece_index != pieces_count; ++piece_index)
 	{
@@ -697,17 +728,22 @@ bool SlidingPuzzleSolver::move_piece(cell_id &start_piece_index, piece_direction
 
 			move(piece_top_left, piece_index, direction);
 
-			start_piece_index = get_next_piece_index(piece_index, direction);
-			start_direction = get_next_direction(direction);
+			if (add_current_state(depth))
+			{
+				start_piece_index = get_next_piece_index(piece_index, direction);
+				start_direction = get_next_direction(direction);
 
-			move_stack.push_back({
-				.next = { .index = 0, .direction = 0 },
-				.undo = { .index = piece_index, .direction = get_inverted_direction(direction) }
-			});
+				move_stack.push_back({
+					.next = { .index = 0, .direction = 0 },
+					.undo = { .index = piece_index, .direction = get_inverted_direction(direction) }
+				});
 
-			state_count++;
+				state_count++;
 
-			return true;
+				return true;
+			}
+
+			move(piece_top_left, piece_index, get_inverted_direction(direction));
 		}
 
 		start_direction = 0; // TODO: Find better approach.

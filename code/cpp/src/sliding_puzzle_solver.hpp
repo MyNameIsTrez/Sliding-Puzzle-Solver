@@ -14,6 +14,7 @@ using json = nlohmann::json;
 #include <fstream>
 #include <chrono>
 #include <vector>
+#include <unordered_map>
 #include <stack>
 #include <thread>
 #include <filesystem>
@@ -104,6 +105,8 @@ private:
 
 
 	// Variables ////////
+	std::unordered_map<std::vector<Piece>, int, Piece::HashFunction> states;
+
 	int state_count = 0;
 	// int prev_state_count = 0;
 
@@ -153,14 +156,16 @@ private:
 	char get_piece_label(cell_id piece_index);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
+	bool add_current_state(int depth);
+
 	void solve(void);
-	void solve_up_till_max_depth(std::vector<Move> &move_stack, int max_depth);
+	void solve_up_till_max_depth(std::vector<Move> &move_stack, const int max_depth);
 	bool no_next_piece_or_direction(const MoveInfo &next);
 
 	void update_finished(void);
 
 	// Move a Piece
-	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &pieces_stack);
+	bool move_piece(cell_id &start_piece_index, piece_direction &start_direction, std::vector<Move> &move_stack, int depth);
 	bool cant_move(const Pos &piece_top_left, cell_id piece_index, piece_direction direction);
 	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction);
 	void apply_offsets_to_cells(Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index);
@@ -170,8 +175,8 @@ private:
 	void undo_move(const MoveInfo &undo);
 
 	// Print progress
-	void timed_print(const std::vector<Move> &move_stack, const int max_depth);
-	void timed_print_core(const int max_depth);
+	void timed_print(const std::vector<Move> &move_stack, const int &max_depth);
+	void timed_print_core(const int &max_depth);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	const std::string get_path_string(const std::vector<Move> &move_stack);

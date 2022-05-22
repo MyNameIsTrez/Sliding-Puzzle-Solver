@@ -24,6 +24,10 @@ typedef std::vector<Piece> pieces_t;
 
 typedef std::queue<std::pair<pieces_t, cells_t>> pieces_queue_t;
 
+typedef std::vector<std::pair<cell_id, piece_direction>> path_t;
+
+typedef std::queue<path_t> path_queue_t;
+
 
 #include "json.hpp"
 using json = nlohmann::json;
@@ -175,7 +179,7 @@ private:
 	void update_finished(const pieces_t &pieces);
 
 	// Move Pieces
-	void queue_valid_moves(pieces_queue_t &pieces_queue, pieces_t &pieces, cells_t &cells);
+	void queue_valid_moves(pieces_queue_t &pieces_queue, pieces_t &pieces, cells_t &cells, path_queue_t &path_queue, const path_t &path);
 	bool cant_move(const Pos &piece_top_left, const cell_id piece_index, const piece_direction direction, cells_t &cells);
 	void move(Pos &piece_top_left, const cell_id piece_index, const piece_direction direction, cells_t &cells);
 	void apply_offsets_to_cells(cells_t &cells, Pos &piece_top_left, const std::vector<Offset> &offsets, const cell_id index);
@@ -183,14 +187,13 @@ private:
 
 	pieces_t get_pieces_copy(const pieces_t &pieces);
 	cells_t get_cells_copy(const cells_t &cells);
+	path_t get_path_copy(const path_t &path);
 
 	// Print progress
-	void timed_print(const pieces_queue_t &pieces_queue);
-	void timed_print_core(const pieces_queue_t &pieces_queue);
+	void timed_print(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue);
+	void timed_print_core(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
-
-	// const std::string get_path_string(const std::vector<Move> &move_stack);
-	// std::vector<Move> get_reversed_move_stack(std::vector<Move> move_stack);
+	std::string get_path_string(const path_t &path);
 
 	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);

@@ -414,7 +414,6 @@ void SlidingPuzzleSolver::print_board(const pieces_t &pieces)
 		}
 		std::cout << std::endl;
 	}
-	std::cout << std::endl;
 }
 
 
@@ -519,8 +518,12 @@ void SlidingPuzzleSolver::solve(void)
 
 	pieces_queue.push({starting_pieces, starting_cells});
 
+	path_queue_t path_queue;
+	const path_t initial_empty_path = std::vector<std::pair<cell_id, piece_direction>>();
+	path_queue.push(initial_empty_path);
+
 	// TODO: Can this line be shortened?
-	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue));
+	std::thread timed_print_thread(&SlidingPuzzleSolver::timed_print, this, std::ref(pieces_queue), std::ref(path_queue));
 
 	while (!pieces_queue.empty())
 	{
@@ -528,6 +531,7 @@ void SlidingPuzzleSolver::solve(void)
 		pieces_queue.pop();
 
 		// print_board(pieces);
+		// std::cout << std::endl;
 
 		update_finished(pieces);
 		if (finished)
@@ -535,30 +539,31 @@ void SlidingPuzzleSolver::solve(void)
 			break;
 		}
 
-		queue_valid_moves(pieces_queue, pieces, cells);
+		const path_t path = path_queue.front();
+		path_queue.pop(); // Purposely placed *after* the break above, as timed_print() is responsible for printing the final path.
+
+		queue_valid_moves(pieces_queue, pieces, cells, path_queue, path);
 	}
 
 	timed_print_thread.join();
 }
 
 
-void SlidingPuzzleSolver::timed_print(const pieces_queue_t &pieces_queue)
+void SlidingPuzzleSolver::timed_print(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue)
 {
 	std::cout << std::endl;
 
 	while (!finished)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		timed_print_core(pieces_queue);
+		timed_print_core(pieces_queue, path_queue);
 	}
 
-	(void)pieces_queue;
-
-	// std::cout << std::endl << std::endl << "Path:" << std::endl << get_path_string(move_stack) << std::endl << std::endl;
+	std::cout << std::endl << std::endl << "Path:" << std::endl << get_path_string(path_queue.front()) << std::endl << std::endl;
 }
 
 
-void SlidingPuzzleSolver::timed_print_core(const pieces_queue_t &pieces_queue)
+void SlidingPuzzleSolver::timed_print_core(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue)
 {
 	// TODO: Store elapsed_time in something more appropriate than int.
 	const int elapsed_time = get_elapsed_seconds().count();
@@ -571,6 +576,11 @@ void SlidingPuzzleSolver::timed_print_core(const pieces_queue_t &pieces_queue)
 	std::cout << "Elapsed time: " << elapsed_time << " seconds";
 
 	KiloFormatter kf;
+
+	if (path_queue.size() > 0)
+	{
+		std::cout << ", Path length: " << kf.format(path_queue.front().size());
+	}
 
 	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
 
@@ -586,50 +596,6 @@ std::chrono::duration<double> SlidingPuzzleSolver::get_elapsed_seconds(void)
 	std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
 	return end_time - start_time;
 }
-
-
-// const std::string SlidingPuzzleSolver::get_path_string(const std::vector<Move> &move_stack)
-// {
-// 	// If this method ever needs to be called a lot then try using a rope instead.
-// 	std::stringstream path_stringstream;
-
-// 	auto reversed_move_stack = get_reversed_move_stack(move_stack);
-
-// 	while (!reversed_move_stack.empty())
-// 	{
-// 		const auto &move = reversed_move_stack.back();
-
-// 		if (move.undo.direction != no_undo)
-// 		{
-// 			const cell_id piece_index = move.undo.index;
-// 			path_stringstream << get_piece_label(piece_index);
-
-// 			const piece_direction direction = get_inverted_direction(move.undo.direction);
-// 			path_stringstream << direction_characters[direction];
-// 		}
-
-// 		reversed_move_stack.pop_back();
-// 	}
-
-// 	return path_stringstream.str();
-// }
-
-
-// std::vector<Move> SlidingPuzzleSolver::get_reversed_move_stack(std::vector<Move> move_stack)
-// {
-// 	std::vector<Move> reversed_move_stack;
-
-// 	while (!move_stack.empty())
-// 	{
-// 		const auto &move = move_stack.back();
-
-// 		reversed_move_stack.push_back(move);
-
-// 		move_stack.pop_back();
-// 	}
-
-// 	return reversed_move_stack;
-// }
 
 
 void SlidingPuzzleSolver::update_finished(const pieces_t &pieces)
@@ -654,7 +620,7 @@ void SlidingPuzzleSolver::update_finished(const pieces_t &pieces)
 }
 
 
-void SlidingPuzzleSolver::queue_valid_moves(pieces_queue_t &pieces_queue, pieces_t &pieces, cells_t &cells)
+void SlidingPuzzleSolver::queue_valid_moves(pieces_queue_t &pieces_queue, pieces_t &pieces, cells_t &cells, path_queue_t &path_queue, const path_t &path)
 {
 	for (cell_id piece_index = 0; piece_index != pieces_count; ++piece_index)
 	{
@@ -673,6 +639,12 @@ void SlidingPuzzleSolver::queue_valid_moves(pieces_queue_t &pieces_queue, pieces
 			if (add_state(pieces))
 			{
 				pieces_queue.push({get_pieces_copy(pieces), get_cells_copy(cells)});
+
+				path_t new_path = get_path_copy(path);
+
+				new_path.push_back({piece_index, direction});
+
+				path_queue.push(new_path);
 
 				state_count++;
 			}
@@ -757,15 +729,41 @@ void SlidingPuzzleSolver::move_piece_top_left(Pos &piece_top_left, const piece_d
 
 pieces_t SlidingPuzzleSolver::get_pieces_copy(const pieces_t &pieces)
 {
-	const pieces_t new_pieces = pieces;
+	const pieces_t pieces_copy = pieces;
 
-	return new_pieces;
+	return pieces_copy;
 }
 
 
 cells_t SlidingPuzzleSolver::get_cells_copy(const cells_t &cells)
 {
-	const cells_t new_cells = cells;
+	const cells_t cells_copy = cells;
 
-	return new_cells;
+	return cells_copy;
+}
+
+
+path_t SlidingPuzzleSolver::get_path_copy(const path_t &path)
+{
+	const path_t path_copy = path;
+
+	return path_copy;
+}
+
+
+std::string SlidingPuzzleSolver::get_path_string(const path_t &path)
+{
+	// If this method ever needs to be called a lot then try using a rope instead.
+	std::stringstream path_stringstream;
+
+	for (path_t::const_iterator pair_it = path.cbegin(); pair_it != path.cend(); ++pair_it)
+	{
+		std::size_t piece_index = pair_it->first;
+		path_stringstream << piece_labels[piece_index];
+
+		char direction = pair_it->second;
+		path_stringstream << direction_characters[direction];
+	}
+
+	return path_stringstream.str();
 }

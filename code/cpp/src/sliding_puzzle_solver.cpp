@@ -511,7 +511,7 @@ void SlidingPuzzleSolver::solve(void)
 {
 	const auto starting_pieces = get_starting_pieces();
 
-	// print_board(starting_pieces);
+	print_board(starting_pieces);
 
 	add_state(starting_pieces);
 
@@ -549,7 +549,7 @@ void SlidingPuzzleSolver::timed_print(const pieces_queue_t &pieces_queue)
 	while (!finished)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		timed_print_core();
+		timed_print_core(pieces_queue);
 	}
 
 	(void)pieces_queue;
@@ -558,7 +558,7 @@ void SlidingPuzzleSolver::timed_print(const pieces_queue_t &pieces_queue)
 }
 
 
-void SlidingPuzzleSolver::timed_print_core(void)
+void SlidingPuzzleSolver::timed_print_core(const pieces_queue_t &pieces_queue)
 {
 	// TODO: Store elapsed_time in something more appropriate than int.
 	const int elapsed_time = get_elapsed_seconds().count();
@@ -572,8 +572,9 @@ void SlidingPuzzleSolver::timed_print_core(void)
 
 	KiloFormatter kf;
 
-	std::cout << ", States count: " << kf.format(state_count);
-	std::cout << " (+" << kf.format(states_count_diff) << "/s)";
+	std::cout << ", Unique states: " << kf.format(state_count) << " (+" << kf.format(states_count_diff) << "/s)";
+
+	std::cout << ", Queue length: " << kf.format(pieces_queue.size());
 
 	std::cout << std::flush;
 }

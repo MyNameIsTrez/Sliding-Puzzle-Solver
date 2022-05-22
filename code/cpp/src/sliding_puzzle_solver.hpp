@@ -186,7 +186,7 @@ private:
 
 	// Print progress
 	void timed_print(const pieces_queue_t &pieces_queue);
-	void timed_print_core(void);
+	void timed_print_core(const pieces_queue_t &pieces_queue);
 	std::chrono::duration<double> get_elapsed_seconds(void);
 
 	// const std::string get_path_string(const std::vector<Move> &move_stack);

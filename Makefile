@@ -1,24 +1,31 @@
-SOURCES :=									\
-	code/cpp/src/main.cpp					\
-	code/cpp/src/sliding_puzzle_solver.cpp
-
+SOURCES :=\
+	code/cpp/src/printer/board_printer.cpp\
+	code/cpp/src/printer/timed_printer.cpp\
+	code/cpp/src/sliding_puzzle_solver.cpp\
+	code/cpp/src/main.cpp
 
 ####
 
 
 NAME := puzzle
 
-CC := C:/msys64/mingw64/bin/g++.exe # No vector debug info.
+CC := /usr/bin/g++
+# CC := C:/msys64/mingw64/bin/g++.exe # No vector debug info.
 # CC := C:/msys64/mingw64/bin/gcc.exe # Errors.
 # CC := C:/msys64/mingw64/bin/gdb.exe # No vector debug info. Errors in puzzle.exe?
 # CC := lldb # TODO: Download this?
 
 LDFLAGS :=
+
 CFLAGS := -Wall -Wextra -Werror
 # CFLAGS += -Og
 CFLAGS += -g3
-# CFLAGS += -O3
-FCLEANED_FILES := puzzle.exe
+CFLAGS += -O3
+CFLAGS += -pthread
+CFLAGS += -std=c++17
+# CFLAGS += -fsanitize=address
+
+FCLEANED_FILES := puzzle
 
 SRC_DIR := code/cpp/src
 OBJ_DIR := code/cpp/obj
@@ -38,7 +45,7 @@ all: $(NAME)
 
 
 $(NAME): $(OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp

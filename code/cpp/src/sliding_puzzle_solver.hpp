@@ -1,32 +1,19 @@
 #pragma once
 
 
-#include <vector>
+// #include <vector>
 #include <unordered_set>
-#include <queue>
+// #include <queue>
 
-#include <iostream>
+// #include <iostream>
 #include <fstream>
-#include <chrono>
+// #include <chrono>
 
 #include <thread>
 #include <filesystem>
 
 
-typedef int cell_id;
-typedef int piece_direction;
-
-
-typedef std::vector<std::vector<cell_id>> cells_t;
-
-struct Piece;
-typedef std::vector<Piece> pieces_t;
-
-typedef std::queue<std::pair<pieces_t, cells_t>> pieces_queue_t;
-
-typedef std::vector<std::pair<cell_id, piece_direction>> path_t;
-
-typedef std::queue<path_t> path_queue_t;
+#include "typedefs.hpp"
 
 
 #include "json.hpp"
@@ -36,11 +23,48 @@ using json = nlohmann::json;
 #include "kilo_formatter.h"
 
 
+// #include "printer/board_printer.hpp"
+// #include "printer/timed_printer.hpp"
+
+
 class SlidingPuzzleSolver
 {
 public:
 	SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name);
 	void solve(void);
+
+
+	// Custom constants ////////
+	const char empty_character = ' ';
+	const char wall_character = '#';
+
+	// TODO: Support more than 26 piece labels in some way.
+	const std::string piece_labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	const std::vector<char> direction_characters = {'^', 'v', '<', '>'};
+
+
+	// Constants ////////
+	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+
+
+	// Constants after constructor ////////
+	std::vector<Wall> walls;
+
+	int width;
+	int height;
+
+	std::vector<StartingPieceInfo> starting_pieces_info;
+
+	int pieces_count;
+
+
+	// Variables ////////
+	bool finished = false;
+
+	int state_count = 0;
+	int prev_state_count = 0;
+
 
 private:
 	// Static consts, structs and enums ////////
@@ -67,28 +91,19 @@ private:
 		wall_cell_id = -2
 	};
 
+
+	// Subclass singletons
+	// BoardPrinter board_printer;
+	// TimedPrinter timed_printer;
+
+
 	// Constants ////////
-	const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
-
-	const char empty_character = ' ';
-	const char wall_character = '#';
-
-	const std::vector<char> direction_characters = {'^', 'v', '<', '>'};
-
-	// TODO: Support more than 26 piece labels in some way.
-	const std::string piece_labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	const std::size_t piece_labels_length = piece_labels.length();
 
 	const bool print_board_every_path = false;
 
 
 	// Constants after constructor ////////
-	std::vector<Wall> walls;
-
-	int width;
-	int height;
-
-	std::vector<StartingPieceInfo> starting_pieces_info;
 	std::vector<EndingPiece> ending_pieces;
 
 	/*
@@ -117,18 +132,11 @@ private:
 	*/
 	pieces_directions_cell_offsets collision_offsets;
 
-	int pieces_count;
-
 	cells_t starting_cells;
 
 
 	// Variables ////////
 	std::unordered_set<pieces_t, Piece::HashFunction> states;
-
-	int state_count = 0;
-	int prev_state_count = 0;
-
-	bool finished = false;
 
 
 	// Methods ////////
@@ -165,15 +173,6 @@ private:
 	pieces_t get_starting_pieces(void);
 
 
-
-	// Print board
-	void print_board(const pieces_t &pieces);
-	const std::vector<std::vector<char>> get_board(const pieces_t &pieces);
-	const std::vector<std::vector<char>> get_2d_vector(void);
-	void set_pieces_on_board(std::vector<std::vector<char>> &board, const pieces_t &pieces);
-	char get_piece_label(cell_id piece_index);
-	void set_walls_on_board(std::vector<std::vector<char>> &board);
-
 	bool add_state(const pieces_t &pieces);
 
 	void update_finished(const pieces_t &pieces);
@@ -188,12 +187,6 @@ private:
 	pieces_t get_pieces_copy(const pieces_t &pieces);
 	cells_t get_cells_copy(const cells_t &cells);
 	path_t get_path_copy(const path_t &path);
-
-	// Print progress
-	void timed_print(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue);
-	void timed_print_core(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue);
-	std::chrono::duration<double> get_elapsed_seconds(void);
-	std::string get_path_string(const path_t &path);
 
 	// bool a_rect_cant_be_moved(const std::vector<Rect> &rects, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);
 	// bool cant_move(const Rect &rect, const piece_direction &direction, const cell_id piece_id, const Pos &piece_top_left);

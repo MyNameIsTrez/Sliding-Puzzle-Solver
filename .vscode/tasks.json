@@ -44,60 +44,10 @@
 		{
 			"type": "shell",
 			"label": "C++ build",
-			"osx": {
-				"command": "/Users/sbos/.brew/bin/c++-11"
-			},
 			"linux": {
-				"command": "/usr/bin/g++"
-			},
-			"args": [
-				"-Wall",
-				"-Wextra",
-				"-Werror",
-				"-g3",
-				"-std=c++17",
-				"-pthread",
-				"-O3",
-				// "-fsanitize=address",
-				"${workspaceFolder}/code/cpp/src/*.cpp",
-				"-o",
-				"${workspaceFolder}/puzzle"
-			],
-			"options": {
-				"cwd": "/usr/bin"
-			},
-			"problemMatcher": ["$gcc"],
-			"group": {
-				"kind": "build",
-				"isDefault": true
+				"command": "make"
 			}
 		},
-		// {
-		// 	"type": "shell",
-		// 	"label": "test.cpp build",
-		// 	"command": "/usr/bin/g++",
-		// 	"args": [
-		// 		"-Wall",
-		// 		"-Wextra",
-		// 		"-Werror",
-		// 		"-g3",
-		// 		"-std=c++17",
-		// 		"-pthread",
-		// 		// "-fsanitize=address",
-		// 		// "-O3",
-		// 		"${workspaceFolder}/test.cpp",
-		// 		"-o",
-		// 		"${workspaceFolder}/test"
-		// 	],
-		// 	"options": {
-		// 		"cwd": "/usr/bin"
-		// 	},
-		// 	"problemMatcher": ["$gcc"],
-		// 	"group": {
-		// 		"kind": "build",
-		// 		"isDefault": true
-		// 	}
-		// },
 		{
 			"type": "shell",
 			"label": "hyperfine",
@@ -110,14 +60,22 @@
 				"./${input:binary_1}",
 				"./${input:binary_2}"
 			],
-			"problemMatcher": []
+			"problemMatcher": [],
+			"dependsOn": ["C++ build"]
 		},
 		{
 			"type": "shell",
-			"label": "flamegraph",
-			"command": "sudo perf record --call-graph dwarf ./${input:binary_1} && sudo perf script | sudo ~/Programming/inferno/target/release/inferno-collapse-perf | sudo ~/Programming/inferno/target/release/inferno-flamegraph > flamegraph.svg",
-			"problemMatcher": []
-		}
+			"label": "hotspot",
+			"command": "sudo perf record --call-graph dwarf --freq=100 ./${input:binary_1} && sudo /home/trez/AppImages/hotspot-v1.3.0-166-g26a7e77-x86_64.AppImage perf.data",
+			"problemMatcher": [],
+			"dependsOn": ["C++ build"]
+		},
+		// {
+		// 	"type": "shell",
+		// 	"label": "flamegraph",
+		// 	"command": "sudo perf record --call-graph dwarf ./${input:binary_1} && sudo perf script | sudo ~/Programming/inferno/target/release/inferno-collapse-perf | sudo ~/Programming/inferno/target/release/inferno-flamegraph > flamegraph.svg",
+		// 	"problemMatcher": []
+		// },
 	],
 	"inputs": [
 		{

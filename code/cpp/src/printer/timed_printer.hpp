@@ -4,15 +4,11 @@
 #include "../typedefs.hpp"
 
 
-class SlidingPuzzleSolver;
-
-
-#include "../sliding_puzzle_solver.hpp"
-
-
 #include <chrono>
 #include <iostream>
 
+
+class SlidingPuzzleSolver;
 
 class TimedPrinter
 {
@@ -25,5 +21,5 @@ private:
 	std::chrono::duration<double> get_elapsed_seconds(void);
 	std::string get_path_string(const path_t &path);
 
-	SlidingPuzzleSolver &sps;
+	const SlidingPuzzleSolver &sps;
 };

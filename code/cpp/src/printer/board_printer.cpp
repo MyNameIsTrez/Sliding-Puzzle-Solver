@@ -1,5 +1,7 @@
 #include "board_printer.hpp"
 
+#include "../sliding_puzzle_solver.hpp"
+
 
 void BoardPrinter::print_board(const pieces_t &pieces)
 {

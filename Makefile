@@ -22,7 +22,7 @@ CFLAGS := -Wall -Wextra -Werror
 CFLAGS += -g3
 CFLAGS += -O3
 CFLAGS += -pthread
-CFLAGS += -std=c++17
+CFLAGS += -std=c++2a #-std=c++17
 # CFLAGS += -fsanitize=address
 
 FCLEANED_FILES := puzzle

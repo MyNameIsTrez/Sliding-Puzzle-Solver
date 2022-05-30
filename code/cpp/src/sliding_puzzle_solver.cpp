@@ -1,7 +1,12 @@
 #include "sliding_puzzle_solver.hpp"
 
 
+#include "printer/board_printer.hpp"
+#include "printer/timed_printer.hpp"
+
+
 SlidingPuzzleSolver::SlidingPuzzleSolver(std::filesystem::path &exe_path, const std::string &puzzle_name)
+	: board_printer(*this), timed_printer(*this)
 {
 	// board_printer = BoardPrinter(&this);
 

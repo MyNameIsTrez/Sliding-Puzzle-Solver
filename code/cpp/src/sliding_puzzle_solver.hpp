@@ -23,8 +23,8 @@ using json = nlohmann::json;
 #include "kilo_formatter.h"
 
 
-// #include "printer/board_printer.hpp"
-// #include "printer/timed_printer.hpp"
+#include "printer/board_printer.hpp"
+#include "printer/timed_printer.hpp"
 
 
 class SlidingPuzzleSolver
@@ -35,13 +35,13 @@ public:
 
 
 	// Custom constants ////////
-	const char empty_character = ' ';
-	const char wall_character = '#';
+	static char const empty_character = ' ';
+	static char const wall_character = '#';
 
 	// TODO: Support more than 26 piece labels in some way.
-	const std::string piece_labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static std::string constexpr piece_labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	const std::vector<char> direction_characters = {'^', 'v', '<', '>'};
+	static std::vector<char> constexpr direction_characters = {'^', 'v', '<', '>'};
 
 
 	// Constants ////////
@@ -67,7 +67,6 @@ public:
 
 
 private:
-	// Static consts, structs and enums ////////
 	static int const direction_count = 4;
 
 	int const no_undo = -1;
@@ -93,8 +92,8 @@ private:
 
 
 	// Subclass singletons
-	// BoardPrinter board_printer;
-	// TimedPrinter timed_printer;
+	const BoardPrinter board_printer;
+	const TimedPrinter timed_printer;
 
 
 	// Constants ////////

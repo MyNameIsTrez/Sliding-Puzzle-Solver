@@ -4,14 +4,10 @@
 #include "../typedefs.hpp"
 
 
-class SlidingPuzzleSolver;
-
-
-#include "../sliding_puzzle_solver.hpp"
-
-
 #include <iostream>
 
+
+class SlidingPuzzleSolver;
 
 class BoardPrinter
 {
@@ -25,5 +21,5 @@ private:
 	void set_pieces_on_board(std::vector<std::vector<char>> &board, const pieces_t &pieces);
 	void set_walls_on_board(std::vector<std::vector<char>> &board);
 
-	SlidingPuzzleSolver &sps;
+	const SlidingPuzzleSolver &sps;
 };

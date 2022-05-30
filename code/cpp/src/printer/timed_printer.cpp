@@ -1,5 +1,7 @@
 #include "timed_printer.hpp"
 
+#include "../sliding_puzzle_solver.hpp"
+
 
 void TimedPrinter::timed_print(const pieces_queue_t &pieces_queue, const path_queue_t &path_queue)
 {
